@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Trova i salvataggi presenti sulla macchina.
@@ -114,6 +115,8 @@ public final class Rilevatore {
         if (utenti == null) {
             return;
         }
+        // Nomi di riserva, letti dalla copia con nomi leggibili.
+        Map<Long, String> nomiXgs = nomiDaXgs();
         for (File utente : utenti) {
             if (!utente.isDirectory()) {
                 continue;
@@ -130,13 +133,71 @@ public final class Rilevatore {
                 continue;
             }
             for (ContenitoreWgs.Slot s : slot) {
-                String etichetta = s.nomeSlot.isEmpty() ? s.guid.substring(0, 8) : s.nomeSlot;
+                String nome = s.nomeSlot;
+                if (nome.isEmpty() && !nomiXgs.isEmpty()) {
+                    // L'indice non ha dato il nome: si prova con la cartella xgs.
+                    String daXgs = nomiXgs.get(Long.valueOf(s.payload.length()));
+                    if (daXgs != null) {
+                        nome = daXgs;
+                    }
+                }
+                String etichetta = nome.isEmpty() ? s.guid.substring(0, 8) : nome;
                 if (!s.nomeSalvataggio.isEmpty()) {
                     etichetta = etichetta + " — " + s.nomeSalvataggio;
                 }
                 dentro.add(new Voce("Xbox Game Pass", etichetta, s.payload, Formato.BLOCCHI));
             }
         }
+    }
+
+    /**
+     * Nomi degli slot letti dalla cartella {@code xgs}, indicizzati per dimensione.
+     *
+     * Accanto a {@code wgs} c'e' una seconda copia degli stessi salvataggi, con
+     * <b>nomi di cartella leggibili</b> invece che GUID:
+     *
+     * <pre>
+     *   xgs/&lt;utente&gt;/Slot3Auto/data       1.743.369 byte
+     *   xgs/&lt;utente&gt;/Slot3Manual/data     1.743.341 byte
+     *   xgs/&lt;utente&gt;/AccountData/data        27.977 byte
+     * </pre>
+     *
+     * I file sono <b>identici byte per byte</b> a quelli dentro {@code wgs}:
+     * verificato con {@code cmp}. Non si scrive li': il gioco aggiorna
+     * {@code containers.index} dentro {@code wgs}, quindi quella e' la copia
+     * autorevole. Serve solo a recuperare il nome di uno slot quando l'indice
+     * non si riesce a leggere, associandolo per dimensione del file.
+     */
+    private static Map<Long, String> nomiDaXgs() {
+        Map<Long, String> perDimensione = new java.util.HashMap<Long, String>();
+        File wgs = cartellaWgs();
+        if (wgs == null) {
+            return perDimensione;
+        }
+        File systemAppData = wgs.getParentFile();
+        if (systemAppData == null) {
+            return perDimensione;
+        }
+        File[] utenti = new File(systemAppData, "xgs").listFiles();
+        if (utenti == null) {
+            return perDimensione;
+        }
+        for (File utente : utenti) {
+            File[] slot = utente.listFiles();
+            if (slot == null) {
+                continue;
+            }
+            for (File cartella : slot) {
+                if (!cartella.isDirectory()) {
+                    continue;
+                }
+                File dati = new File(cartella, "data");
+                if (dati.isFile()) {
+                    perDimensione.put(Long.valueOf(dati.length()), cartella.getName());
+                }
+            }
+        }
+        return perDimensione;
     }
 
     private static boolean contieneContenitori(File[] voci) {
