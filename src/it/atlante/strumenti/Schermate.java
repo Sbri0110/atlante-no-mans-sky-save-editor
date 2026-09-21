@@ -92,13 +92,21 @@ public final class Schermate {
         String[][] viste = {
                 {"Principale", "atlante-principale"},
                 {"Tuta", "atlante-tuta"},
-                {"Multitool", "atlante-multitool"},
+                {"Navi", "atlante-navi"},
         };
         for (String[] vista : viste) {
             finestra.mostraSezionePerNome(vista[0]);
             // Tre livelli bastano per arrivare ai valori in tutte le sezioni:
             // contenitore, gruppo, campo.
             finestra.espandiA(3);
+            if (vista[0].equals("Tuta")) {
+                System.out.println("collaudo selezione Tuta:");
+                System.out.println("  slot: " + finestra.quantiSlot()
+                        + ", primo occupato: " + finestra.primoOccupato());
+                System.out.println("  clic simulato -> " + finestra.provaSelezione());
+                finestra.selezionaSlot(finestra.primoOccupato());
+                System.out.println("  selezionato dopo il clic: " + finestra.slotSelezionato());
+            }
             scatta(finestra, new File(uscita, vista[1] + ".png"), vista[0]);
         }
 

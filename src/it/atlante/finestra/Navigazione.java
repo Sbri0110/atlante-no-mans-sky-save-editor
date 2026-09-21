@@ -60,19 +60,7 @@ public final class Navigazione {
         SEZIONI.add(new Sezione("Principale", "Informazioni del file e azioni rapide",
                 "P", Contenitore.PRINCIPALE));
 
-        SEZIONI.add(new Sezione("Tutto", "Il salvataggio completo, campo per campo",
-                "*", Contenitore.RADICE));
-
-        SEZIONI.add(new Sezione("Partita", "Difficolta', risorse, stato del giocatore",
-                "P", Contenitore.GIOCATORE,
-                "DifficultyState", "SaveSummary", "TimeAlive", "TimeStamp", "Health", "Shield",
-                "Energy", "Hazard", "HazardTimeAlive", "Units", "Nanites", "Specials",
-                "BannerTitleId", "BannerIcon", "BannerMainColour", "BannerBackgroundColour",
-                "CharacterCustomisationData", "Outfits", "OutfitNames", "GameStartAddress1",
-                "GameStartAddress2", "FirstSpawnPosition", "HomeRealityIteration",
-                "UseSmallerBlackholeJumps", "JetpackEffect", "SaveSummary"));
-
-        SEZIONI.add(new Sezione("Tuta", "Inventario personale, cargo e tecnologie",
+        SEZIONI.add(new Sezione("Tuta", "Inventario personale, stiva e tecnologie",
                 "T", Contenitore.GIOCATORE,
                 "Inventory", "Inventory_Cargo", "Inventory_TechOnly", "RepairTechBuffer"));
 
@@ -129,13 +117,14 @@ public final class Navigazione {
                 "SettlementStatesV2", "SettlementLocalSaveData", "SettlementHistory",
                 "SettlementStateRingBufferIndexV2"));
 
-        SEZIONI.add(new Sezione("Scoperte", "Sistemi, pianeti, parole e meraviglie",
+        SEZIONI.add(new Sezione("Spedizioni", "La spedizione in corso, i suoi traguardi e le ricompense",
+                "E", Contenitore.COMUNE,
+                "SeasonData", "SeasonState", "SeasonTransferInventoryData",
+                "StartingSeasonNumber", "RestartAllInactiveSeasonalMissions"));
+
+        SEZIONI.add(new Sezione("Conquista stazioni", "Cosa serve per rivendicare una stazione spaziale",
                 "S", Contenitore.GIOCATORE,
-                "PlanetSeeds", "VisitedSystems", "VisitedPortal", "KnownWords", "KnownWordGroups",
-                "KnownProducts", "KnownTech", "KnownSpecials", "KnownRefinerRecipes",
-                "KnownPortalRunes", "Wonder*", "AtlasStationAdressData",
-                "NewAtlasStationAdressData", "VisitedAtlasStationsData", "SpacePoiDiscoveries",
-                "TeleportEndpoints", "SurveyedEventPositions", "PlanetPositions"));
+                "Stats", "ProgressionLevel", "MissionProgress"));
 
         SEZIONI.add(new Sezione("Traguardi e fazioni", "Statistiche, missioni e reputazione",
                 "G", Contenitore.GIOCATORE,
@@ -145,19 +134,11 @@ public final class Navigazione {
                 "TelemetryStats", "ShopTier", "ShopNumber", "SavedInteractionDialogTable",
                 "SavedInteractionIndicies"));
 
-        SEZIONI.add(new Sezione("Account e ricompense", "Spedizioni, drop e sblocchi del profilo",
+        SEZIONI.add(new Sezione("Account e ricompense", "Drop, sblocchi del profilo e diritti",
                 "R", Contenitore.COMUNE,
-                "SeasonData", "SeasonState", "SeasonTransferInventoryData",
                 "EarnedSeasonSpecialRewards", "RedeemedSeasonRewards", "RedeemedTwitchRewards",
                 "RedeemedPlatformRewards", "UsedEntitlements", "SaveUniversalId",
-                "UsedPlatforms", "StartingSeasonNumber", "RestartAllInactiveSeasonalMissions"));
-
-        SEZIONI.add(new Sezione("Foto e musica", "Modalita' fotografica e biblioteca ByteBeat",
-                "F", Contenitore.COMUNE,
-                "PhotoModeSettings", "ByteBeatLibrary"));
-
-        SEZIONI.add(new Sezione("Archivio scoperte", "Il registro delle scoperte del gioco",
-                "D", Contenitore.SCOPERTE, "DiscoveryData-v1"));
+                "UsedPlatforms"));
     }
 
     public static List<Sezione> elenco() {

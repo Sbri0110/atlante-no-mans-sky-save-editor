@@ -93,6 +93,43 @@ public final class Inventari {
         return l == null ? Collections.<Inventario>emptyList() : l;
     }
 
+    /**
+     * Gli inventari di una sezione, ricavati dal salvataggio aperto.
+     *
+     * Per la sezione Navi non basta un elenco fisso: le navi possedute sono una
+     * lista, e ognuna ha il suo inventario. I nomi delle sotto-schede sono i
+     * nomi che il giocatore ha dato alle navi, cosi' si riconoscono.
+     */
+    @SuppressWarnings("unchecked")
+    public static List<Inventario> perSezione(Object radice, String nomeSezione) {
+        if ("Navi".equals(nomeSezione)) {
+            return navi(radice);
+        }
+        return perSezione(nomeSezione);
+    }
+
+    private static List<Inventario> navi(Object radice) {
+        List<Inventario> elenco = new ArrayList<Inventario>();
+        Object possedute = risolvi(radice, "BaseContext.PlayerStateData.ShipOwnership");
+        if (!(possedute instanceof List)) {
+            return elenco;
+        }
+        List<Object> lista = (List<Object>) possedute;
+        for (int i = 0; i < lista.size(); i++) {
+            String nome = "Nave " + (i + 1);
+            Object nave = lista.get(i);
+            if (nave instanceof Map) {
+                Object n = ((Map<String, Object>) nave).get("Name");
+                if (n != null && !String.valueOf(n).trim().isEmpty()) {
+                    nome = String.valueOf(n).trim();
+                }
+            }
+            elenco.add(new Inventario(nome,
+                    "BaseContext.PlayerStateData.ShipOwnership[" + i + "].Inventory"));
+        }
+        return elenco;
+    }
+
     /** Vero se la sezione si mostra come griglie di slot invece che come campi. */
     public static boolean aGriglia(String nomeSezione) {
         return PER_SEZIONE.containsKey(nomeSezione);

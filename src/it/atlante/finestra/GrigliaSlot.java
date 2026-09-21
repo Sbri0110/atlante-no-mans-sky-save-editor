@@ -246,6 +246,51 @@ public final class GrigliaSlot extends JPanel {
         return selezionata == null ? -1 : selezionata.indice;
     }
 
+    /**
+     * Simula un clic su uno slot. Serve al collaudo: verifica che la catena
+     * dall'evento del mouse fino al form funzioni, senza dover cliccare a mano.
+     */
+    public boolean provaClick(int indice) {
+        for (Component c : contenitore.getComponents()) {
+            if (c instanceof Cella && ((Cella) c).indice == indice) {
+                Cella cella = (Cella) c;
+                cella.dispatchEvent(new MouseEvent(cella, MouseEvent.MOUSE_CLICKED,
+                        System.currentTimeMillis(), 0,
+                        Math.max(1, cella.getWidth() / 2), Math.max(1, cella.getHeight() / 2),
+                        1, false));
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /** Quante schede sono state costruite: serve al collaudo. */
+    public int quanteSchede() {
+        return contenitore.getComponentCount();
+    }
+
+    /** Il primo slot occupato, o -1 se sono tutti liberi. */
+    public int primoOccupato() {
+        for (int i = 0; i < slot.size(); i++) {
+            String id = testo(i, "Id");
+            if (id != null && !id.isEmpty() && !"^".equals(id)) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    /** Sceglie uno slot senza passare dal mouse. */
+    public void seleziona(int indice) {
+        for (Component c : contenitore.getComponents()) {
+            if (c instanceof Cella && ((Cella) c).indice == indice) {
+                selezionata = (Cella) c;
+                contenitore.repaint();
+                return;
+            }
+        }
+    }
+
     /** Il valore di un campo di uno slot, con ripiego. */
     @SuppressWarnings("unchecked")
     private Object campo(int indice, String nome) {

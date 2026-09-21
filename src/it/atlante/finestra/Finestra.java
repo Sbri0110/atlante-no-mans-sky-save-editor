@@ -513,6 +513,30 @@ public final class Finestra extends JFrame {
         }
     }
 
+    /** Collaudo della selezione degli slot. */
+    public String provaSelezione() {
+        return inventario == null ? "nessun pannello inventario" : inventario.provaSelezione();
+    }
+
+    public int quantiSlot() {
+        return inventario == null ? 0 : inventario.quantiSlot();
+    }
+
+    public int primoOccupato() {
+        return inventario == null ? -1 : inventario.primoOccupato();
+    }
+
+    /** Sceglie uno slot senza passare dal mouse. */
+    public void selezionaSlot(int indice) {
+        if (inventario != null && indice >= 0) {
+            inventario.selezionaDirettamente(indice);
+        }
+    }
+
+    public int slotSelezionato() {
+        return inventario == null ? -1 : inventario.slotSelezionato();
+    }
+
     /** Seleziona una sezione per nome: usato dal generatore di schermate. */
     public boolean mostraSezionePerNome(String nome) {
         for (int i = 0; i < modelloSezioni.size(); i++) {

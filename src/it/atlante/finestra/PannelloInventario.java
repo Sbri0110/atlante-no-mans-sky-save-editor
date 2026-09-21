@@ -103,7 +103,7 @@ public final class PannelloInventario extends JPanel {
     /** Mostra la sezione: sceglie le sotto-schede e apre la prima. */
     public void mostra(Object radice, String nomeSezione) {
         this.radice = radice;
-        inventari = Inventari.esistenti(radice, Inventari.perSezione(nomeSezione));
+        inventari = Inventari.esistenti(radice, Inventari.perSezione(radice, nomeSezione));
         schede.removeAll();
 
         if (inventari.isEmpty()) {
@@ -137,7 +137,16 @@ public final class PannelloInventario extends JPanel {
     private void apri(Inventari.Inventario inv) {
         corrente = inv;
         griglia.mostra(Inventari.risolvi(radice, inv.percorso), inv.etichetta);
-        modulo.svuota();
+        // Si sceglie subito il primo slot occupato. Aprendo l'inventario con il
+        // form vuoto la sezione sembra rotta: "nessuno slot scelto" non dice
+        // niente, mentre il primo pezzo mostrato dice subito dove sei.
+        int primo = griglia.primoOccupato();
+        if (primo >= 0) {
+            griglia.seleziona(primo);
+            modulo.mostra(primo);
+        } else {
+            modulo.svuota();
+        }
         aggiornaContatore();
     }
 
@@ -170,6 +179,39 @@ public final class PannelloInventario extends JPanel {
     /** Adatta la griglia allo spazio disponibile, dopo un ridimensionamento. */
     public void ridisponi() {
         griglia.ricalcolaColonne();
+    }
+
+    /** Collaudo: simula un clic sul primo slot occupato e riferisce l'esito. */
+    public String provaSelezione() {
+        int quante = griglia.quanteSchede();
+        int indice = griglia.primoOccupato();
+        if (indice < 0) {
+            return "nessuno slot occupato (schede: " + quante + ")";
+        }
+        boolean inviato = griglia.provaClick(indice);
+        return "schede " + quante + ", clic sullo slot " + indice
+                + (inviato ? " inviato" : " NON inviato")
+                + ", selezionato ora: " + griglia.selezionato();
+    }
+
+    /** Collaudo: sceglie direttamente uno slot, senza passare dal mouse. */
+    public void selezionaDirettamente(int indice) {
+        modulo.mostra(indice);
+    }
+
+    /** Quanti slot ha l'inventario aperto. */
+    public int quantiSlot() {
+        return griglia.quanteSchede();
+    }
+
+    /** Quale slot risulta selezionato, o -1. */
+    public int slotSelezionato() {
+        return griglia.selezionato();
+    }
+
+    /** Il primo slot occupato, o -1. */
+    public int primoOccupato() {
+        return griglia.primoOccupato();
     }
 
     // ------------------------------------------------------------------
