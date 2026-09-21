@@ -87,7 +87,7 @@ public final class PannelloStazioni extends JPanel {
             new Requisito("3. Contratti di recupero", "I contratti di recupero completati in questo sistema",
                     "UI-MILESTONES", 5, false, "^SP_POI_MISSIONS"),
             new Requisito("4. Unità per il nucleo", "Le unità che hai, disponibili per costruire il nucleo",
-                    "PRODUCT-SPECIAL", 1000000000, true, "Units"),
+                    "SUBSTANCE-UNITS", 1000000000, true, "Units"),
     };
 
     private final Catalogo catalogo;
@@ -96,6 +96,7 @@ public final class PannelloStazioni extends JPanel {
 
     private final JPanel contenitore = new Colonna();
     private final JLabel sistema = new JLabel("—");
+    private final JLabel stazione = new JLabel("—");
     private final JLabel indirizzo = new JLabel("—");
     private final JLabel possedute = new JLabel("—");
     private final JLabel chiave = new JLabel("—");
@@ -194,7 +195,8 @@ public final class PannelloStazioni extends JPanel {
         righe.setOpaque(false);
         sistema.setFont(sistema.getFont().deriveFont(Font.BOLD, 15f));
         sistema.setForeground(Aspetto.TESTO);
-        riga(righe, "Sistema", sistema);
+        riga(righe, "Base attuale", sistema);
+        riga(righe, "Stazione", stazione);
         riga(righe, "Indirizzo galattico", indirizzo);
         riga(righe, "Stazioni già possedute", possedute);
 
@@ -315,7 +317,21 @@ public final class PannelloStazioni extends JPanel {
             }
         }
         indirizzo.setText(indirizzoTesto);
-        sistema.setText("Sistema " + intero(indirizzoDi(ua)));
+        // SaveSummary e' il nome della BASE attuale, non del sistema: il campo
+        // si chiama "riassunto" ma contiene una stringa come "In GamX | OASI",
+        // che e' il nome che il giocatore ha dato alla sua base.
+        // Il vecchio editor lo presenta come "Sistema Solare Corrente" e sbaglia.
+        // Il nome del sistema non e' nel salvataggio: i nomi scoperti stanno in
+        // DiscoveryManagerData, che in questo file e' vuoto.
+        Object riassunto = stato.get("SaveSummary");
+        String nomeBase = riassunto == null ? "" : String.valueOf(riassunto).trim();
+        sistema.setText(nomeBase.isEmpty() ? "(senza nome)" : nomeBase);
+
+        // La stazione: se tra le basi permanenti ce n'e' una di tipo stazione,
+        // il suo nome e' quello che il gioco le ha dato.
+        String nomeStazione = nomeStazione(stato);
+        stazione.setText(nomeStazione.isEmpty()
+                ? "nessuna stazione registrata in questo sistema" : nomeStazione);
 
         // --- valori delle statistiche ---
         possedute.setText(valoreDi(stato, "^STATIONS_OWNED") + " stazioni");
@@ -347,6 +363,36 @@ public final class PannelloStazioni extends JPanel {
     private String iconaDi(String id) {
         Catalogo.Voce v = catalogo.voce(id);
         return v == null ? null : v.icona;
+    }
+
+    /**
+     * Il nome della stazione, se il gioco ne ha registrata una.
+     *
+     * Le basi permanenti hanno un nome e un tipo. Una di tipo
+     * PlayerSpaceStationBase e' una stazione rivendicata: il suo nome e' quello
+     * che le e' stato dato.
+     */
+    @SuppressWarnings("unchecked")
+    private String nomeStazione(Map<String, Object> stato) {
+        Object basi = stato.get("PersistentPlayerBases");
+        if (!(basi instanceof List)) {
+            return "";
+        }
+        for (Object b : (List<Object>) basi) {
+            if (!(b instanceof Map)) {
+                continue;
+            }
+            Map<String, Object> base = (Map<String, Object>) b;
+            String tipo = String.valueOf(base.get("BaseType"));
+            if (!tipo.contains("Station")) {
+                continue;
+            }
+            Object nome = base.get("Name");
+            if (nome != null && !String.valueOf(nome).trim().isEmpty()) {
+                return String.valueOf(nome).trim();
+            }
+        }
+        return "";
     }
 
     private static Object statoDelGiocatore(Object radice) {
