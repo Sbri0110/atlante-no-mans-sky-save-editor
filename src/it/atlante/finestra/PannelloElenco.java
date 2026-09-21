@@ -72,6 +72,7 @@ public final class PannelloElenco extends JPanel {
     private final DefaultListModel<Voce> modello = new DefaultListModel<Voce>();
     private final JList<Voce> elenco = new JList<Voce>(modello);
     private final PannelloCampi campi;
+    private final PannelloWingman wingman;
     private final JLabel titolo = new JLabel();
     private final JLabel conteggio = new JLabel();
     private final JPanel testata = new JPanel();
@@ -79,10 +80,15 @@ public final class PannelloElenco extends JPanel {
     private final JLabel testataNome = new JLabel();
     private final JLabel testataSotto = new JLabel();
 
+    private Object radice;
+    /** Vero se questa sezione usa la scheda del pilota invece dell'albero. */
+    private boolean usaScheda;
+
     public PannelloElenco(Catalogo catalogo, Icone icone, Runnable suModifica) {
         this.catalogo = catalogo;
         this.icone = icone;
         this.campi = new PannelloCampi(catalogo, icone, suModifica);
+        this.wingman = new PannelloWingman(icone, suModifica);
 
         setLayout(new BorderLayout());
         setBackground(Aspetto.PANNELLO);
@@ -142,7 +148,12 @@ public final class PannelloElenco extends JPanel {
         JPanel destra = new JPanel(new BorderLayout());
         destra.setBackground(Aspetto.PANNELLO);
         destra.add(testata, BorderLayout.NORTH);
+        // Due modi di modificare lo stesso elemento: l'albero dei campi, che va
+        // bene per le fregate, e la scheda del pilota, che per lo squadrone e'
+        // l'unico modo di non perdersi. Se ne vede uno alla volta.
         destra.add(campi, BorderLayout.CENTER);
+        destra.add(wingman, BorderLayout.CENTER);
+        wingman.setVisible(false);
 
         add(sinistra, BorderLayout.WEST);
         add(destra, BorderLayout.CENTER);
@@ -154,7 +165,11 @@ public final class PannelloElenco extends JPanel {
                 }
                 Voce v = elenco.getSelectedValue();
                 if (v != null) {
-                    campi.mostra(v.valore);
+                    if (usaScheda) {
+                        wingman.mostra(radice, v.indice);
+                    } else {
+                        campi.mostra(v.valore);
+                    }
                 }
                 aggiornaTestata(v);
             }
@@ -181,11 +196,18 @@ public final class PannelloElenco extends JPanel {
     /** Mostra l'elenco di una sezione. */
     public void mostra(Object radice, String nomeSezione) {
         Elenchi.Elenco descrizione = Elenchi.perSezione(nomeSezione);
+        this.radice = radice;
+        usaScheda = "Squadrone".equals(nomeSezione);
+        campi.setVisible(!usaScheda);
+        wingman.setVisible(usaScheda);
+        // La scheda del pilota ha gia' la sua testata con l'icona grande.
+        testata.setVisible(!usaScheda);
         modello.clear();
         titolo.setText(nomeSezione.toUpperCase());
         if (descrizione == null) {
             conteggio.setText("");
             campi.mostra(null);
+            wingman.svuota();
             aggiornaTestata(null);
             return;
         }
@@ -212,8 +234,15 @@ public final class PannelloElenco extends JPanel {
 
         if (!modello.isEmpty()) {
             elenco.setSelectedIndex(0);
+            // Se l'indice era gia' zero il listener non riceve niente: la prima
+            // voce va aperta lo stesso, altrimenti si apre l'elenco con la
+            // scheda vuota.
+            if (usaScheda) {
+                wingman.mostra(radice, 0);
+            }
         } else {
             campi.mostra(null);
+            wingman.svuota();
             aggiornaTestata(null);
         }
     }
