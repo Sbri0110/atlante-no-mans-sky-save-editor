@@ -261,7 +261,8 @@ alla scrittura: **se non passa, la modifica è sbagliata.**
 
 ## Licenza
 
-Codice rilasciato con licenza MIT — vedi [LICENSE](LICENSE).
+Codice rilasciato con licenza **MIT** — vedi [LICENSE](LICENSE).
+Le librerie incluse, i dati di gioco e i marchi sono documentati in [NOTICE.md](NOTICE.md).
 
 No Man's Sky e tutti i nomi correlati sono marchi di Hello Games Limited.
 Questo progetto non è affiliato, approvato o sponsorizzato da Hello Games.
