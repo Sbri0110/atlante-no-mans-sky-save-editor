@@ -8,7 +8,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
+import java.nio.file.AtomicMoveNotSupportedException;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -188,10 +191,24 @@ public final class Salvataggio {
         } finally {
             out.close();
         }
-        // Sostituzione atomica: o il file nuovo e' completo, o resta il vecchio.
-        if (!temporaneo.renameTo(file)) {
-            Files.deleteIfExists(temporaneo.toPath());
-            throw new IOException("impossibile sostituire il file: " + file);
+        // Sostituzione del file, non un semplice spostamento.
+        //
+        // Qui c'era File.renameTo, che su Windows non sovrascrive un file che
+        // esiste gia': il salvataggio finiva sempre con "impossibile sostituire
+        // il file" e non si salvava niente. Files.move con REPLACE_EXISTING fa
+        // quello che serve, e con ATOMIC_MOVE la sostituzione e' un'unica
+        // operazione del sistema: o il file nuovo c'e' per intero, o resta il
+        // vecchio. Se il file system non sa farlo atomico, si ripiega.
+        Path destinazione = file.toPath();
+        Path sorgente = temporaneo.toPath();
+        try {
+            Files.move(sorgente, destinazione, StandardCopyOption.REPLACE_EXISTING,
+                    StandardCopyOption.ATOMIC_MOVE);
+        } catch (AtomicMoveNotSupportedException e) {
+            Files.move(sorgente, destinazione, StandardCopyOption.REPLACE_EXISTING);
+        } catch (IOException e) {
+            Files.deleteIfExists(sorgente);
+            throw new IOException("impossibile sostituire il file: " + file, e);
         }
 
         dimensioneCompressa = compresso.length;
