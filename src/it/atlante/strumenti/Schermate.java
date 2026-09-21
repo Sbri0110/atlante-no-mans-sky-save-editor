@@ -92,6 +92,7 @@ public final class Schermate {
         String[][] viste = {
                 {"Multitool", "atlante-multitool"},
                 {"Navi", "atlante-navi"},
+                {"Mercantile", "atlante-mercantile"},
                 {"Traguardi e fazioni", "atlante-traguardi"},
                 {"Conquista stazioni", "atlante-stazioni"},
                 {"Spedizioni", "atlante-spedizioni"},

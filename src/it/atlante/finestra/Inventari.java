@@ -19,11 +19,11 @@ import java.util.Map;
  * I percorsi sono relativi alla radice e usano i nomi leggibili dei campi, gli
  * stessi che si vedono nell'editor.
  *
- * <b>Gruppi.</b> Una nave non ha un inventario solo: ha la stiva, le tecnologie
- * e il cargo. Sono tre griglie diverse della stessa nave, e mostrarne una sola
- * significa nascondere due terzi di quello che c'e' a bordo. Le voci hanno
- * quindi un <i>gruppo</i> — il nome della nave — e la sezione mostra prima le
- * navi e poi gli inventari di quella scelta.
+ * <b>Gruppi.</b> Una nave ha due depositi — l'inventario e le tecnologie — e
+ * mostrarne uno solo significa nascondere meta' di quello che c'e' a bordo. Le
+ * voci hanno quindi un <i>gruppo</i> — il nome della nave — e la sezione mostra
+ * prima le navi e poi i depositi di quella scelta. Le altre sezioni hanno una
+ * fila di schede sola: tuta, mercantile e contenitori non si chiamano per nome.
  */
 public final class Inventari {
 
@@ -131,7 +131,6 @@ public final class Inventari {
 
         sezione("Tuta",
                 inv("Inventario", base + "Inventory"),
-                inv("Stiva", base + "Inventory_Cargo"),
                 inv("Tecnologie", base + "Inventory_TechOnly"));
 
         // Le statistiche principali della tuta: gli stessi valori che il gioco
@@ -151,10 +150,23 @@ public final class Inventari {
         // salvataggio, come i multi-tool. Vedi navi().
         sezione("Navi");
 
-        sezione("Mercantile",
-                inv("Stiva del mercantile", base + "FreighterInventory"),
-                inv("Cargo del mercantile", base + "FreighterInventory_Cargo"),
-                inv("Tecnologie del mercantile", base + "FreighterInventory_TechOnly"));
+        // Il mercantile ha inventario e tecnologie, e nella stiva i dieci
+        // contenitori di stoccaggio: nel gioco sono gli stessi della base, e si
+        // aprono da tutti e due i posti. Chi cerca il deposito mentre e' a bordo
+        // non deve andare a cercarlo in un'altra sezione.
+        //
+        // Tredici schede in fila non si leggono: sono quindi due gruppi, e la
+        // prima riga dice solo "Mercantile" o "Depositi".
+        List<Inventario> mercantile = new ArrayList<Inventario>();
+        mercantile.add(new Inventario("Mercantile", "Inventario", base + "FreighterInventory", null));
+        mercantile.add(new Inventario("Mercantile", "Cargo", base + "FreighterInventory_Cargo", null));
+        mercantile.add(new Inventario("Mercantile", "Tecnologie",
+                base + "FreighterInventory_TechOnly", null));
+        for (int i = 1; i <= 10; i++) {
+            mercantile.add(new Inventario("Depositi", "Deposito " + i,
+                    base + "Chest" + i + "Inventory", null));
+        }
+        PER_SEZIONE.put("Mercantile", Collections.unmodifiableList(mercantile));
 
         sezione("Basi e contenitori",
                 inv("Deposito 1", base + "Chest1Inventory"),
@@ -230,7 +242,12 @@ public final class Inventari {
     }
 
     /**
-     * Le navi possedute, ognuna con stiva, tecnologie e cargo.
+     * Le navi possedute, ognuna con il suo inventario e le sue tecnologie.
+     *
+     * Nel gioco una nave ha due depositi e non tre: l'inventario e le
+     * tecnologie. Il campo {@code Inventory_Cargo} esiste nel salvataggio ma
+     * resta vuoto — zero caselle sbloccate, zero oggetti — e mostrarlo faceva
+     * credere a un deposito che non c'e'.
      *
      * Le navi vuote — quelle che il salvataggio tiene come segnaposto, una
      * cella sola e nessun oggetto — non si mostrano: sono righe che non
@@ -253,31 +270,41 @@ public final class Inventari {
                     nome = String.valueOf(n).trim();
                 }
             }
-            if (!haSlot(radice, radice2 + ".Inventory")) {
+            if (!esiste(radice, radice2 + ".Inventory")) {
                 continue;
             }
-            elenco.add(new Inventario(nome, "Stiva", radice2 + ".Inventory",
+            elenco.add(new Inventario(nome, "Inventario", radice2 + ".Inventory",
                     radice2 + ".Inventory.BaseStatValues"));
-            if (haSlot(radice, radice2 + ".Inventory_TechOnly")) {
+            if (esiste(radice, radice2 + ".Inventory_TechOnly")) {
                 elenco.add(new Inventario(nome, "Tecnologie",
                         radice2 + ".Inventory_TechOnly", null));
-            }
-            if (haSlot(radice, radice2 + ".Inventory_Cargo")) {
-                elenco.add(new Inventario(nome, "Cargo", radice2 + ".Inventory_Cargo", null));
             }
         }
         return elenco;
     }
 
-    /** Vero se l'inventario esiste e ha almeno uno slot. */
+    /**
+     * Vero se il gioco ha davvero messo qualcosa in questo inventario.
+     *
+     * E' il criterio che decide quali schede si vedono: un campo che esiste nel
+     * salvataggio ma non ha ne' caselle sbloccate ne' oggetti non e' un
+     * deposito, e' un campo vuoto. Cosi' la tuta non mostra una stiva che non
+     * ha e le navi non mostrano un cargo che non hanno, mentre il mercantile
+     * tiene il suo.
+     */
     @SuppressWarnings("unchecked")
-    private static boolean haSlot(Object radice, String percorso) {
+    public static boolean esiste(Object radice, String percorso) {
         Object inv = risolvi(radice, percorso);
         if (!(inv instanceof Map)) {
             return false;
         }
         Map<String, Object> mappa = (Map<String, Object>) inv;
-        return larghezza(mappa) * altezza(mappa) > 1;
+        Object validi = mappa.get("ValidSlotIndices");
+        if (validi instanceof List && !((List<Object>) validi).isEmpty()) {
+            return true;
+        }
+        Object slots = mappa.get("Slots");
+        return slots instanceof List && !((List<Object>) slots).isEmpty();
     }
 
     /** Quante colonne ha una griglia di slot, 0 se non e' dichiarato. */
@@ -373,7 +400,7 @@ public final class Inventari {
     public static List<Inventario> esistenti(Object radice, List<Inventario> tutti) {
         List<Inventario> trovati = new ArrayList<Inventario>();
         for (Inventario i : tutti) {
-            if (risolvi(radice, i.percorso) instanceof Map) {
+            if (esiste(radice, i.percorso)) {
                 trovati.add(i);
             }
         }

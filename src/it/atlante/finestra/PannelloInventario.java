@@ -36,8 +36,8 @@ import java.util.Map;
  * <ul>
  *   <li>le sotto-schede mostrano anche <b>quanti slot sono occupati</b>, cosi'
  *       si vede dove c'e' spazio senza aprirle tutte;</li>
- *   <li>quando una cosa ha piu' depositi — una nave ha stiva, tecnologie e
- *       cargo — le schede sono su due file: prima la cosa, poi i suoi depositi;</li>
+ *   <li>quando una cosa ha piu' depositi — una nave ha inventario e tecnologie
+ *       — le schede sono su due file: prima la cosa, poi i suoi depositi;</li>
  *   <li>il form mostra il pezzo scelto con la sua icona grande e la descrizione
  *       di gioco, non una fila di campi senza contesto;</li>
  *   <li>le azioni sono sul pezzo, non sull'inventario: <i>ripara</i>, <i>ricarica</i>
