@@ -89,6 +89,7 @@ public final class Finestra extends JFrame {
     private PannelloInventario inventario;
     private PannelloElenco elenco;
     private PannelloPremi premi;
+    private PannelloStazioni stazioni;
     private PannelloPrincipale principale;
     private Salvataggio salvataggio;
     private Rilevatore.Voce voceCorrente;
@@ -180,6 +181,14 @@ public final class Finestra extends JFrame {
         });
 
         elenco = new PannelloElenco(catalogo, icone, new Runnable() {
+            public void run() {
+                salvataggio.segnaModificato();
+                testata.segnaModificato();
+                messaggio.setText("Modifiche non salvate");
+            }
+        });
+
+        stazioni = new PannelloStazioni(catalogo, icone, new Runnable() {
             public void run() {
                 salvataggio.segnaModificato();
                 testata.segnaModificato();
@@ -673,6 +682,9 @@ public final class Finestra extends JFrame {
             // campi. Si sceglie l'elemento a sinistra e si modifica a destra.
             elenco.mostra(salvataggio.albero(), sezioneCorrente.nome);
             centro.add(elenco, BorderLayout.CENTER);
+        } else if (sezioneCorrente != null && "Conquista stazioni".equals(sezioneCorrente.nome)) {
+            stazioni.mostra(salvataggio.albero());
+            centro.add(stazioni, BorderLayout.CENTER);
         } else if (sezioneCorrente != null && "Spedizioni".equals(sezioneCorrente.nome)) {
             // I premi delle spedizioni, raggruppati, con la casella per ognuno.
             premi.mostra(salvataggio.albero(),
