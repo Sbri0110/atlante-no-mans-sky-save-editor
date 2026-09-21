@@ -79,6 +79,12 @@ public final class Piloti {
 
         String sc = "MODELS/COMMON/SPACECRAFT/";
         List<Nave> navi = new ArrayList<Nave>();
+        // Le icone: dove il gioco ha davvero l'immagine di quella nave si usa
+        // quella — le navi-premio ce l'hanno, perche' sono oggetti del catalogo
+        // (Golden Vector e' ^EXPD_SHIP01, Utopia Speeder ^EXPD_SHIP09 e cosi'
+        // via). Per i tipi normali il gioco non ha nessuna immagine: le navi
+        // sono modelli 3D generati proceduralmente, non esistono icone di
+        // "Fighter" o di "Shuttle" nei pak. Li' resta l'icona dell'interfaccia.
         navi.add(new Nave("Fighter", sc + "FIGHTERS/FIGHTER_PROC.SCENE.MBIN"));
         navi.add(new Nave("Shuttle", sc + "SHUTTLE/SHUTTLE_PROC.SCENE.MBIN"));
         navi.add(new Nave("Hauler", sc + "DROPSHIPS/DROPSHIP_PROC.SCENE.MBIN"));
@@ -88,10 +94,14 @@ public final class Piloti {
         navi.add(new Nave("Solar", sc + "SAILSHIP/SAILSHIP_PROC.SCENE.MBIN"));
         navi.add(new Nave("Robot", sc + "SENTINELSHIP/SENTINELSHIP_PROC.SCENE.MBIN"));
         navi.add(new Nave("Corvette", sc + "BIGGS/BIGGS.SCENE.MBIN"));
-        navi.add(new Nave("Utopia Speeder", sc + "FIGHTERS/VRSPEEDER.SCENE.MBIN"));
-        navi.add(new Nave("Golden Vector", sc + "FIGHTERS/FIGHTERCLASSICGOLD.SCENE.MBIN"));
-        navi.add(new Nave("Horizon Vector NX", sc + "FIGHTERS/FIGHTERSPECIALSWITCH.SCENE.MBIN"));
-        navi.add(new Nave("Starborn Runner", sc + "FIGHTERS/WRACER.SCENE.MBIN"));
+        navi.add(new Nave("Utopia Speeder", sc + "FIGHTERS/VRSPEEDER.SCENE.MBIN",
+                "PRODUCT-EXPD_SHIP09.PNG"));
+        navi.add(new Nave("Golden Vector", sc + "FIGHTERS/FIGHTERCLASSICGOLD.SCENE.MBIN",
+                "PRODUCT-EXPD_SHIP01.PNG"));
+        navi.add(new Nave("Horizon Vector NX", sc + "FIGHTERS/FIGHTERSPECIALSWITCH.SCENE.MBIN",
+                "PRODUCT-SWITCH_SHIP01.PNG"));
+        navi.add(new Nave("Starborn Runner", sc + "FIGHTERS/WRACER.SCENE.MBIN",
+                "PRODUCT-EXPD_SHIP12.PNG"));
         NAVI = Collections.unmodifiableList(navi);
     }
 

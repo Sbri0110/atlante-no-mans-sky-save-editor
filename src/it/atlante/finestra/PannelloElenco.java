@@ -224,7 +224,14 @@ public final class PannelloElenco extends JPanel {
             if (icona == null) {
                 icona = descrizione.iconaFissa;
             }
+            // La navicella: se il tipo ha un'immagine vera nel catalogo — le
+            // navi-premio ce l'hanno — si usa quella, altrimenti l'icona
+            // dell'interfaccia.
             String icona2 = iconaDi(elemento, descrizione.campoIcona2);
+            Piloti.Nave tipoNave = Piloti.naveDi(risorsaDi(elemento, descrizione.campoIcona2));
+            if (tipoNave != null) {
+                icona2 = tipoNave.icona;
+            }
             String classe = Icone.classeDiRisorsa(risorsaDi(elemento, descrizione.campoIcona2));
             modello.addElement(new Voce(i, nomeDi(elemento, descrizione, i),
                     sottotitoloDi(elemento, descrizione, classe), elemento,
