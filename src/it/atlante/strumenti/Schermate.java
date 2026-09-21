@@ -55,6 +55,29 @@ public final class Schermate {
         Catalogo catalogo = Catalogo.carica(items);
         System.out.println("catalogo: " + catalogo.dimensione() + " oggetti");
 
+        // Diagnostica: cosa trova il rilevatore e in che ordine.
+        System.out.println("salvataggi trovati dal rilevatore:");
+        for (it.atlante.nms.Rilevatore.Voce v : it.atlante.nms.Rilevatore.cercaTutti()) {
+            System.out.println("   " + v.formato + "  " + v.piattaforma + "  " + v.etichetta
+                    + "  -> " + v.file.getName());
+        }
+        System.out.println("cartella WGS: " + it.atlante.nms.Rilevatore.cartellaWgs());
+        System.out.println("cartella Steam: " + it.atlante.nms.Rilevatore.cartellaSteam());
+
+        // Diagnostica del catalogo: l'icona di un oggetto noto.
+        it.atlante.nms.Catalogo.Voce prova = catalogo.voce("^FUEL2");
+        System.out.println("catalogo ^FUEL2: " + (prova == null ? "NON TROVATO"
+                : prova.etichetta() + " / icona=" + prova.icona));
+        File cartellaIcone = new File("risorse" + File.separator + "icone");
+        System.out.println("cartella icone: " + cartellaIcone.getAbsolutePath()
+                + "  esiste=" + cartellaIcone.isDirectory());
+        if (prova != null && prova.icona != null) {
+            File f = new File(cartellaIcone, prova.icona);
+            System.out.println("file icona: " + f.getAbsolutePath() + "  esiste=" + f.isFile());
+            javax.swing.ImageIcon ii = new javax.swing.ImageIcon(f.getAbsolutePath());
+            System.out.println("decodifica: " + ii.getIconWidth() + "x" + ii.getIconHeight());
+        }
+
         Finestra finestra = new Finestra(catalogo,
                 new File("risorse" + File.separator + "icone"),
                 new File("backup"));
@@ -64,17 +87,30 @@ public final class Schermate {
         if (!finestra.apriPrimoTrovato()) {
             System.err.println("nessun salvataggio trovato: la schermata sara' vuota");
         }
-        finestra.espandiA(3);
-        finestra.selezionaPrimoOggetto();
-        finestra.messaggioStato("Verifica automatica attiva prima di ogni scrittura");
 
-        // Il layout ha bisogno di un giro completo prima di essere dipinto.
+        // Una schermata per sezione: mostrano la navigazione in uso, non solo
+        // l'albero completo.
+        String[][] viste = {
+                {"Tuta", "atlante-tuta"},
+                {"Navi", "atlante-navi"},
+                {"Tutto", "atlante-tutto"},
+        };
+        for (String[] vista : viste) {
+            finestra.mostraSezionePerNome(vista[0]);
+            finestra.espandiA(2);
+            finestra.selezionaPrimoOggetto();
+            scatta(finestra, new File(uscita, vista[1] + ".png"), vista[0]);
+        }
+
+        finestra.dispose();
+    }
+
+    private static void scatta(Finestra finestra, File destinazione, String sezione) throws Exception {
         for (int i = 0; i < 6; i++) {
             finestra.validate();
             finestra.doLayout();
-            Thread.sleep(90);
+            Thread.sleep(80);
         }
-
         BufferedImage immagine = new BufferedImage(
                 finestra.getWidth(), finestra.getHeight(), BufferedImage.TYPE_INT_RGB);
         Graphics2D g = immagine.createGraphics();
@@ -84,12 +120,8 @@ public final class Schermate {
                 java.awt.RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
         finestra.paintAll(g);
         g.dispose();
-
-        File file = new File(uscita, "atlante-principale.png");
-        ImageIO.write(immagine, "png", file);
-        System.out.println("scritto " + file.getAbsolutePath()
-                + "  (" + finestra.getWidth() + "x" + finestra.getHeight() + ")");
-
-        finestra.dispose();
+        ImageIO.write(immagine, "png", destinazione);
+        System.out.println("scritto " + destinazione.getName()
+                + "  (" + finestra.getWidth() + "x" + finestra.getHeight() + ", sezione " + sezione + ")");
     }
 }

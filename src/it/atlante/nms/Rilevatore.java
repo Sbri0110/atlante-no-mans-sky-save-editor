@@ -87,35 +87,65 @@ public final class Rilevatore {
         return nms.isDirectory() ? nms : null;
     }
 
+    /**
+     * Cerca i contenitori di Xbox Game Pass.
+     *
+     * La struttura ha <b>due</b> livelli sotto {@code wgs}: prima una cartella
+     * per utente (nome lungo, con underscore), poi i contenitori veri e propri
+     * (nome di 32 caratteri esadecimali).
+     *
+     * <pre>
+     *   wgs/000901FF2F07BBDE_29070100B936489ABCE8B9AF3980429C/   utente
+     *       containers.index
+     *       18C4F9F24DEB4BDF965C25D080DAF634/                    contenitore
+     *       6D75D8AC158B45E099788DE4B593BD8B/
+     * </pre>
+     *
+     * Il primo tentativo cercava i contenitori direttamente sotto {@code wgs} e
+     * non ne trovava nessuno: l'unica cosa che il rilevatore riusciva a leggere
+     * erano i dati account, e il programma apriva sempre quelli.
+     */
     private static void cercaWgs(List<Voce> dentro) {
         File radice = cartellaWgs();
         if (radice == null) {
             return;
         }
-        File[] contenitori = radice.listFiles();
-        if (contenitori == null) {
+        File[] utenti = radice.listFiles();
+        if (utenti == null) {
             return;
         }
-        for (File contenitore : contenitori) {
-            if (!contenitore.isDirectory() || contenitore.getName().length() != 32) {
+        for (File utente : utenti) {
+            if (!utente.isDirectory()) {
                 continue;
             }
+            // Si accetta solo una cartella che contenga davvero dei contenitori.
+            File[] possibili = utente.listFiles();
+            if (possibili == null || !contieneContenitori(possibili)) {
+                continue;
+            }
+            List<ContenitoreWgs.Slot> slot;
             try {
-                List<ContenitoreWgs.Slot> slot = ContenitoreWgs.elenca(contenitore.getParentFile());
-                for (ContenitoreWgs.Slot s : slot) {
-                    if (!s.cartella.equals(contenitore)) {
-                        continue;
-                    }
-                    String etichetta = s.nomeSlot.isEmpty() ? s.guid.substring(0, 8) : s.nomeSlot;
-                    if (!s.nomeSalvataggio.isEmpty()) {
-                        etichetta = etichetta + " — " + s.nomeSalvataggio;
-                    }
-                    dentro.add(new Voce("Xbox Game Pass", etichetta, s.payload, Formato.BLOCCHI));
-                }
+                slot = ContenitoreWgs.elenca(utente);
             } catch (IOException e) {
-                // contenitore illeggibile: si passa al prossimo
+                continue;
+            }
+            for (ContenitoreWgs.Slot s : slot) {
+                String etichetta = s.nomeSlot.isEmpty() ? s.guid.substring(0, 8) : s.nomeSlot;
+                if (!s.nomeSalvataggio.isEmpty()) {
+                    etichetta = etichetta + " — " + s.nomeSalvataggio;
+                }
+                dentro.add(new Voce("Xbox Game Pass", etichetta, s.payload, Formato.BLOCCHI));
             }
         }
+    }
+
+    private static boolean contieneContenitori(File[] voci) {
+        for (File f : voci) {
+            if (f.isDirectory() && f.getName().length() == 32) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private static void cercaSteam(List<Voce> dentro) {

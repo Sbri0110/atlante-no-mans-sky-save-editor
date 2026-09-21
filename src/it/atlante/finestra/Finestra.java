@@ -72,8 +72,12 @@ public final class Finestra extends JFrame {
     private final File cartellaIcone;
     private final File cartellaBackup;
 
-    private final DefaultListModel<Rilevatore.Voce> modelloSlot = new DefaultListModel<Rilevatore.Voce>();
-    private final JList<Rilevatore.Voce> elencoSlot = new JList<Rilevatore.Voce>(modelloSlot);
+    private final DefaultListModel<Navigazione.Sezione> modelloSezioni =
+            new DefaultListModel<Navigazione.Sezione>();
+    private final JList<Navigazione.Sezione> elencoSezioni = new JList<Navigazione.Sezione>(modelloSezioni);
+    private final javax.swing.JComboBox<Rilevatore.Voce> comboSalvataggi =
+            new javax.swing.JComboBox<Rilevatore.Voce>();
+    private Navigazione.Sezione sezioneCorrente;
     private final JPanel centro = new JPanel(new BorderLayout());
     private final JLabel stato = new JLabel();
     private final JLabel messaggio = new JLabel();
@@ -125,7 +129,7 @@ public final class Finestra extends JFrame {
     // ------------------------------------------------------------------
 
     private JComponent costruisciCorpo() {
-        JPanel sinistra = costruisciElencoSlot();
+        JPanel sinistra = costruisciNavigazione();
 
         centro.setBackground(Aspetto.FONDO);
         centro.add(pannelloVuoto(), BorderLayout.CENTER);
@@ -169,7 +173,16 @@ public final class Finestra extends JFrame {
         salvaCome.setFont(salvaCome.getFont().deriveFont(12.5f));
         salva.setEnabled(false);
         salvaCome.setEnabled(false);
+
+        // I salvataggi trovati stanno qui invece che in una colonna: si scelgono
+        // una volta all'inizio, mentre le sezioni si cambiano di continuo.
+        comboSalvataggi.setPreferredSize(new Dimension(330, 30));
+        comboSalvataggi.setFont(comboSalvataggi.getFont().deriveFont(12.5f));
+        comboSalvataggi.setRenderer(new DisegnatoreSalvataggio());
+        comboSalvataggi.setToolTipText("Salvataggi trovati sulla macchina");
+
         comandi.add(apri);
+        comandi.add(comboSalvataggi);
         comandi.add(salva);
         comandi.add(salvaCome);
         barra.add(comandi, BorderLayout.WEST);
@@ -186,27 +199,38 @@ public final class Finestra extends JFrame {
         return barra;
     }
 
-    private JPanel costruisciElencoSlot() {
-        elencoSlot.setBackground(Aspetto.PANNELLO);
-        elencoSlot.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        elencoSlot.setCellRenderer(new DisegnatoreSlot());
-        elencoSlot.setFixedCellHeight(52);
+    /**
+     * La colonna di sinistra: le sezioni del salvataggio.
+     *
+     * E' la navigazione vera del programma. Prima qui c'era l'elenco dei
+     * salvataggi, che ora sta nel menu a tendina della barra comandi: il
+     * salvataggio si scegle una volta, la sezione si cambia di continuo.
+     */
+    private JPanel costruisciNavigazione() {
+        elencoSezioni.setBackground(Aspetto.PANNELLO);
+        elencoSezioni.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        elencoSezioni.setCellRenderer(new DisegnatoreSezione());
+        elencoSezioni.setFixedCellHeight(46);
 
-        JScrollPane scorrimento = new JScrollPane(elencoSlot);
+        JScrollPane scorrimento = new JScrollPane(elencoSezioni);
         scorrimento.setBorder(BorderFactory.createEmptyBorder());
         scorrimento.getVerticalScrollBar().setUnitIncrement(16);
 
-        JLabel titolo = new JLabel("  SALVATAGGI TROVATI");
+        JLabel titolo = new JLabel("  SEZIONI");
         titolo.setFont(Aspetto.monospaziato(10, Font.BOLD));
         titolo.setForeground(Aspetto.TESTO_DEBOLE);
-        titolo.setBorder(BorderFactory.createEmptyBorder(12, 6, 8, 6));
+        titolo.setBorder(BorderFactory.createEmptyBorder(12, 8, 8, 8));
 
         JPanel pannello = new JPanel(new BorderLayout());
         pannello.setBackground(Aspetto.PANNELLO);
         pannello.setBorder(BorderFactory.createMatteBorder(0, 0, 0, 1, Aspetto.BORDO));
         pannello.add(titolo, BorderLayout.NORTH);
         pannello.add(scorrimento, BorderLayout.CENTER);
-        pannello.setPreferredSize(new Dimension(290, 600));
+        pannello.setPreferredSize(new Dimension(252, 600));
+
+        for (Navigazione.Sezione s : Navigazione.elenco()) {
+            modelloSezioni.addElement(s);
+        }
         return pannello;
     }
 
@@ -275,6 +299,8 @@ public final class Finestra extends JFrame {
                 }
             }
         }));
+        vista.addSeparator();
+        vista.add(costruisciMenuColori());
         barra.add(vista);
 
         JMenu aiuto = new JMenu("?");
@@ -285,6 +311,47 @@ public final class Finestra extends JFrame {
         }));
         barra.add(aiuto);
         return barra;
+    }
+
+    /**
+     * Sottomenu per cambiare la tavolozza a programma avviato.
+     *
+     * Il cambio e' immediato: i colori vengono rimessi nella tavolozza dei
+     * componenti e l'interfaccia viene ridipinta, senza riavviare. La scelta
+     * viene salvata in {@code risorse/aspetto.properties}, quindi resta anche
+     * alla riapertura successiva.
+     */
+    private JMenu costruisciMenuColori() {
+        JMenu colori = new JMenu("Colori");
+        javax.swing.ButtonGroup gruppo = new javax.swing.ButtonGroup();
+        for (final String nome : Aspetto.nomiTavolozze()) {
+            javax.swing.JRadioButtonMenuItem v = new javax.swing.JRadioButtonMenuItem(nome);
+            v.setSelected(nome.equals(Aspetto.nomeTavolozza()));
+            v.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    Aspetto.cambiaTavolozza(nome);
+                    messaggio.setText("Tavolozza \"" + nome + "\" applicata e salvata");
+                    repaint();
+                }
+            });
+            gruppo.add(v);
+            colori.add(v);
+        }
+        colori.addSeparator();
+        JMenuItem dove = new JMenuItem("Dove sono i colori...");
+        dove.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                File f = new File("risorse" + File.separator + "aspetto.properties");
+                JOptionPane.showMessageDialog(Finestra.this,
+                        "I colori stanno in:\n\n" + f.getAbsolutePath()
+                        + "\n\nI valori sono esadecimali (#RRGGBB). Per cambiare un colore\n"
+                        + "solo, cancella la riga \"tavolozza\" e lascia le altre: quelle\n"
+                        + "che restano vincono sulla tavolozza scelta.",
+                        "Dove sono i colori", JOptionPane.INFORMATION_MESSAGE);
+            }
+        });
+        colori.add(dove);
+        return colori;
     }
 
     private JMenuItem voce(String testo, int tasto, final Runnable azione) {
@@ -316,17 +383,51 @@ public final class Finestra extends JFrame {
     // Azioni
     // ------------------------------------------------------------------
 
+    /**
+     * Cerca i salvataggi e ne apre uno.
+     *
+     * L'apertura automatica va fatta con cautela: riempiendo il menu a tendina
+     * a mano, ogni aggiunta fa scattare l'ascoltatore e finiva per aprirsi
+     * l'ultimo elemento aggiunto — nella pratica i dati account, che non hanno
+     * la struttura di un salvataggio di gioco e lasciavano tutte le sezioni
+     * vuote. Qui l'ascoltatore viene staccato durante il riempimento, e alla
+     * fine si apre di proposito un salvataggio di gioco.
+     */
     private void cercaSlot() {
-        modelloSlot.clear();
-        final List<Rilevatore.Voce> trovate = Rilevatore.cercaTutti();
-        for (Rilevatore.Voce v : trovate) {
-            modelloSlot.addElement(v);
+        ActionListener[] ascoltatori = comboSalvataggi.getActionListeners();
+        for (ActionListener a : ascoltatori) {
+            comboSalvataggi.removeActionListener(a);
         }
+        comboSalvataggi.removeAllItems();
+
+        List<Rilevatore.Voce> trovate = Rilevatore.cercaTutti();
+        for (Rilevatore.Voce v : trovate) {
+            comboSalvataggi.addItem(v);
+        }
+        for (ActionListener a : ascoltatori) {
+            comboSalvataggi.addActionListener(a);
+        }
+
         if (trovate.isEmpty()) {
             aggiornaStato("Nessun salvataggio trovato automaticamente. Usa File > Apri file...");
-        } else {
-            aggiornaStato(trovate.size() + " salvataggi trovati. Scegline uno.");
+            return;
         }
+
+        // Si preferisce un salvataggio di gioco: i dati account non hanno le
+        // sezioni di gioco e vanno aperti solo se non c'e' altro.
+        int scelto = -1;
+        for (int i = 0; i < trovate.size(); i++) {
+            if (trovate.get(i).formato == it.atlante.nms.Formato.BLOCCHI) {
+                scelto = i;
+                break;
+            }
+        }
+        if (scelto < 0) {
+            scelto = 0;
+        }
+        comboSalvataggi.setSelectedIndex(scelto);
+        aggiornaStato(trovate.size() + " salvataggi trovati.");
+        apri(trovate.get(scelto).file);
     }
 
     private void apriFile() {
@@ -408,21 +509,52 @@ public final class Finestra extends JFrame {
         }
     }
 
+    /** Seleziona una sezione per nome: usato dal generatore di schermate. */
+    public boolean mostraSezionePerNome(String nome) {
+        for (int i = 0; i < modelloSezioni.size(); i++) {
+            if (modelloSezioni.get(i).nome.equalsIgnoreCase(nome)) {
+                elencoSezioni.setSelectedIndex(i);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /** Nomi delle sezioni, per chi vuole sceglierne una. */
+    public String[] nomiSezioni() {
+        String[] nomi = new String[modelloSezioni.size()];
+        for (int i = 0; i < modelloSezioni.size(); i++) {
+            nomi[i] = modelloSezioni.get(i).nome;
+        }
+        return nomi;
+    }
+
     /** Scrive un messaggio nella barra di stato. */
     public void messaggioStato(String testo) {
         messaggio.setText(testo);
     }
 
-    private void apri(File file) {        try {
+    private void apri(File file) {
+        try {
             messaggio.setText("Apertura in corso...");
             Salvataggio nuovo = Salvataggio.apri(file, mappaChiavi());
             salvataggio = nuovo;
+
+            // La sezione scelta resta; se non ce n'e' una si parte da "Tutto".
+            if (sezioneCorrente == null) {
+                sezioneCorrente = Navigazione.elenco().get(0);
+            }
+            elencoSezioni.setSelectedValue(sezioneCorrente, true);
+
             costruisciAlbero();
+            // I conteggi per sezione cambiano con il salvataggio: il disegnatore
+            // li rilegge a ogni disegno, quindi basta forzare un ridisegno.
+            elencoSezioni.repaint();
             salva.setEnabled(true);
             salvaCome.setEnabled(true);
             testata.aggiorna(nuovo);
             aggiornaStato(nuovo.riepilogo());
-            messaggio.setText("Verifica automatica attiva prima di ogni scrittura");
+            messaggio.setText("Sezione: " + sezioneCorrente.nome);
         } catch (IOException e) {
             JOptionPane.showMessageDialog(this,
                     "Non riesco ad aprire il file.\n\n" + e.getMessage(),
@@ -431,8 +563,35 @@ public final class Finestra extends JFrame {
         }
     }
 
+    /**
+     * Cambia la sezione mostrata.
+     *
+     * L'albero viene ricostruito sul ramo della sezione. Le modifiche gia'
+     * fatte restano: i valori dell'albero ridotto sono gli stessi oggetti del
+     * salvataggio, non copie.
+     */
+    private void mostraSezione(Navigazione.Sezione sezione) {
+        sezioneCorrente = sezione;
+        if (salvataggio == null) {
+            messaggio.setText("Sezione scelta: " + sezione.nome + ". Apri prima un salvataggio.");
+            return;
+        }
+        costruisciAlbero();
+        int quanti = Navigazione.conta(salvataggio.albero(), sezione);
+        if (quanti == 0) {
+            messaggio.setText(sezione.nome + " — nessun campo di questa sezione nel file aperto"
+                    + " (forse sono dati account, non un salvataggio di gioco)");
+        } else {
+            messaggio.setText(sezione.nome + " — " + quanti + " campi · " + sezione.descrizione);
+        }
+    }
+
     private void costruisciAlbero() {
-        albero = new AlberoDati(salvataggio.albero(), catalogo, icone, new Runnable() {
+        if (sezioneCorrente == null) {
+            sezioneCorrente = Navigazione.elenco().get(0);
+        }
+        Object radice = Navigazione.filtro(salvataggio.albero(), sezioneCorrente);
+        albero = new AlberoDati(radice, catalogo, icone, new Runnable() {
             public void run() {
                 salvataggio.segnaModificato();
                 testata.segnaModificato();
@@ -554,10 +713,10 @@ public final class Finestra extends JFrame {
 
         private final JLabel nomeSalvataggio = new JLabel("Nessun salvataggio aperto");
         private final JLabel percorso = new JLabel("");
-        private final Pillola slot = new Pillola(Aspetto.ACCENTO);
-        private final Pillola durata = new Pillola(Aspetto.INFO);
-        private final Pillola dimensione = new Pillola(Aspetto.ATTENZIONE);
-        private final Pillola modificato = new Pillola(Aspetto.ERRORE);
+        private final Pillola slot = new Pillola(Pillola.ACCENTO);
+        private final Pillola durata = new Pillola(Pillola.INFO);
+        private final Pillola dimensione = new Pillola(Pillola.ATTENZIONE);
+        private final Pillola modificato = new Pillola(Pillola.ERRORE);
         private ImageIcon marchio;
 
         Testata() {
@@ -655,15 +814,36 @@ public final class Finestra extends JFrame {
         }
     }
 
-    /** Etichetta a pillola, per i dati in evidenza nella testata. */
+    /**
+     * Etichetta a pillola, per i dati in evidenza nella testata.
+     *
+     * Il colore non viene memorizzato: viene risolto a ogni disegno dalla
+     * tavolozza corrente. Memorizzandolo, cambiando tema le pillole restavano
+     * del colore vecchio fino al riavvio.
+     */
     private static final class Pillola extends JLabel {
-        private final Color colore;
+
+        static final int ACCENTO = 1;
+        static final int INFO = 2;
+        static final int ATTENZIONE = 3;
+        static final int ERRORE = 4;
+
+        private final int tipo;
         private String testo;
 
-        Pillola(Color colore) {
-            this.colore = colore;
+        Pillola(int tipo) {
+            this.tipo = tipo;
             setOpaque(false);
             setFont(Aspetto.monospaziato(11, Font.PLAIN));
+        }
+
+        private Color colore() {
+            switch (tipo) {
+                case INFO:       return Aspetto.INFO;
+                case ATTENZIONE: return Aspetto.ATTENZIONE;
+                case ERRORE:     return Aspetto.ERRORE;
+                default:         return Aspetto.ACCENTO;
+            }
         }
 
         void testo(String valore) {
@@ -687,11 +867,12 @@ public final class Finestra extends JFrame {
             if (testo == null) {
                 return;
             }
+            Color c = colore();
             Graphics2D g2 = (Graphics2D) g.create();
             g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-            g2.setColor(new Color(colore.getRed(), colore.getGreen(), colore.getBlue(), 40));
+            g2.setColor(new Color(c.getRed(), c.getGreen(), c.getBlue(), 40));
             g2.fillRoundRect(0, 0, getWidth() - 1, getHeight() - 1, getHeight(), getHeight());
-            g2.setColor(colore);
+            g2.setColor(c);
             g2.setFont(getFont());
             java.awt.FontMetrics fm = g2.getFontMetrics();
             g2.drawString(testo, 12, (getHeight() + fm.getAscent() - fm.getDescent()) / 2);
@@ -699,23 +880,61 @@ public final class Finestra extends JFrame {
         }
     }
 
-    /** Disegnatore dell'elenco slot a sinistra. */
-    private final class DisegnatoreSlot extends JPanel
+    /** Disegnatore dell'elenco delle sezioni. */
+    private final class DisegnatoreSezione extends JPanel
+            implements ListCellRenderer<Navigazione.Sezione> {
+
+        private final JLabel icona = new JLabel();
+        private final JLabel titolo = new JLabel();
+        private final JLabel dettaglio = new JLabel();
+
+        DisegnatoreSezione() {
+            setLayout(new BorderLayout(10, 0));
+            setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 8));
+            add(icona, BorderLayout.WEST);
+            JPanel testi = new JPanel();
+            testi.setOpaque(false);
+            testi.setLayout(new BoxLayout(testi, BoxLayout.Y_AXIS));
+            titolo.setFont(titolo.getFont().deriveFont(Font.BOLD, 12.5f));
+            dettaglio.setFont(dettaglio.getFont().deriveFont(10.5f));
+            dettaglio.setForeground(Aspetto.TESTO_DEBOLE);
+            testi.add(titolo);
+            testi.add(dettaglio);
+            add(testi, BorderLayout.CENTER);
+        }
+
+        public Component getListCellRendererComponent(JList<? extends Navigazione.Sezione> lista,
+                                                      Navigazione.Sezione valore, int indice,
+                                                      boolean selezionato, boolean conFuoco) {
+            setBackground(selezionato ? Aspetto.SELEZIONE : Aspetto.PANNELLO);
+            titolo.setForeground(selezionato ? Aspetto.TESTO : Aspetto.TESTO_TENUE);
+            icona.setIcon(Icone.segno(valore.segno, 26,
+                    selezionato ? Aspetto.ACCENTO : Aspetto.TESTO_DEBOLE, true));
+            titolo.setText(valore.nome);
+            int quanti = salvataggio == null ? 0 : Navigazione.conta(salvataggio.albero(), valore);
+            dettaglio.setText(quanti == 0 ? valore.descrizione : quanti + " campi");
+            setToolTipText(valore.descrizione);
+            return this;
+        }
+    }
+
+    /** Disegnatore delle voci del menu a tendina dei salvataggi. */
+    private final class DisegnatoreSalvataggio extends JPanel
             implements ListCellRenderer<Rilevatore.Voce> {
 
         private final JLabel icona = new JLabel();
         private final JLabel titolo = new JLabel();
         private final JLabel dettaglio = new JLabel();
 
-        DisegnatoreSlot() {
-            setLayout(new BorderLayout(10, 0));
-            setBorder(BorderFactory.createEmptyBorder(6, 12, 6, 10));
+        DisegnatoreSalvataggio() {
+            setLayout(new BorderLayout(9, 0));
+            setBorder(BorderFactory.createEmptyBorder(3, 8, 3, 8));
             add(icona, BorderLayout.WEST);
             JPanel testi = new JPanel();
             testi.setOpaque(false);
             testi.setLayout(new BoxLayout(testi, BoxLayout.Y_AXIS));
-            titolo.setFont(titolo.getFont().deriveFont(Font.BOLD, 12.5f));
-            dettaglio.setFont(dettaglio.getFont().deriveFont(11f));
+            titolo.setFont(titolo.getFont().deriveFont(Font.BOLD, 12f));
+            dettaglio.setFont(dettaglio.getFont().deriveFont(10.5f));
             dettaglio.setForeground(Aspetto.TESTO_DEBOLE);
             testi.add(titolo);
             testi.add(dettaglio);
@@ -725,10 +944,16 @@ public final class Finestra extends JFrame {
         public Component getListCellRendererComponent(JList<? extends Rilevatore.Voce> lista,
                                                       Rilevatore.Voce valore, int indice,
                                                       boolean selezionato, boolean conFuoco) {
-            setBackground(selezionato ? Aspetto.ACCENTO_SCURO : Aspetto.PANNELLO);
-            titolo.setForeground(selezionato ? new Color(0xFFE9E9) : Aspetto.TESTO);
+            setBackground(selezionato ? Aspetto.SELEZIONE : Aspetto.PANNELLO_ALTO);
+            titolo.setForeground(selezionato ? Aspetto.TESTO : Aspetto.TESTO_TENUE);
+            if (valore == null) {
+                titolo.setText("nessun salvataggio trovato");
+                dettaglio.setText("");
+                icona.setIcon(null);
+                return this;
+            }
             icona.setIcon(Icone.segno(valore.formato == it.atlante.nms.Formato.BLOCCHI ? "S" : "A",
-                    28, selezionato ? Aspetto.ACCENTO_CHIARO : Aspetto.TESTO_DEBOLE, true));
+                    22, selezionato ? Aspetto.ACCENTO : Aspetto.TESTO_DEBOLE, true));
             titolo.setText(valore.etichetta);
             dettaglio.setText(valore.piattaforma + "  ·  " + Salvataggio.mb(valore.file.length()));
             return this;
@@ -753,14 +978,22 @@ public final class Finestra extends JFrame {
                 salvaCome();
             }
         });
-        elencoSlot.addListSelectionListener(new ListSelectionListener() {
+        elencoSezioni.addListSelectionListener(new ListSelectionListener() {
             public void valueChanged(ListSelectionEvent e) {
                 if (e.getValueIsAdjusting()) {
                     return;
                 }
-                Rilevatore.Voce v = elencoSlot.getSelectedValue();
-                if (v != null) {
-                    apri(v.file);
+                Navigazione.Sezione s = elencoSezioni.getSelectedValue();
+                if (s != null) {
+                    mostraSezione(s);
+                }
+            }
+        });
+        comboSalvataggi.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                Object scelto = comboSalvataggi.getSelectedItem();
+                if (scelto instanceof Rilevatore.Voce) {
+                    apri(((Rilevatore.Voce) scelto).file);
                 }
             }
         });

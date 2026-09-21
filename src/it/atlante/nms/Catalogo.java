@@ -153,6 +153,26 @@ public final class Catalogo {
     // ------------------------------------------------------------------
 
     private static final class Lettore extends DefaultHandler {
+
+        /**
+         * I soli elementi che <b>definiscono</b> un oggetto.
+         *
+         * Nel database l'attributo {@code id} compare anche su elementi che si
+         * limitano a <em>citare</em> un oggetto: le 2.887 formule di crafting
+         * ({@code <requirement id="^FUEL2" quantity="1">}) e i riferimenti
+         * incrociati. Trattando ogni {@code id} come una definizione, l'ultimo
+         * riferimento sovrascriveva la voce vera con una priva di nome, icona e
+         * descrizione: un oggetto su cui si poteva ancora cliccare, ma che
+         * appariva come una sigla senza immagine.
+         *
+         * {@code ^FUEL2} compare 51 volte, {@code ^CASING} 85: senza questo
+         * elenco la maggior parte degli oggetti perdeva nome e icona.
+         */
+        private static final java.util.Set<String> DEFINIZIONI =
+                new java.util.HashSet<String>(java.util.Arrays.asList(
+                        "substance", "product", "technology", "techbox",
+                        "procedural-product", "procedural-technology", "product-template"));
+
         private final Catalogo catalogo;
         private StringBuilder testoCorrente;
         private Voce voceCorrente;
@@ -164,29 +184,30 @@ public final class Catalogo {
 
         @Override
         public void startElement(String uri, String locale, String nome, Attributes attributi) {
-            String id = attributi.getValue("id");
-            if (id != null && !id.isEmpty()) {
-                // Elemento di catalogo: apre una voce nuova.
-                voceCorrente = new Voce(
-                        id,
-                        attributi.getValue("name"),
-                        attributi.getValue("subtitle"),
-                        attributi.getValue("category"),
-                        attributi.getValue("icon"),
-                        null,
-                        nome);
-                catalogo.perId.put(id, voceCorrente);
-                catturaDescrizione = false;
-                testoCorrente = null;
+            if (!DEFINIZIONI.contains(nome)) {
+                // Elemento figlio. Si raccoglie il testo della descrizione, se
+                // c'e', e non si tocca la voce in corso.
+                if ("description".equals(nome) && voceCorrente != null) {
+                    catturaDescrizione = true;
+                    testoCorrente = new StringBuilder();
+                }
                 return;
             }
-            // Elemento figlio. Il primo tentativo azzerava qui la voce corrente,
-            // e la descrizione andava persa: la voce va conservata e si attiva
-            // solo la raccolta del testo.
-            if ("description".equals(nome) && voceCorrente != null) {
-                catturaDescrizione = true;
-                testoCorrente = new StringBuilder();
+            String id = attributi.getValue("id");
+            if (id == null || id.isEmpty()) {
+                return;
             }
+            voceCorrente = new Voce(
+                    id,
+                    attributi.getValue("name"),
+                    attributi.getValue("subtitle"),
+                    attributi.getValue("category"),
+                    attributi.getValue("icon"),
+                    null,
+                    nome);
+            catalogo.perId.put(id, voceCorrente);
+            catturaDescrizione = false;
+            testoCorrente = null;
         }
 
         @Override
@@ -213,7 +234,7 @@ public final class Catalogo {
                 testoCorrente = null;
                 return;
             }
-            // La chiusura dell'elemento di catalogo chiude la voce.
+            // La chiusura dell'elemento di definizione chiude la voce.
             if (voceCorrente != null && nome.equals(voceCorrente.tipo)) {
                 voceCorrente = null;
                 testoCorrente = null;

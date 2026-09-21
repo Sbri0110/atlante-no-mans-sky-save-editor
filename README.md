@@ -27,7 +27,7 @@ campo per campo con l'originale: se anche un solo valore differisce, il file non
 toccato.
 
 <p align="center">
-  <img src="assets/schermate/atlante-principale.png" width="100%" alt="Finestra di Atlante: elenco dei salvataggi a sinistra, albero dei campi con le icone degli oggetti al centro, scheda dell'oggetto a destra">
+  <img src="assets/schermate/atlante-tuta.png" width="100%" alt="Finestra di Atlante: elenco dei salvataggi a sinistra, albero dei campi con le icone degli oggetti al centro, scheda dell'oggetto a destra">
 </p>
 
 ---
