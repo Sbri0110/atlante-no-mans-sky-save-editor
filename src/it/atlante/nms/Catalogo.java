@@ -110,13 +110,40 @@ public final class Catalogo {
         return Collections.unmodifiableList(categorie);
     }
 
+    /**
+     * La voce di catalogo di un identificatore.
+     *
+     * Gli oggetti costruiti dal gioco hanno un suffisso numerico che li
+     * distingue l'uno dall'altro ma non cambia cosa sono:
+     *
+     * <pre>
+     *   ^UA_HYP4#08236    e' un potenziamento Iperguida, come ^UA_HYP4
+     *   ^UP_CANN4#35271   e' un potenziamento Cannone, come ^UP_CANN4
+     * </pre>
+     *
+     * Nel salvataggio questi suffissi sono frequenti: degli oggetti presenti
+     * negli inventari, quasi uno su tre ha questa forma. Cercando solo
+     * l'identificatore esatto restavano senza nome e senza icona.
+     * Qui si ripiega sulla parte prima del cancelletto.
+     */
     public Voce voce(String id) {
-        return id == null ? null : perId.get(id);
+        if (id == null) {
+            return null;
+        }
+        Voce trovata = perId.get(id);
+        if (trovata != null) {
+            return trovata;
+        }
+        int cancelletto = id.indexOf('#');
+        if (cancelletto > 0) {
+            return perId.get(id.substring(0, cancelletto));
+        }
+        return null;
     }
 
-    /** Vero se l'identificatore e' noto al catalogo. */
+    /** Vero se l'identificatore e' noto al catalogo, anche senza suffisso. */
     public boolean conosciuto(String id) {
-        return id != null && perId.containsKey(id);
+        return voce(id) != null;
     }
 
     /** Cerca per nome o identificatore: serve alla ricerca dell'interfaccia. */
