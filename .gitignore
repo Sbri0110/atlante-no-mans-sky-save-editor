@@ -1,0 +1,38 @@
+# Classi compilate
+classi/
+*.class
+
+# Uscita dei comandi dump
+uscita/
+*.dump.json
+
+# Copie di sicurezza dei salvataggi
+backup/
+
+# Icone degli oggetti di gioco.
+#
+# Sono 3.210 PNG per circa 73 MB: sono l'arte di No Man's Sky, non codice di
+# questo progetto. Tenendole fuori il repository resta leggero da clonare e non
+# ridistribuisce materiale di Hello Games.
+#
+# Per averle in locale basta copiare i PNG in risorse/icone/. Il programma
+# funziona anche senza: mostra le sigle al posto delle icone.
+risorse/icone/
+
+# Ambienti di sviluppo
+.idea/
+.vscode/
+*.iml
+.settings/
+.classpath
+.project
+
+# Sistema
+Thumbs.db
+desktop.ini
+.DS_Store
+
+# Log e temporanei
+*.log
+*.tmp
+*.nuovo

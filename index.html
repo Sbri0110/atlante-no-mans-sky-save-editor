@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Atlante — editor di salvataggi per No Man's Sky</title>
+<meta name="description" content="Editor di salvataggi per No Man's Sky, scritto da zero in Java, senza dipendenze. Interfaccia in italiano, tema scuro, verifica automatica prima di ogni scrittura.">
+
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="assets/marchio/favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="assets/marchio/favicon-16.png">
+<link rel="apple-touch-icon" href="assets/marchio/apple-touch-icon.png">
+<meta property="og:title" content="Atlante — editor di salvataggi per No Man's Sky">
+<meta property="og:description" content="Editor di salvataggi scritto da zero in Java, senza dipendenze.">
+<meta property="og:image" content="assets/marchio/logo-512.png">
+<meta property="og:type" content="website">
+
+<style>
+  :root{
+    --fondo:#0D0B0D; --pannello:#14100F; --pannello-alto:#1A1416; --bordo:#33262A;
+    --accento:#E5484D; --accento-chiaro:#FF7A7A; --testo:#EDE6E7; --tenue:#A29194; --debole:#6E5F63;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:var(--fondo); color:var(--testo);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.65; -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1000px; margin:0 auto; padding:64px 26px 90px}
+  header{display:flex; align-items:center; gap:26px; flex-wrap:wrap; margin-bottom:40px}
+  header img{width:118px; height:118px; flex:none}
+  h1{font-size:40px; font-weight:700; letter-spacing:-.02em; margin:0 0 8px}
+  .tagline{font-size:17px; color:var(--tenue); margin:0}
+  .filo{width:150px; height:4px; background:var(--accento); border-radius:2px; margin:18px 0 0}
+
+  .verdetto{
+    background:linear-gradient(180deg,#1A1113,var(--pannello));
+    border:1px solid var(--bordo); border-left:3px solid var(--accento);
+    border-radius:12px; padding:22px 24px; margin:36px 0; font-size:16px;
+  }
+  .verdetto p{margin:0}
+  .verdetto p + p{margin-top:12px}
+
+  h2{font-size:21px; font-weight:600; margin:52px 0 10px; padding-top:20px; border-top:1px solid var(--bordo)}
+  h3{font-size:16px; font-weight:600; margin:26px 0 8px}
+  p{margin:12px 0}
+  ul{margin:12px 0; padding-left:22px}
+  li{margin:7px 0}
+  strong{color:#fff; font-weight:600}
+  a{color:var(--accento-chiaro); text-decoration:none}
+  a:hover{text-decoration:underline}
+  code{
+    font-family:ui-monospace,SFMono-Regular,Consolas,monospace; font-size:.87em;
+    background:#221A1C; border:1px solid var(--bordo); border-radius:5px; padding:1px 6px; color:#F0C9CB;
+  }
+  table{width:100%; border-collapse:collapse; margin:20px 0; font-size:14.5px}
+  th{text-align:left; font-size:12px; letter-spacing:.06em; text-transform:uppercase; color:var(--debole);
+     padding:8px 12px; border-bottom:1px solid var(--bordo); font-weight:600}
+  td{padding:11px 12px; border-bottom:1px solid #221A1C; vertical-align:top}
+  tr:last-child td{border-bottom:none}
+  .ok{color:#4ADE80; font-weight:600}
+  .no{color:#FEBC2E; font-weight:600}
+  .schermata{border:1px solid var(--bordo); border-radius:12px; overflow:hidden; margin:22px 0; display:block; width:100%}
+  .due{display:grid; gap:16px; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); margin:22px 0}
+  .due > div{background:var(--pannello); border:1px solid var(--bordo); border-radius:10px; padding:16px 18px}
+  .due h4{margin:0 0 8px; font-size:14px}
+  .due p{margin:0; font-size:13.5px; color:var(--tenue)}
+  .pulsanti{display:flex; gap:12px; flex-wrap:wrap; margin:28px 0}
+  .pulsante{
+    display:inline-block; padding:11px 22px; border-radius:10px; font-weight:600; font-size:14.5px;
+    background:var(--accento); color:#FFF2F2;
+  }
+  .pulsante.secondario{background:var(--pannello-alto); color:var(--testo); border:1px solid var(--bordo)}
+  footer{margin-top:70px; padding-top:24px; border-top:1px solid var(--bordo); font-size:13px; color:var(--debole)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <img src="assets/marchio/logo-512.png" alt="Marchio di Atlante: rombo rosso con nucleo incandescente">
+  <div>
+    <h1>Atlante</h1>
+    <p class="tagline">Editor di salvataggi per No Man's Sky</p>
+    <div class="filo"></div>
+  </div>
+</header>
+
+<div class="verdetto">
+  <p><strong>Scritto da zero in Java, senza dipendenze esterne.</strong> Legge i salvataggi, ne decodifica le chiavi cifrate, li mostra in un albero con le icone di gioco e li riscrive <em>verificando che i dati non cambino</em>.</p>
+  <p>Prima di ogni scrittura il contenuto viene ricompattato, riscompattato e confrontato campo per campo con l'originale: se anche un solo valore differisce, il file non viene toccato.</p>
+</div>
+
+<div class="pulsanti">
+  <a class="pulsante" href="https://github.com/Sbri0110/atlante">Vedi su GitHub</a>
+  <a class="pulsante secondario" href="https://github.com/Sbri0110/atlante#readme">Come si usa</a>
+</div>
+
+<h2>L'interfaccia</h2>
+<p>Non è un disegno preparato a parte: l'immagine è la fotografia dell'applicazione vera mentre legge un salvataggio reale. Gli oggetti mostrano l'icona e il nome di gioco presi dal catalogo, non la sigla interna.</p>
+<img class="schermata" src="assets/schermate/atlante-principale.png"
+     alt="Finestra di Atlante: elenco dei salvataggi a sinistra, albero dei campi con le icone degli oggetti al centro, scheda dell'oggetto a destra">
+
+<h2>Cosa fa</h2>
+<table>
+  <thead><tr><th>Funzione</th><th>Stato</th></tr></thead>
+  <tbody>
+    <tr><td>Lettura dei salvataggi Xbox Game Pass</td><td class="ok">funziona</td></tr>
+    <tr><td>Lettura dei salvataggi Steam e GOG</td><td class="ok">funziona</td></tr>
+    <tr><td>Dati account (ricompense, QuickSilver)</td><td class="ok">funziona</td></tr>
+    <tr><td>Scompattazione e ricompressione LZ4</td><td class="ok">funziona</td></tr>
+    <tr><td>Decodifica delle chiavi cifrate</td><td class="ok">640.510 su 640.567</td></tr>
+    <tr><td>Catalogo di gioco con nomi, icone e descrizioni</td><td class="ok">5.587 voci</td></tr>
+    <tr><td>Modifica dei valori e scrittura con verifica</td><td class="ok">funziona</td></tr>
+    <tr><td>Copertura totale dei campi del salvataggio</td><td class="ok">tutti</td></tr>
+  </tbody>
+</table>
+
+<h2>Tre scelte che vale la pena raccontare</h2>
+<div class="due">
+  <div>
+    <h4>I numeri non passano per la virgola mobile</h4>
+    <p>Un campo come <code>0.6000000238418579</code> riscritto come <code>0.6</code> è un valore diverso, e il gioco se ne accorge. Ogni numero conserva il testo originale.</p>
+  </div>
+  <div>
+    <h4>La verifica viene prima della scrittura</h4>
+    <p>Non c'è un "sei sicuro?" da cliccare: se il contenuto non sopravvive al giro completo, il programma si ferma da solo. Una copia di sicurezza viene comunque creata.</p>
+  </div>
+  <div>
+    <h4>Il formato è documentato</h4>
+    <p>Struttura dei blocchi, intestazioni dei metadati, forma dell'indice dei contenitori: tutto ricavato leggendo i byte e scritto nel README, perché serva anche a chi non usa questo programma.</p>
+  </div>
+</div>
+
+<h2>Requisiti</h2>
+<p>Un <strong>JDK 8 o superiore</strong>. Nient'altro: nessuna libreria da scaricare, nessun gestore di pacchetti. Si compila con <code>compila.bat</code> su Windows o <code>./compila.sh</code> altrove.</p>
+
+<footer>
+  <p>No Man's Sky e tutti i nomi correlati sono marchi di Hello Games Limited. Questo progetto non è affiliato, approvato o sponsorizzato da Hello Games.</p>
+  <p>Codice rilasciato con licenza MIT.</p>
+</footer>
+
+</div>
+</body>
+</html>

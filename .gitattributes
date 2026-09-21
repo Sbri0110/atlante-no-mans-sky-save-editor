@@ -1,0 +1,25 @@
+# Normalizzazione dei fine riga.
+#
+# I .bat devono restare in CRLF: cmd.exe li esegue male se hanno
+# solo LF. Tutto il resto in LF, cosi' il repository resta leggibile
+# da qualunque sistema.
+
+* text=auto eol=lf
+
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+*.java text eol=lf
+*.sh   text eol=lf
+*.md   text eol=lf
+*.json text eol=lf
+
+# I database di gioco non vanno toccati: contengono descrizioni con
+# interruzioni di riga significative e vanno lasciati byte per byte.
+risorse/db/** -text
+
+# Binari
+*.jar binary
+*.png binary
+*.ico binary
+*.class binary

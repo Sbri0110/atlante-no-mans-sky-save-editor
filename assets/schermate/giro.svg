@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 265" width="600" height="265" role="img" aria-label="Atlante — collaudo del giro completo">
+<title>Atlante — collaudo del giro completo</title>
+<rect width="600" height="265" rx="10" fill="#0B1220"/>
+<rect width="600" height="38" rx="10" fill="#141F33"/>
+<rect y="28" width="600" height="10" fill="#141F33"/>
+<rect y="38" width="600" height="1" fill="#1E2A40"/>
+<circle cx="22" cy="19" r="6" fill="#FF5F57"/>
+<circle cx="40" cy="19" r="6" fill="#FEBC2E"/>
+<circle cx="58" cy="19" r="6" fill="#28C840"/>
+<text x="84" y="24" font-size="12.5" fill="#5B6B84" font-family="ui-monospace, SFMono-Regular, Consolas, monospace">Atlante — collaudo del giro completo</text>
+<text x="22" y="60" font-size="14" fill="#4ADE80" font-family="ui-monospace, SFMono-Regular, Consolas, monospace" xml:space="preserve">$ java -cp classi it.atlante.Main giro &lt;file&gt;</text>
+<text x="22" y="85" font-size="14" fill="#38BDF8" font-family="ui-monospace, SFMono-Regular, Consolas, monospace" xml:space="preserve">=== GIRO COMPLETO SU EEC95D8A4074480B94EC48FD53A6C503 ===</text>
+<text x="22" y="106" font-size="14" fill="#9FB0C6" font-family="ui-monospace, SFMono-Regular, Consolas, monospace" xml:space="preserve">  1. letto        : 9,4 MB in 19 blocchi</text>
+<text x="22" y="127" font-size="14" fill="#9FB0C6" font-family="ui-monospace, SFMono-Regular, Consolas, monospace" xml:space="preserve">  2. riscritto    : 1,6 MB in 19 blocchi  (rapporto 5,76:1)</text>
+<text x="22" y="148" font-size="14" fill="#9FB0C6" font-family="ui-monospace, SFMono-Regular, Consolas, monospace" xml:space="preserve">  3. riletto      : 9,4 MB in 19 blocchi</text>
+<text x="22" y="169" font-size="14" fill="#9FB0C6" font-family="ui-monospace, SFMono-Regular, Consolas, monospace" xml:space="preserve">  4. byte identici: si</text>
+<text x="22" y="190" font-size="14" fill="#9FB0C6" font-family="ui-monospace, SFMono-Regular, Consolas, monospace" xml:space="preserve">  5. dati identici: si</text>
+<text x="22" y="232" font-size="14" fill="#4ADE80" font-family="ui-monospace, SFMono-Regular, Consolas, monospace" xml:space="preserve">ESITO: il giro completo conserva i dati.</text>
+</svg>

@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1315 370" width="1315" height="370" role="img" aria-label="Atlante — elenco degli slot">
+<title>Atlante — elenco degli slot</title>
+<rect width="1315" height="370" rx="10" fill="#0B1220"/>
+<rect width="1315" height="38" rx="10" fill="#141F33"/>
+<rect y="28" width="1315" height="10" fill="#141F33"/>
+<rect y="38" width="1315" height="1" fill="#1E2A40"/>
+<circle cx="22" cy="19" r="6" fill="#FF5F57"/>
+<circle cx="40" cy="19" r="6" fill="#FEBC2E"/>
+<circle cx="58" cy="19" r="6" fill="#28C840"/>
+<text x="84" y="24" font-size="12.5" fill="#5B6B84" font-family="ui-monospace, SFMono-Regular, Consolas, monospace">Atlante — elenco degli slot</text>
+<text x="22" y="60" font-size="14" fill="#4ADE80" font-family="ui-monospace, SFMono-Regular, Consolas, monospace" xml:space="preserve">$ java -cp classi it.atlante.Main elenca &quot;&lt;cartella WGS&gt;&quot;</text>
+<text x="22" y="85" font-size="14" fill="#E6EDF3" font-family="ui-monospace, SFMono-Regular, Consolas, monospace" xml:space="preserve">cartella: <cartella dei salvataggi></text>
+<text x="22" y="106" font-size="14" fill="#E6EDF3" font-family="ui-monospace, SFMono-Regular, Consolas, monospace" xml:space="preserve">slot trovati: 2</text>
+<text x="22" y="148" font-size="14" fill="#9FB0C6" font-family="ui-monospace, SFMono-Regular, Consolas, monospace" xml:space="preserve">  Slot3Auto  &quot;<nome della partita>&quot;</text>
+<text x="22" y="169" font-size="14" fill="#7D8FA9" font-family="ui-monospace, SFMono-Regular, Consolas, monospace" xml:space="preserve">      guid      : 18C4F9F24DEB4BDF965C25D080DAF634</text>
+<text x="22" y="190" font-size="14" fill="#7D8FA9" font-family="ui-monospace, SFMono-Regular, Consolas, monospace" xml:space="preserve">      payload   : EEC95D8A4074480B94EC48FD53A6C503  (1,7 MB compressi)</text>
+<text x="22" y="211" font-size="14" fill="#7D8FA9" font-family="ui-monospace, SFMono-Regular, Consolas, monospace" xml:space="preserve">      decompresso: 9,4 MB</text>
+<text x="22" y="232" font-size="14" fill="#7D8FA9" font-family="ui-monospace, SFMono-Regular, Consolas, monospace" xml:space="preserve">      durata    : 185 h 58 min</text>
+<text x="22" y="253" font-size="14" fill="#9FB0C6" font-family="ui-monospace, SFMono-Regular, Consolas, monospace" xml:space="preserve">  Slot3Manual  &quot;<nome della partita>&quot;</text>
+<text x="22" y="274" font-size="14" fill="#7D8FA9" font-family="ui-monospace, SFMono-Regular, Consolas, monospace" xml:space="preserve">      guid      : 6D75D8AC158B45E099788DE4B593BD8B</text>
+<text x="22" y="295" font-size="14" fill="#7D8FA9" font-family="ui-monospace, SFMono-Regular, Consolas, monospace" xml:space="preserve">      payload   : 83A31919493B4D3CB27B887E3CBC3C52  (1,7 MB compressi)</text>
+<text x="22" y="316" font-size="14" fill="#7D8FA9" font-family="ui-monospace, SFMono-Regular, Consolas, monospace" xml:space="preserve">      decompresso: 9,4 MB</text>
+<text x="22" y="337" font-size="14" fill="#7D8FA9" font-family="ui-monospace, SFMono-Regular, Consolas, monospace" xml:space="preserve">      durata    : 185 h 58 min</text>
+</svg>
