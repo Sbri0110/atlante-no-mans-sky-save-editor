@@ -39,11 +39,21 @@ public final class Premi {
         public final String id;
         public final String nome;
         public final boolean conIcona;
+        /**
+         * L'identificativo che il salvataggio usa per questa ricompensa.
+         *
+         * rewards.xml la chiama {@code ^EXPD_EGG_23}, il salvataggio la segna
+         * come {@code ^RS_S23_EGG}: due nomi diversi per la stessa cosa. Per
+         * riconoscere le ricompense gia' ottenute — e per scriverne di nuove —
+         * serve il secondo.
+         */
+        public final String idGioco;
 
-        Premio(String id, String nome, boolean conIcona) {
+        Premio(String id, String nome, boolean conIcona, String idGioco) {
             this.id = id;
             this.nome = nome;
             this.conIcona = conIcona;
+            this.idGioco = idGioco;
         }
     }
 
@@ -90,9 +100,9 @@ public final class Premi {
             String id = m.group(1);
             String nome = m.group(2);
             boolean conIcona = m.group(3) != null && m.group(3).contains("unlock=\"true\"");
-            Premio premio = new Premio(id, nome, conIcona);
-
             int numero = numeroDi(id);
+            Premio premio = new Premio(id, nome, conIcona, idDelGioco(id, numero));
+
             if (numero > 0 && (corrente == null || corrente.numero != numero)) {
                 // Una voce numerata diversa apre una spedizione nuova.
                 corrente = new Spedizione(numero);
@@ -116,7 +126,7 @@ public final class Premi {
 
         Matcher t = TWITCH_VOCE.matcher(testo);
         while (t.find()) {
-            TWITCH.add(new Premio(t.group(1), t.group(2), false));
+            TWITCH.add(new Premio(t.group(1), t.group(2), false, null));
         }
 
         // L'ordine si ricalcola: il file non e' in ordine di numero. Le
@@ -141,6 +151,42 @@ public final class Premi {
         return spedizioni;
     }
 
+    /**
+     * Ricava l'identificativo che il salvataggio usa, da quello di rewards.xml.
+     *
+     * <pre>
+     *   ^EXPD_EGG_23      -> ^RS_S23_EGG
+     *   ^EXPD_GUN23       -> ^RS_S23_GUN
+     *   ^EXPD_SHIP23A     -> ^RS_S23_SHIPA
+     *   ^EXPD_SPEC02      -> ^RS_S2_SPEC
+     * </pre>
+     *
+     * La regola: si toglie il numero di stagione (con gli zeri iniziali) dal
+     * tipo e lo si sposta davanti, nella forma {@code ^RS_S<n>_<tipo>}.
+     *
+     * Verificata su dieci coppie reali lette dal salvataggio di Sbri: dieci
+     * corrette su dieci. E' quello che permette di riconoscere le ricompense
+     * gia' ottenute e di scriverne di nuove senza inventare valori.
+     */
+    static String idDelGioco(String idRewards, int stagione) {
+        if (idRewards == null || stagione <= 0 || !idRewards.startsWith("^EXPD_")) {
+            return null;
+        }
+        String tipo = idRewards.substring("^EXPD_".length());
+        // il numero puo' avere zeri iniziali: SPEC02 -> SPEC, GUN23 -> GUN
+        tipo = tipo.replaceAll("0*" + stagione, "");
+        while (tipo.startsWith("_")) {
+            tipo = tipo.substring(1);
+        }
+        while (tipo.endsWith("_")) {
+            tipo = tipo.substring(0, tipo.length() - 1);
+        }
+        if (tipo.isEmpty()) {
+            return null;
+        }
+        return "^RS_S" + stagione + "_" + tipo;
+    }
+
     /** Il numero di spedizione contenuto in un identificativo, o -1. */
     private static int numeroDi(String id) {
         Matcher m = NUMERO.matcher(id);
@@ -152,6 +198,78 @@ public final class Premi {
         } catch (NumberFormatException e) {
             return -1;
         }
+    }
+
+    /**
+     * La corrispondenza fra gli identificativi di rewards.xml e quelli che il
+     * salvataggio usa davvero.
+     *
+     * Sono due spazi di nomi diversi:
+     *
+     * <pre>
+     *   rewards.xml            il salvataggio
+     *   ^EXPD_EGG_23           ^RS_S23_EGG
+     *   ^EXPD_GUN23            ^RS_S23_GUN
+     *   ^EXPD_SHIP23A          ^RS_S23_SHIPA
+     *   ^EXPD_SPEC02           ^RS_S2_SPEC
+     * </pre>
+     *
+     * Senza questa corrispondenza il pannello non poteva riconoscere nemmeno le
+     * ricompense gia' ottenute, e mostrava zero su tutto.
+     *
+     * La regola: lo stesso numero di spedizione, e le lettere del tipo contenute
+     * nell'identificativo dell'altro elenco. Le cifre si tolgono perche' il
+     * numero di stagione puo' stare in mezzo al tipo ({@code SHIPA} contro
+     * {@code SHIP23A}).
+     *
+     * Non copre tutto: alcune ricompense del salvataggio (i pezzi di nave della
+     * 20, i treni della 19) non hanno una voce corrispondente in rewards.xml,
+     * perche' il gioco le tiene altrove. Quelle restano non riconosciute, ed e'
+     * giusto cosi': meglio un premio non spuntato che uno spuntato a caso.
+     */
+    public static java.util.Map<String, String> corrispondenze(
+            List<Spedizione> spedizioni, java.util.Collection<String> idSalvataggio) {
+        java.util.Map<String, String> mappa = new java.util.LinkedHashMap<String, String>();
+        if (idSalvataggio == null) {
+            return mappa;
+        }
+        for (String idGioco : idSalvataggio) {
+            Matcher m = RS.matcher(idGioco);
+            if (!m.matches()) {
+                continue;
+            }
+            String stagione = m.group(1);
+            String tipo = soloLettere(m.group(2));
+            if (tipo.isEmpty()) {
+                continue;
+            }
+            for (Spedizione s : spedizioni) {
+                if (!String.valueOf(s.numero).equals(stagione)) {
+                    continue;
+                }
+                for (Premio p : s.premi) {
+                    if (soloLettere(p.id).contains(tipo)) {
+                        mappa.put(p.id, idGioco);
+                        break;
+                    }
+                }
+            }
+        }
+        return mappa;
+    }
+
+    private static final Pattern RS = Pattern.compile("\\^RS_S(\\d+)_(.+)");
+
+    /** Solo le lettere maiuscole di un testo: per confrontare i tipi. */
+    private static String soloLettere(String testo) {
+        StringBuilder b = new StringBuilder();
+        for (int i = 0; i < testo.length(); i++) {
+            char c = Character.toUpperCase(testo.charAt(i));
+            if (c >= 'A' && c <= 'Z') {
+                b.append(c);
+            }
+        }
+        return b.toString();
     }
 
     /** Quanti premi Twitch ci sono. */

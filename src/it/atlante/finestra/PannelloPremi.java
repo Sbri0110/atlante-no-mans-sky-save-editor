@@ -62,7 +62,29 @@ public final class PannelloPremi extends JPanel {
     private List<Premi.Spedizione> spedizioni = new ArrayList<Premi.Spedizione>();
     private Set<String> sbloccati = new LinkedHashSet<String>();
     private List<String> listaSbloccati;
+    private java.util.Map<String, String> corrispondenze =
+            new java.util.LinkedHashMap<String, String>();
     private boolean mostraTwitch;
+
+    /**
+     * Vero se il premio risulta gia' ottenuto.
+     *
+     * Si guardano due cose: l'identificativo di rewards.xml e quello che il
+     * salvataggio usa davvero per la stessa ricompensa. Sono elenchi diversi —
+     * {@code ^EXPD_EGG_23} contro {@code ^RS_S23_EGG} — e senza il secondo
+     * confronto il pannello non riconosceva nemmeno le spedizioni finite.
+     */
+    private boolean sbloccato(Premi.Premio premio) {
+        if (sbloccati.contains(premio.id)) {
+            return true;
+        }
+        return premio.idGioco != null && sbloccati.contains(premio.idGioco);
+    }
+
+    /** L'identificativo da scrivere per un premio: quello del gioco se c'e'. */
+    private String idDaScrivere(Premi.Premio premio) {
+        return premio.idGioco != null ? premio.idGioco : premio.id;
+    }
 
     public PannelloPremi(Catalogo catalogo, Icone icone, Runnable suModifica) {
         this.catalogo = catalogo;
@@ -200,6 +222,8 @@ public final class PannelloPremi extends JPanel {
         } catch (IOException e) {
             spedizioni = new ArrayList<Premi.Spedizione>();
         }
+        // Si ricava la corrispondenza fra i due elenchi di identificativi:/n        // senza, le ricompense gia' ottenute non si riconoscono.
+        corrispondenze = Premi.corrispondenze(spedizioni, sbloccati);
         disegna();
     }
 
@@ -242,7 +266,7 @@ public final class PannelloPremi extends JPanel {
         for (Premi.Spedizione s : spedizioni) {
             for (Premi.Premio p : s.premi) {
                 totale++;
-                if (sbloccati.contains(p.id)) {
+                if (sbloccato(p)) {
                     fatti++;
                 }
             }
@@ -251,7 +275,7 @@ public final class PannelloPremi extends JPanel {
             List<Premi.Premio> tw = Premi.twitch();
             int tf = 0;
             for (Premi.Premio p : tw) {
-                if (sbloccati.contains(p.id)) {
+                if (sbloccato(p)) {
                     tf++;
                 }
             }
@@ -265,43 +289,28 @@ public final class PannelloPremi extends JPanel {
     // ------------------------------------------------------------------
 
     private void cambia(Premi.Premio p, boolean sbloccare) {
-        // NON si scrive: vedi la nota qui sotto.
-        //
-        // Il salvataggio tiene le ricompense sbloccate in
-        // EarnedSeasonSpecialRewards con identificativi della forma
-        // ^RS_S23_SHIPB, ^RS_S20_TRIM, ^RS_S22_GUN. rewards.xml usa invece
-        // ^EXPD_EGG_23, ^SWARM_HAT, ^EXPD_TITLE22.
-        //
-        // I due elenchi non hanno una sola voce in comune: sono spazi di nomi
-        // diversi. Aggiungere un identificativo di rewards.xml a quella lista
-        // scriverebbe un valore che il gioco non riconosce — nel migliore dei
-        // casi inutile, nel peggiore un dato incoerente nel salvataggio.
-        //
-        // Finche' non si conosce la corrispondenza fra i due (sta nei metadati
-        // REWARDS del gioco, dentro i pak) il pannello resta in sola lettura.
-        avvisaNonModificabile();
-    }
-
-    private boolean avvisato;
-
-    private void avvisaNonModificabile() {
-        if (avvisato) {
+        if (listaSbloccati == null) {
             return;
         }
-        avvisato = true;
-        javax.swing.JOptionPane.showMessageDialog(this,
-                "Questo pannello e' in sola lettura.\n\n"
-                + "Gli identificativi dei premi in rewards.xml non sono quelli che il\n"
-                + "salvataggio usa per segnare le ricompense ottenute. Scrivere qui\n"
-                + "metterebbe nel file valori che il gioco non riconosce.\n\n"
-                + "Serve prima ricavare la corrispondenza fra i due elenchi dai\n"
-                + "metadati del gioco.",
-                "Sola lettura", javax.swing.JOptionPane.WARNING_MESSAGE);
+        // Si scrive l'identificativo che il gioco usa (^RS_S23_EGG), non quello
+        // di rewards.xml (^EXPD_EGG_23): sono elenchi diversi, e nella lista del
+        // salvataggio l'unico che il gioco riconosce e' il primo.
+        String id = idDaScrivere(p);
+        if (sbloccare) {
+            if (!sbloccati.contains(id)) {
+                sbloccati.add(id);
+                listaSbloccati.add(id);
+            }
+        } else {
+            sbloccati.remove(id);
+            listaSbloccati.remove(id);
+        }
+        suModifica.run();
     }
 
     private void sbloccaGruppo(Premi.Spedizione s, List<Premi.Premio> premi) {
         for (Premi.Premio p : premi) {
-            if (!sbloccati.contains(p.id)) {
+            if (!sbloccato(p)) {
                 cambia(p, true);
             }
         }
@@ -311,13 +320,13 @@ public final class PannelloPremi extends JPanel {
     private void sbloccaTutto() {
         for (Premi.Spedizione s : spedizioni) {
             for (Premi.Premio p : s.premi) {
-                if (!sbloccati.contains(p.id)) {
+                if (!sbloccato(p)) {
                     cambia(p, true);
                 }
             }
         }
         for (Premi.Premio p : Premi.twitch()) {
-            if (!sbloccati.contains(p.id)) {
+            if (!sbloccato(p)) {
                 cambia(p, true);
             }
         }
@@ -346,7 +355,7 @@ public final class PannelloPremi extends JPanel {
 
             int fatti = 0;
             for (Premi.Premio p : premi) {
-                if (sbloccati.contains(p.id)) {
+                if (sbloccato(p)) {
                     fatti++;
                 }
             }
