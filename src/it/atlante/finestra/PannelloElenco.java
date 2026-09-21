@@ -5,6 +5,7 @@ import it.atlante.nms.Catalogo;
 
 import javax.swing.BorderFactory;
 import javax.swing.DefaultListModel;
+import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
@@ -42,12 +43,22 @@ public final class PannelloElenco extends JPanel {
         final String nome;
         final String sottotitolo;
         final Object valore;
+        /** Il file dell'icona dell'elemento (la razza del pilota), o null. */
+        final String icona;
+        /** Il file dell'icona della sua cosa (la navicella), o null. */
+        final String icona2;
+        /** La classe della sua cosa, per esempio "S" per una nave, o null. */
+        final String classe;
 
-        Voce(int indice, String nome, String sottotitolo, Object valore) {
+        Voce(int indice, String nome, String sottotitolo, Object valore,
+             String icona, String icona2, String classe) {
             this.indice = indice;
             this.nome = nome;
             this.sottotitolo = sottotitolo;
             this.valore = valore;
+            this.icona = icona;
+            this.icona2 = icona2;
+            this.classe = classe;
         }
 
         @Override
@@ -63,6 +74,10 @@ public final class PannelloElenco extends JPanel {
     private final PannelloCampi campi;
     private final JLabel titolo = new JLabel();
     private final JLabel conteggio = new JLabel();
+    private final JPanel testata = new JPanel();
+    private final JLabel testataIcona = new JLabel();
+    private final JLabel testataNome = new JLabel();
+    private final JLabel testataSotto = new JLabel();
 
     public PannelloElenco(Catalogo catalogo, Icone icone, Runnable suModifica) {
         this.catalogo = catalogo;
@@ -102,8 +117,35 @@ public final class PannelloElenco extends JPanel {
         sinistra.add(scorrimento, BorderLayout.CENTER);
         sinistra.setPreferredSize(new Dimension(320, 500));
 
+        // --- testata a destra: quello che hai scelto, con la sua icona ---
+        testata.setBackground(Aspetto.FONDO_ALTO);
+        testata.setLayout(new BorderLayout(12, 0));
+        testata.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createMatteBorder(0, 0, 1, 0, Aspetto.BORDO),
+                BorderFactory.createEmptyBorder(12, 16, 12, 16)));
+        testataIcona.setPreferredSize(new Dimension(52, 52));
+        testata.add(testataIcona, BorderLayout.WEST);
+        JPanel testiTestata = new JPanel();
+        testiTestata.setOpaque(false);
+        testiTestata.setLayout(new javax.swing.BoxLayout(testiTestata, javax.swing.BoxLayout.Y_AXIS));
+        testataNome.setFont(testataNome.getFont().deriveFont(Font.BOLD, 15f));
+        testataNome.setForeground(Aspetto.TESTO);
+        testataNome.setAlignmentX(Component.LEFT_ALIGNMENT);
+        testataSotto.setFont(testataSotto.getFont().deriveFont(11.5f));
+        testataSotto.setForeground(Aspetto.TESTO_TENUE);
+        testataSotto.setAlignmentX(Component.LEFT_ALIGNMENT);
+        testiTestata.add(testataNome);
+        testiTestata.add(javax.swing.Box.createVerticalStrut(4));
+        testiTestata.add(testataSotto);
+        testata.add(testiTestata, BorderLayout.CENTER);
+
+        JPanel destra = new JPanel(new BorderLayout());
+        destra.setBackground(Aspetto.PANNELLO);
+        destra.add(testata, BorderLayout.NORTH);
+        destra.add(campi, BorderLayout.CENTER);
+
         add(sinistra, BorderLayout.WEST);
-        add(campi, BorderLayout.CENTER);
+        add(destra, BorderLayout.CENTER);
 
         elenco.addListSelectionListener(new ListSelectionListener() {
             public void valueChanged(ListSelectionEvent e) {
@@ -114,8 +156,24 @@ public final class PannelloElenco extends JPanel {
                 if (v != null) {
                     campi.mostra(v.valore);
                 }
+                aggiornaTestata(v);
             }
         });
+    }
+
+    /** Aggiorna la testata a destra con l'elemento scelto. */
+    private void aggiornaTestata(Voce v) {
+        if (v == null) {
+            testataIcona.setIcon(Icone.segno("·", 52, Aspetto.TESTO_DEBOLE, true));
+            testataNome.setText("Nessun elemento scelto");
+            testataSotto.setText("");
+            return;
+        }
+        ImageIcon img = v.icona == null ? null : icone.perFile(v.icona, 52);
+        testataIcona.setIcon(img != null ? img
+                : Icone.segno(v.nome.substring(0, 1).toUpperCase(), 52, Aspetto.ACCENTO, true));
+        testataNome.setText(v.nome);
+        testataSotto.setText(v.sottotitolo);
     }
 
     // ------------------------------------------------------------------
@@ -128,6 +186,7 @@ public final class PannelloElenco extends JPanel {
         if (descrizione == null) {
             conteggio.setText("");
             campi.mostra(null);
+            aggiornaTestata(null);
             return;
         }
 
@@ -139,8 +198,15 @@ public final class PannelloElenco extends JPanel {
 
         for (int i = 0; i < elementi.size(); i++) {
             Object elemento = elementi.get(i);
+            String icona = iconaDi(elemento, descrizione.campoIcona);
+            if (icona == null) {
+                icona = descrizione.iconaFissa;
+            }
+            String icona2 = iconaDi(elemento, descrizione.campoIcona2);
+            String classe = Icone.classeDiRisorsa(risorsaDi(elemento, descrizione.campoIcona2));
             modello.addElement(new Voce(i, nomeDi(elemento, descrizione, i),
-                    sottotitoloDi(elemento, descrizione), elemento));
+                    sottotitoloDi(elemento, descrizione, classe), elemento,
+                    icona, icona2, classe));
         }
         conteggio.setText(elementi.size() + (elementi.size() == 1 ? " elemento" : " elementi"));
 
@@ -148,6 +214,7 @@ public final class PannelloElenco extends JPanel {
             elenco.setSelectedIndex(0);
         } else {
             campi.mostra(null);
+            aggiornaTestata(null);
         }
     }
 
@@ -163,13 +230,98 @@ public final class PannelloElenco extends JPanel {
         return descrizione.prefisso + " " + (indice + 1);
     }
 
-    /** La riga sotto il nome: un campo che aiuta a riconoscere l'elemento. */
+    /**
+     * Il percorso della risorsa di un elemento.
+     *
+     * Certe volte il campo e' un oggetto con dentro un {@code Filename} (la
+     * risorsa del pilota, quella della sua nave), certe volte e' direttamente
+     * il nome della cosa (la razza di una fregata, che e' "Gek" e basta).
+     */
     @SuppressWarnings("unchecked")
-    private String sottotitoloDi(Object elemento, Elenchi.Elenco descrizione) {
-        if (descrizione.campoSottotitolo == null || !(elemento instanceof Map)) {
+    private static String risorsaDi(Object elemento, String campo) {
+        if (campo == null || !(elemento instanceof Map)) {
+            return null;
+        }
+        Object v = ((Map<String, Object>) elemento).get(campo);
+        if (v instanceof Map) {
+            Map<String, Object> dentro = (Map<String, Object>) v;
+            Object f = dentro.get("Filename");
+            if (f != null && !String.valueOf(f).isEmpty()) {
+                return String.valueOf(f);
+            }
+            // Alcuni campi hanno un solo valore annidato senza Filename: la
+            // razza di una fregata sta in {AlienRace: "Gek"}.
+            if (dentro.size() == 1) {
+                Object solo = dentro.values().iterator().next();
+                return solo == null ? null : String.valueOf(solo);
+            }
+            return null;
+        }
+        return v == null ? null : String.valueOf(v);
+    }
+
+    /** Il file dell'icona di un elemento, o null. */
+    private static String iconaDi(Object elemento, String campo) {
+        return Icone.iconaDiRisorsa(risorsaDi(elemento, campo));
+    }
+
+    /** La razza scritta per esteso, letta dal modello: NPCKORVAX -> Korvax. */
+    private static String razzaDi(Object elemento, String campo) {
+        String r = risorsaDi(elemento, campo);
+        if (r == null) {
+            return null;
+        }
+        String u = r.toUpperCase();
+        if (u.indexOf("KORVAX") >= 0 || u.indexOf("EXPLORER") >= 0) {
+            return "Korvax";
+        }
+        if (u.indexOf("VYKEEN") >= 0 || u.indexOf("VY'KEEN") >= 0 || u.indexOf("WARRIOR") >= 0) {
+            return "Vy'keen";
+        }
+        if (u.indexOf("GEK") >= 0 || u.indexOf("TRADER") >= 0) {
+            return "Gek";
+        }
+        return null;
+    }
+
+    /**
+     * La riga sotto il nome.
+     *
+     * Dice le cose che servono a riconoscere l'elemento a colpo d'occhio: la
+     * razza e la classe della navicella per un pilota dello squadrone, il grado
+     * e cosi' via. Il campo dichiarato dalla sezione resta in fondo, con la sua
+     * etichetta italiana.
+     */
+    private String sottotitoloDi(Object elemento, Elenchi.Elenco descrizione, String classe) {
+        List<String> pezzi = new ArrayList<String>();
+        String razza = razzaDi(elemento, descrizione.campoIcona);
+        if (razza != null) {
+            pezzi.add(razza);
+        }
+        if (classe != null) {
+            pezzi.add("Classe " + classe);
+        }
+        String dichiarato = valoreSemplice(elemento, descrizione.campoSottotitolo);
+        if (dichiarato != null && !dichiarato.isEmpty()) {
+            pezzi.add(Etichette.leggi(descrizione.campoSottotitolo) + " " + dichiarato);
+        }
+        StringBuilder testo = new StringBuilder();
+        for (String pezzo : pezzi) {
+            if (testo.length() > 0) {
+                testo.append("  ·  ");
+            }
+            testo.append(pezzo);
+        }
+        return testo.toString();
+    }
+
+    /** Il valore di un campo come testo, scendendo di un livello se e' un oggetto. */
+    @SuppressWarnings("unchecked")
+    private String valoreSemplice(Object elemento, String campo) {
+        if (campo == null || !(elemento instanceof Map)) {
             return "";
         }
-        Object v = ((Map<String, Object>) elemento).get(descrizione.campoSottotitolo);
+        Object v = ((Map<String, Object>) elemento).get(campo);
         // Certe volte il campo e' a sua volta un oggetto con dentro un solo
         // valore (FrigateClass = {FrigateClass = "Exploration"}). Senza scendere
         // di un livello si mostrerebbe il toString della mappa.
@@ -188,7 +340,7 @@ public final class PannelloElenco extends JPanel {
         if (testo.isEmpty() || "0".equals(testo)) {
             return "";
         }
-        return Etichette.leggi(descrizione.campoSottotitolo) + " " + testo;
+        return testo;
     }
 
     /** Quanti elementi ha l'elenco: serve al collaudo. */
@@ -208,14 +360,29 @@ public final class PannelloElenco extends JPanel {
     private final class Disegnatore extends JPanel implements ListCellRenderer<Voce> {
 
         private final JLabel icona = new JLabel();
+        private final JLabel icona2 = new JLabel();
         private final JLabel nome = new JLabel();
         private final JLabel sotto = new JLabel();
 
         Disegnatore() {
             setLayout(new BorderLayout(10, 0));
-            setBorder(BorderFactory.createEmptyBorder(6, 12, 6, 10));
-            icona.setPreferredSize(new Dimension(30, 30));
-            add(icona, BorderLayout.WEST);
+            setBorder(BorderFactory.createEmptyBorder(6, 10, 6, 10));
+
+            // L'icona della cosa e, piu' piccola accanto, quella della sua
+            // navicella: un pilota dello squadrone si riconosce dalla razza e
+            // dalla nave che porta.
+            JPanel immagini = new JPanel();
+            immagini.setOpaque(false);
+            immagini.setLayout(new javax.swing.BoxLayout(immagini, javax.swing.BoxLayout.X_AXIS));
+            icona.setPreferredSize(new Dimension(34, 34));
+            icona.setMaximumSize(new Dimension(34, 34));
+            icona2.setPreferredSize(new Dimension(26, 26));
+            icona2.setMaximumSize(new Dimension(26, 26));
+            immagini.add(icona);
+            immagini.add(javax.swing.Box.createHorizontalStrut(4));
+            immagini.add(icona2);
+            add(immagini, BorderLayout.WEST);
+
             JPanel testi = new JPanel();
             testi.setOpaque(false);
             testi.setLayout(new javax.swing.BoxLayout(testi, javax.swing.BoxLayout.Y_AXIS));
@@ -231,8 +398,16 @@ public final class PannelloElenco extends JPanel {
                                                       int indice, boolean selezionato, boolean conFuoco) {
             setBackground(selezionato ? Aspetto.SELEZIONE : Aspetto.PANNELLO);
             nome.setForeground(selezionato ? Aspetto.TESTO : Aspetto.TESTO_TENUE);
-            icona.setIcon(Icone.segno(valore.nome.substring(0, 1).toUpperCase(), 30,
+
+            ImageIcon img = valore.icona == null ? null : icone.perFile(valore.icona, 34);
+            icona.setIcon(img != null ? img
+                    : Icone.segno(valore.nome.substring(0, 1).toUpperCase(), 34,
                     selezionato ? Aspetto.ACCENTO : Aspetto.TESTO_DEBOLE, true));
+
+            ImageIcon img2 = valore.icona2 == null ? null : icone.perFile(valore.icona2, 26);
+            icona2.setIcon(img2);
+            icona2.setVisible(img2 != null);
+
             nome.setText(valore.nome);
             sotto.setText(valore.sottotitolo);
             return this;

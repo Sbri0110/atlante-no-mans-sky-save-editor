@@ -122,6 +122,59 @@ public final class Icone {
         return icona;
     }
 
+    /**
+     * L'icona che corrisponde a una risorsa del gioco.
+     *
+     * Il salvataggio non dice "questo pilota e' un Korvax": dice che il suo
+     * modello e' {@code MODELS/COMMON/PLAYER/PLAYERCHARACTER/NPCKORVAX.SCENE.MBIN}.
+     * La razza si legge da li', e le icone delle razze sono le stesse che il
+     * gioco usa nel menu dello squadrone. Per le navi il modello sta in
+     * {@code MODELS/COMMON/SPACECRAFT/...}: l'icona e' quella dell'interfaccia,
+     * e la classe (S, A, B, C) si legge dal nome della cartella.
+     *
+     * @param risorsa il percorso del modello, come sta nel salvataggio
+     * @return il nome del file dell'icona, o null se non se ne conosce una
+     */
+    public static String iconaDiRisorsa(String risorsa) {
+        if (risorsa == null || risorsa.isEmpty()) {
+            return null;
+        }
+        String r = risorsa.toUpperCase();
+        // Le razze: il pilota dello squadrone ha il modello nel nome
+        // (NPCKORVAX), la fregata ha la gilda (Warriors, Traders, Explorers).
+        if (r.indexOf("KORVAX") >= 0 || r.indexOf("EXPLORER") >= 0) {
+            return "UI-KORVAX.PNG";
+        }
+        if (r.indexOf("VYKEEN") >= 0 || r.indexOf("VY'KEEN") >= 0 || r.indexOf("WARRIOR") >= 0) {
+            return "UI-VYKEEN.PNG";
+        }
+        if (r.indexOf("GEK") >= 0 || r.indexOf("TRADER") >= 0) {
+            return "UI-GEK.PNG";
+        }
+        if (r.indexOf("SPACECRAFT") >= 0 || r.indexOf("/SHIP") >= 0) {
+            return "UI-SHIPICON.PNG";
+        }
+        return null;
+    }
+
+    /**
+     * La classe di una nave, letta dal percorso del suo modello.
+     *
+     * @return "S", "A", "B", "C", o null se il percorso non la dice
+     */
+    public static String classeDiRisorsa(String risorsa) {
+        if (risorsa == null) {
+            return null;
+        }
+        String r = risorsa.toUpperCase();
+        for (char c : new char[]{'S', 'A', 'B', 'C'}) {
+            if (r.indexOf(c + "-CLASS") >= 0) {
+                return String.valueOf(c);
+            }
+        }
+        return null;
+    }
+
     private static ImageIcon ridimensiona(ImageIcon originale, int lato) {
         int larghezza = originale.getIconWidth();
         int altezza = originale.getIconHeight();
