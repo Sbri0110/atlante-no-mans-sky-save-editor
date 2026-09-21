@@ -126,6 +126,10 @@ public final class Navigazione {
                 "PRODUCT-STATIONCRATE", Contenitore.GIOCATORE,
                 "Stats", "ProgressionLevel", "MissionProgress"));
 
+        SEZIONI.add(new Sezione("Statistiche", "Danno, scudo, iperguida e manovrabilità di navi, armi e veicoli",
+                "TECHNOLOGY-RENDER.BOOSTMOD", Contenitore.GIOCATORE,
+                "ShipOwnership", "Multitools", "VehicleOwnership"));
+
         SEZIONI.add(new Sezione("Traguardi e fazioni", "Statistiche, missioni e reputazione",
                 "UI-MILESTONES", Contenitore.GIOCATORE,
                 "MissionProgress", "MissionRecurrences", "MissionVersion", "CurrentMissionID",

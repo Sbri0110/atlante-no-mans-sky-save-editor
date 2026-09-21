@@ -91,6 +91,7 @@ public final class Finestra extends JFrame {
     private PannelloPremi premi;
     private PannelloStazioni stazioni;
     private PannelloTraguardi traguardi;
+    private PannelloStatistiche statistiche;
     private PannelloPrincipale principale;
     private Salvataggio salvataggio;
     private Rilevatore.Voce voceCorrente;
@@ -182,6 +183,14 @@ public final class Finestra extends JFrame {
         });
 
         elenco = new PannelloElenco(catalogo, icone, new Runnable() {
+            public void run() {
+                salvataggio.segnaModificato();
+                testata.segnaModificato();
+                messaggio.setText("Modifiche non salvate");
+            }
+        });
+
+        statistiche = new PannelloStatistiche(catalogo, icone, new Runnable() {
             public void run() {
                 salvataggio.segnaModificato();
                 testata.segnaModificato();
@@ -691,6 +700,9 @@ public final class Finestra extends JFrame {
             // campi. Si sceglie l'elemento a sinistra e si modifica a destra.
             elenco.mostra(salvataggio.albero(), sezioneCorrente.nome);
             centro.add(elenco, BorderLayout.CENTER);
+        } else if (sezioneCorrente != null && "Statistiche".equals(sezioneCorrente.nome)) {
+            statistiche.mostra(salvataggio.albero());
+            centro.add(statistiche, BorderLayout.CENTER);
         } else if (sezioneCorrente != null && "Traguardi e fazioni".equals(sezioneCorrente.nome)) {
             traguardi.mostra(salvataggio.albero());
             centro.add(traguardi, BorderLayout.CENTER);
