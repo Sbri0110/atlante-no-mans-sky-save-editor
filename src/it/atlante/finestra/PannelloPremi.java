@@ -61,9 +61,8 @@ public final class PannelloPremi extends JPanel {
 
     private List<Premi.Spedizione> spedizioni = new ArrayList<Premi.Spedizione>();
     private Set<String> sbloccati = new LinkedHashSet<String>();
-    private List<String> listaSbloccati;
-    private java.util.Map<String, String> corrispondenze =
-            new java.util.LinkedHashMap<String, String>();
+    /** Le liste del salvataggio su cui scrivere, per poterle aggiornare. */
+    private List<List<String>> listeDaScrivere = new ArrayList<List<String>>();
     private boolean mostraTwitch;
 
     /**
@@ -199,22 +198,41 @@ public final class PannelloPremi extends JPanel {
 
     // ------------------------------------------------------------------
 
-    /** Mostra i premi, leggendo lo stato dal salvataggio aperto. */
-    @SuppressWarnings("unchecked")
+    /**
+     * Mostra i premi, leggendo lo stato dal salvataggio aperto.
+     *
+     * Lo stato delle ricompense NON sta in un solo posto. Cercarlo solo in
+     * EarnedSeasonSpecialRewards — che contiene le 24 ricompense speciali —
+     * faceva apparire 11 premi ottenuti su 293 quando l'utente li aveva tutti:
+     * il vecchio editor, che li legge tutti, ne mostrava 293 su 293.
+     *
+     * Le liste da guardare, in entrambi i contesti (partita e spedizione):
+     *   - RedeemedSeasonRewards: le ricompense riscattate, con gli stessi
+     *     identificativi di rewards.xml (^EXPD_*);
+     *   - KnownProducts e KnownSpecials: i pezzi conosciuti, dove il gioco
+     *     registra la maggior parte delle ricompense;
+     *   - EarnedSeasonSpecialRewards: le ricompense speciali, con
+     *     identificativi propri (^RS_S23_EGG).
+     */
     public void mostra(Object radice, File filePremi) {
         sbloccati = new LinkedHashSet<String>();
-        listaSbloccati = null;
+        listeDaScrivere = new ArrayList<List<String>>();
 
-        Object comune = radice instanceof Map ? ((Map<String, Object>) radice).get("CommonStateData") : null;
-        if (comune instanceof Map) {
-            Object elenco = ((Map<String, Object>) comune).get("EarnedSeasonSpecialRewards");
-            if (elenco instanceof List) {
-                List<Object> lista = (List<Object>) elenco;
-                listaSbloccati = (List<String>) (List<?>) lista;
-                for (Object o : lista) {
-                    sbloccati.add(String.valueOf(o));
-                }
+        for (String contesto : new String[]{"BaseContext", "ExpeditionContext"}) {
+            Object c = radice instanceof Map
+                    ? ((Map<String, Object>) radice).get(contesto) : null;
+            Object psd = c instanceof Map
+                    ? ((Map<String, Object>) c).get("PlayerStateData") : null;
+            if (psd instanceof Map) {
+                raccogli((Map<String, Object>) psd, "RedeemedSeasonRewards");
+                raccogli((Map<String, Object>) psd, "KnownProducts");
+                raccogli((Map<String, Object>) psd, "KnownSpecials");
             }
+        }
+        Object comune = radice instanceof Map
+                ? ((Map<String, Object>) radice).get("CommonStateData") : null;
+        if (comune instanceof Map) {
+            raccogli((Map<String, Object>) comune, "EarnedSeasonSpecialRewards");
         }
 
         try {
@@ -222,9 +240,24 @@ public final class PannelloPremi extends JPanel {
         } catch (IOException e) {
             spedizioni = new ArrayList<Premi.Spedizione>();
         }
-        // Si ricava la corrispondenza fra i due elenchi di identificativi:/n        // senza, le ricompense gia' ottenute non si riconoscono.
-        corrispondenze = Premi.corrispondenze(spedizioni, sbloccati);
         disegna();
+    }
+
+    /** Aggiunge al gruppo degli sbloccati il contenuto di una lista del salvataggio. */
+    @SuppressWarnings("unchecked")
+    private void raccogli(Map<String, Object> dove, String nome) {
+        Object elenco = dove.get(nome);
+        if (!(elenco instanceof List)) {
+            return;
+        }
+        List<Object> lista = (List<Object>) elenco;
+        List<String> testi = new ArrayList<String>();
+        for (Object o : lista) {
+            String testo = String.valueOf(o);
+            sbloccati.add(testo);
+            testi.add(testo);
+        }
+        listeDaScrivere.add(testi);
     }
 
     private void disegna() {
@@ -289,21 +322,22 @@ public final class PannelloPremi extends JPanel {
     // ------------------------------------------------------------------
 
     private void cambia(Premi.Premio p, boolean sbloccare) {
-        if (listaSbloccati == null) {
+        if (listeDaScrivere.isEmpty()) {
             return;
         }
-        // Si scrive l'identificativo che il gioco usa (^RS_S23_EGG), non quello
-        // di rewards.xml (^EXPD_EGG_23): sono elenchi diversi, e nella lista del
-        // salvataggio l'unico che il gioco riconosce e' il primo.
-        String id = idDaScrivere(p);
+        // Si scrive nella prima lista disponibile. RedeemedSeasonRewards e' la
+        // piu' adatta: e' quella che il gioco usa per le ricompense di
+        // spedizione, e accetta gli stessi identificativi di rewards.xml.
+        List<String> destinazione = listeDaScrivere.get(0);
+        String id = p.idGioco != null ? p.idGioco : p.id;
         if (sbloccare) {
             if (!sbloccati.contains(id)) {
                 sbloccati.add(id);
-                listaSbloccati.add(id);
+                destinazione.add(id);
             }
         } else {
             sbloccati.remove(id);
-            listaSbloccati.remove(id);
+            destinazione.remove(id);
         }
         suModifica.run();
     }
