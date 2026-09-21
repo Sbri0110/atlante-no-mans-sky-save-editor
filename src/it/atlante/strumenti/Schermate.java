@@ -90,11 +90,8 @@ public final class Schermate {
 
         // Una schermata per sezione: mostrano la navigazione in uso.
         String[][] viste = {
-                {"Principale", "atlante-principale"},
+                {"Spedizioni", "atlante-spedizioni"},
                 {"Tuta", "atlante-tuta"},
-                {"Navi", "atlante-navi"},
-                {"Squadrone", "atlante-squadrone"},
-                {"Fregate", "atlante-fregate"},
         };
         for (String[] vista : viste) {
             finestra.mostraSezionePerNome(vista[0]);
