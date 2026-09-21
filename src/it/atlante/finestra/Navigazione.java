@@ -58,20 +58,20 @@ public final class Navigazione {
 
     static {
         SEZIONI.add(new Sezione("Principale", "Informazioni del file e azioni rapide",
-                "P", Contenitore.PRINCIPALE));
+                "UI-FILEICON", Contenitore.PRINCIPALE));
 
         SEZIONI.add(new Sezione("Tuta", "Inventario personale, stiva e tecnologie",
-                "T", Contenitore.GIOCATORE,
+                "PRODUCT-SUIT_INV_TOKEN", Contenitore.GIOCATORE,
                 "Inventory", "Inventory_Cargo", "Inventory_TechOnly", "RepairTechBuffer"));
 
         SEZIONI.add(new Sezione("Multitool", "Armi, moduli installati e munizioni",
-                "M", Contenitore.GIOCATORE,
+                "UI-WEAPONICON", Contenitore.GIOCATORE,
                 "Multitools", "ArchivedMultitools", "ActiveMultioolIndex", "CurrentWeapon",
                 "WeaponInventory", "WeaponLayout", "StartingPrimaryWeapon",
                 "StartingSecondaryWeapon", "BoltAmmo", "LaserAmmo", "PulseAmmo", "ScatterAmmo"));
 
         SEZIONI.add(new Sezione("Navi", "Flotta, inventari di bordo e statistiche",
-                "N", Contenitore.GIOCATORE,
+                "UI-SHIPICON", Contenitore.GIOCATORE,
                 "ShipOwnership", "CurrentShip", "PrimaryShip", "ArchivedShipOwnership",
                 "MultiShipEnabled", "ShipInventory", "ShipLayout", "ShipHealth", "ShipShield",
                 "ShipMoveableContents", "ShipUsesLegacyColours", "ShipNeedsTerrainPositioning",
@@ -80,11 +80,11 @@ public final class Navigazione {
                 "CorvetteStorageLayout"));
 
         SEZIONI.add(new Sezione("Squadrone", "Piloti reclutati e slot sbloccati",
-                "Q", Contenitore.GIOCATORE,
+                "UI-GEK", Contenitore.GIOCATORE,
                 "SquadronPilots", "SquadronUnlockedPilotSlots"));
 
         SEZIONI.add(new Sezione("Mercantile", "Nave capitale, inventari e flotta",
-                "C", Contenitore.GIOCATORE,
+                "UI-FREIGHTERICON", Contenitore.GIOCATORE,
                 "CurrentFreighter", "CurrentFreighterNPC", "CurrentFreighterHomeSystemSeed",
                 "PlayerFreighterName", "FreighterDismissed", "FreighterFleet", "FreighterLayout",
                 "FreighterInventory", "FreighterInventory_Cargo", "FreighterInventory_TechOnly",
@@ -93,41 +93,41 @@ public final class Navigazione {
                 "FreighterUniverseAddress"));
 
         SEZIONI.add(new Sezione("Fregate", "Navi da supporto e spedizioni",
-                "F", Contenitore.GIOCATORE,
+                "UI-SHIPICON", Contenitore.GIOCATORE,
                 "FleetFrigates", "FleetExpeditions", "FleetSeed"));
 
         SEZIONI.add(new Sezione("Veicoli", "Exocraft, piattaforma da pesca e mezzi",
-                "V", Contenitore.GIOCATORE,
+                "PRODUCT-AM_EXOCRAFTTREE", Contenitore.GIOCATORE,
                 "VehicleOwnership", "PrimaryVehicle", "VehicleAIControlEnabled", "SkiffData",
                 "CustomTruckPresets", "CustomTruckPresetNames"));
 
         SEZIONI.add(new Sezione("Compagni", "Animali, uova e personalizzazioni",
-                "A", Contenitore.GIOCATORE,
+                "UI-PET", Contenitore.GIOCATORE,
                 "Pets", "Eggs", "UnlockedPetSlots", "PetAccessoryCustomisation", "PetBattleTeam"));
 
         SEZIONI.add(new Sezione("Basi e contenitori", "Basi costruite, container e depositi",
-                "B", Contenitore.GIOCATORE,
+                "UI-BASEICON", Contenitore.GIOCATORE,
                 "BaseBuildingObjects", "SeenBaseBuildingObjects", "PersistentPlayerBases",
                 "Chest*", "RocketLocker*", "CookingIngredients*", "FoodUnit*", "FishBaitBox*",
                 "FishPlatform*", "GraveInventory", "RefinerBufferData", "RefinerBufferKeys",
                 "TerrainEditData"));
 
         SEZIONI.add(new Sezione("Insediamenti", "Colonie, produttivita' e storia",
-                "I", Contenitore.GIOCATORE,
+                "PRODUCT-BLD_PLANET_HOLO", Contenitore.GIOCATORE,
                 "SettlementStatesV2", "SettlementLocalSaveData", "SettlementHistory",
                 "SettlementStateRingBufferIndexV2"));
 
         SEZIONI.add(new Sezione("Spedizioni", "La spedizione in corso, i suoi traguardi e le ricompense",
-                "E", Contenitore.COMUNE,
+                "PRODUCT-EXPEDITION.S23.BANNER", Contenitore.COMUNE,
                 "SeasonData", "SeasonState", "SeasonTransferInventoryData",
                 "StartingSeasonNumber", "RestartAllInactiveSeasonalMissions"));
 
         SEZIONI.add(new Sezione("Conquista stazioni", "Cosa serve per rivendicare una stazione spaziale",
-                "S", Contenitore.GIOCATORE,
+                "PRODUCT-STATIONCRATE", Contenitore.GIOCATORE,
                 "Stats", "ProgressionLevel", "MissionProgress"));
 
         SEZIONI.add(new Sezione("Traguardi e fazioni", "Statistiche, missioni e reputazione",
-                "G", Contenitore.GIOCATORE,
+                "UI-MILESTONES", Contenitore.GIOCATORE,
                 "MissionProgress", "MissionRecurrences", "MissionVersion", "CurrentMissionID",
                 "PreviousMissionID", "CurrentMissionSeed", "PreviousMissionSeed",
                 "PostMissionIndex", "Stats", "ProgressionLevel", "InteractionProgressTable",

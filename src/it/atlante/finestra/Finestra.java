@@ -189,7 +189,7 @@ public final class Finestra extends JFrame {
             }
         });
 
-        traguardi = new PannelloTraguardi(new Runnable() {
+        traguardi = new PannelloTraguardi(icone, new Runnable() {
             public void run() {
                 salvataggio.segnaModificato();
                 testata.segnaModificato();
@@ -988,8 +988,11 @@ public final class Finestra extends JFrame {
                                                       boolean selezionato, boolean conFuoco) {
             setBackground(selezionato ? Aspetto.SELEZIONE : Aspetto.PANNELLO);
             titolo.setForeground(selezionato ? Aspetto.TESTO : Aspetto.TESTO_TENUE);
-            icona.setIcon(Icone.segno(valore.segno, 26,
-                    selezionato ? Aspetto.ACCENTO : Aspetto.TESTO_DEBOLE, true));
+            // Icona di gioco, non una lettera: ogni sezione ha la sua.
+            ImageIcon img = icone.perFile(valore.segno + ".PNG", 26);
+            icona.setIcon(img != null ? img
+                    : Icone.segno(valore.nome.substring(0, 1), 26,
+                            selezionato ? Aspetto.ACCENTO : Aspetto.TESTO_DEBOLE, true));
             titolo.setText(valore.nome);
             int quanti = salvataggio == null ? 0 : Navigazione.conta(salvataggio.albero(), valore);
             dettaglio.setText(quanti == 0 ? valore.descrizione : quanti + " campi");
