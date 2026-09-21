@@ -18,11 +18,25 @@ import java.util.Map;
  *
  * I percorsi sono relativi alla radice e usano i nomi leggibili dei campi, gli
  * stessi che si vedono nell'editor.
+ *
+ * <b>Gruppi.</b> Una nave non ha un inventario solo: ha la stiva, le tecnologie
+ * e il cargo. Sono tre griglie diverse della stessa nave, e mostrarne una sola
+ * significa nascondere due terzi di quello che c'e' a bordo. Le voci hanno
+ * quindi un <i>gruppo</i> — il nome della nave — e la sezione mostra prima le
+ * navi e poi gli inventari di quella scelta.
  */
 public final class Inventari {
 
     /** Un inventario: dove sta e come si chiama. */
     public static final class Inventario {
+        /**
+         * Il gruppo a cui appartiene, o null.
+         *
+         * Per le navi e' il nome della nave: la stiva, le tecnologie e il cargo
+         * di "Fenice nata tra le stelle" sono tre schede dello stesso gruppo.
+         */
+        public final String gruppo;
+
         public final String etichetta;
         public final String percorso;
         /**
@@ -36,18 +50,60 @@ public final class Inventari {
         public final String statistiche;
 
         Inventario(String etichetta, String percorso) {
-            this(etichetta, percorso, null);
+            this(null, etichetta, percorso, null);
         }
 
         Inventario(String etichetta, String percorso, String statistiche) {
+            this(null, etichetta, percorso, statistiche);
+        }
+
+        Inventario(String gruppo, String etichetta, String percorso, String statistiche) {
+            this.gruppo = gruppo;
             this.etichetta = etichetta;
             this.percorso = percorso;
             this.statistiche = statistiche;
         }
     }
 
+    /**
+     * Una statistica scritta come un valore singolo, non come lista di
+     * statistiche base.
+     *
+     * Salute, scudo, energia, unita', naniti e quicksilver stanno nel
+     * salvataggio come numeri interi sciolti dentro PlayerStateData. Il vecchio
+     * editor li chiamava "Statistiche principali" e li mostrava nella scheda
+     * della tuta.
+     */
+    public static final class Statistica {
+        public final String etichetta;
+        public final String percorso;
+        /**
+         * Vero per le valute.
+         *
+         * Il salvataggio tiene unita', naniti e quicksilver in un intero con
+         * segno, ma il gioco li mostra senza: un giocatore con due miliardi e
+         * settecento milioni di unita' ha nel file {@code -1598048959}. Qui si
+         * legge e si scrive il numero che si vede nel gioco, e la conversione
+         * resta dentro questo editor.
+         */
+        public final boolean senzaSegno;
+
+        Statistica(String etichetta, String percorso) {
+            this(etichetta, percorso, false);
+        }
+
+        Statistica(String etichetta, String percorso, boolean senzaSegno) {
+            this.etichetta = etichetta;
+            this.percorso = percorso;
+            this.senzaSegno = senzaSegno;
+        }
+    }
+
     private static final Map<String, List<Inventario>> PER_SEZIONE =
             new LinkedHashMap<String, List<Inventario>>();
+
+    private static final Map<String, List<Statistica>> STATISTICHE_PRINCIPALI =
+            new LinkedHashMap<String, List<Statistica>>();
 
     private static void sezione(String nome, Inventario... inventari) {
         PER_SEZIONE.put(nome, Collections.unmodifiableList(Arrays.asList(inventari)));
@@ -78,12 +134,22 @@ public final class Inventari {
                 inv("Stiva", base + "Inventory_Cargo"),
                 inv("Tecnologie", base + "Inventory_TechOnly"));
 
+        // Le statistiche principali della tuta: gli stessi valori che il gioco
+        // mostra in basso a sinistra nella schermata dell'inventario. I nomi
+        // italiani vengono da Etichette, cosi' restano gli stessi del resto
+        // dell'interfaccia.
+        List<Statistica> tuta = new ArrayList<Statistica>();
+        tuta.add(new Statistica(Etichette.leggi("Health"), base + "Health"));
+        tuta.add(new Statistica(Etichette.leggi("Shield"), base + "Shield"));
+        tuta.add(new Statistica(Etichette.leggi("Energy"), base + "Energy"));
+        tuta.add(new Statistica(Etichette.leggi("Units"), base + "Units", true));
+        tuta.add(new Statistica(Etichette.leggi("Nanites"), base + "Nanites", true));
+        tuta.add(new Statistica(Etichette.leggi("Specials"), base + "Specials", true));
+        STATISTICHE_PRINCIPALI.put("Tuta", Collections.unmodifiableList(tuta));
 
-
-        sezione("Navi",
-                inv("Stiva della nave", base + "ShipInventory"),
-                inv("Tecnologie della nave", base + "ShipInventory_TechOnly"),
-                inv("Corvetta", base + "CorvetteStorageInventory"));
+        // Le navi non stanno qui: ognuna ha i suoi inventari e si leggono dal
+        // salvataggio, come i multi-tool. Vedi navi().
+        sezione("Navi");
 
         sezione("Mercantile",
                 inv("Stiva del mercantile", base + "FreighterInventory"),
@@ -104,7 +170,7 @@ public final class Inventari {
                 inv("Deposito speciale", base + "ChestMagicInventory"),
                 inv("Deposito del razzo", base + "RocketLockerInventory"),
                 inv("Ingredienti di cucina", base + "CookingIngredientsInventory"),
-                inv("Unità di cibo", base + "FoodUnitInventory"),
+                inv("Unita' di cibo", base + "FoodUnitInventory"),
                 inv("Esca da pesca", base + "FishBaitBoxInventory"),
                 inv("Piattaforma da pesca", base + "FishPlatformInventory"));
     }
@@ -119,8 +185,8 @@ public final class Inventari {
      * Gli inventari di una sezione, ricavati dal salvataggio aperto.
      *
      * Per la sezione Navi non basta un elenco fisso: le navi possedute sono una
-     * lista, e ognuna ha il suo inventario. I nomi delle sotto-schede sono i
-     * nomi che il giocatore ha dato alle navi, cosi' si riconoscono.
+     * lista, e ognuna ha tre inventari. Il nome della nave fa da gruppo, cosi'
+     * si passa dalla nave ai suoi tre depositi.
      */
     @SuppressWarnings("unchecked")
     public static List<Inventario> perSezione(Object radice, String nomeSezione) {
@@ -163,6 +229,13 @@ public final class Inventari {
         return elenco;
     }
 
+    /**
+     * Le navi possedute, ognuna con stiva, tecnologie e cargo.
+     *
+     * Le navi vuote — quelle che il salvataggio tiene come segnaposto, una
+     * cella sola e nessun oggetto — non si mostrano: sono righe che non
+     * portano a niente.
+     */
     private static List<Inventario> navi(Object radice) {
         List<Inventario> elenco = new ArrayList<Inventario>();
         Object possedute = risolvi(radice, "BaseContext.PlayerStateData.ShipOwnership");
@@ -171,6 +244,7 @@ public final class Inventari {
         }
         List<Object> lista = (List<Object>) possedute;
         for (int i = 0; i < lista.size(); i++) {
+            String radice2 = "BaseContext.PlayerStateData.ShipOwnership[" + i + "]";
             String nome = "Nave " + (i + 1);
             Object nave = lista.get(i);
             if (nave instanceof Map) {
@@ -179,11 +253,57 @@ public final class Inventari {
                     nome = String.valueOf(n).trim();
                 }
             }
-            elenco.add(new Inventario(nome,
-                    "BaseContext.PlayerStateData.ShipOwnership[" + i + "].Inventory",
-                    "BaseContext.PlayerStateData.ShipOwnership[" + i + "].Inventory.BaseStatValues"));
+            if (!haSlot(radice, radice2 + ".Inventory")) {
+                continue;
+            }
+            elenco.add(new Inventario(nome, "Stiva", radice2 + ".Inventory",
+                    radice2 + ".Inventory.BaseStatValues"));
+            if (haSlot(radice, radice2 + ".Inventory_TechOnly")) {
+                elenco.add(new Inventario(nome, "Tecnologie",
+                        radice2 + ".Inventory_TechOnly", null));
+            }
+            if (haSlot(radice, radice2 + ".Inventory_Cargo")) {
+                elenco.add(new Inventario(nome, "Cargo", radice2 + ".Inventory_Cargo", null));
+            }
         }
         return elenco;
+    }
+
+    /** Vero se l'inventario esiste e ha almeno uno slot. */
+    @SuppressWarnings("unchecked")
+    private static boolean haSlot(Object radice, String percorso) {
+        Object inv = risolvi(radice, percorso);
+        if (!(inv instanceof Map)) {
+            return false;
+        }
+        Map<String, Object> mappa = (Map<String, Object>) inv;
+        return larghezza(mappa) * altezza(mappa) > 1;
+    }
+
+    /** Quante colonne ha una griglia di slot, 0 se non e' dichiarato. */
+    public static int larghezza(Map<String, Object> inventario) {
+        return intero(inventario.get("Width"));
+    }
+
+    /** Quante righe ha una griglia di slot, 0 se non e' dichiarato. */
+    public static int altezza(Map<String, Object> inventario) {
+        return intero(inventario.get("Height"));
+    }
+
+    private static int intero(Object v) {
+        if (v instanceof it.atlante.json.Json.Numero) {
+            return (int) ((it.atlante.json.Json.Numero) v).comeLong();
+        }
+        if (v instanceof Number) {
+            return ((Number) v).intValue();
+        }
+        return 0;
+    }
+
+    /** Le statistiche principali di una sezione, o lista vuota. */
+    public static List<Statistica> statistichePrincipali(String nomeSezione) {
+        List<Statistica> l = STATISTICHE_PRINCIPALI.get(nomeSezione);
+        return l == null ? Collections.<Statistica>emptyList() : l;
     }
 
     /** Vero se la sezione si mostra come griglie di slot invece che come campi. */

@@ -13,15 +13,17 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.JToggleButton;
+import javax.swing.Scrollable;
 import javax.swing.SwingConstants;
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -34,10 +36,12 @@ import java.util.Map;
  * <ul>
  *   <li>le sotto-schede mostrano anche <b>quanti slot sono occupati</b>, cosi'
  *       si vede dove c'e' spazio senza aprirle tutte;</li>
+ *   <li>quando una cosa ha piu' depositi — una nave ha stiva, tecnologie e
+ *       cargo — le schede sono su due file: prima la cosa, poi i suoi depositi;</li>
  *   <li>il form mostra il pezzo scelto con la sua icona grande e la descrizione
  *       di gioco, non una fila di campi senza contesto;</li>
- *   <li>le azioni sono sul pezzo, non sull'inventario: <i>ripara</i> e
- *       <i>ricarica</i> agiscono su quello che hai davanti;</li>
+ *   <li>le azioni sono sul pezzo, non sull'inventario: <i>ripara</i>, <i>ricarica</i>
+ *       e <i>svuota</i> agiscono su quello che hai davanti;</li>
  *   <li>il pulsante per marcare uno slot <b>super-caricato</b> sta nel form:
  *       nel gioco sono pochi e preziosi, e vanno scelti con intenzione.</li>
  * </ul>
@@ -48,14 +52,20 @@ public final class PannelloInventario extends JPanel {
     private final Icone icone;
     private final Runnable suModifica;
 
+    private final JPanel schedeGruppi = new JPanel(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT, 6, 0));
     private final JPanel schede = new JPanel(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT, 6, 0));
     private final JLabel contatore = new JLabel();
+    private JPanel primaRiga;
     private final GrigliaSlot griglia;
     private final Modulo modulo;
 
     private Object radice;
+    private String sezione = "";
     private List<Inventari.Inventario> inventari = new ArrayList<Inventari.Inventario>();
+    private List<String> gruppi = new ArrayList<String>();
+    private List<Inventari.Statistica> principali = new ArrayList<Inventari.Statistica>();
     private Inventari.Inventario corrente;
+    private String gruppoCorrente;
 
     public PannelloInventario(Catalogo catalogo, Icone icone, Runnable suModifica) {
         this.catalogo = catalogo;
@@ -78,16 +88,34 @@ public final class PannelloInventario extends JPanel {
 
         modulo = new Modulo();
 
-        JPanel testa = new JPanel(new BorderLayout(12, 0));
+        primaRiga = new JPanel(new BorderLayout(12, 0));
+        primaRiga.setOpaque(false);
+        schedeGruppi.setOpaque(false);
+        primaRiga.add(schedeGruppi, BorderLayout.WEST);
+
+        // Il contatore sta sulla seconda riga: sulla prima le schede delle navi
+        // occupano tutto lo spazio e il contatore finiva schiacciato a zero,
+        // cioe' invisibile proprio dove serve sapere quanto spazio resta.
+        JPanel secondaRiga = new JPanel(new BorderLayout(12, 0));
+        secondaRiga.setOpaque(false);
+        schede.setOpaque(false);
+        secondaRiga.add(schede, BorderLayout.WEST);
+        contatore.setFont(Aspetto.monospaziato(11, Font.PLAIN));
+        contatore.setForeground(Aspetto.TESTO_DEBOLE);
+        contatore.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 2));
+        secondaRiga.add(contatore, BorderLayout.EAST);
+
+        JPanel testa = new JPanel();
+        testa.setLayout(new BoxLayout(testa, BoxLayout.Y_AXIS));
         testa.setBackground(Aspetto.FONDO_ALTO);
         testa.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createMatteBorder(0, 0, 1, 0, Aspetto.BORDO),
                 BorderFactory.createEmptyBorder(10, 16, 10, 16)));
-        schede.setOpaque(false);
-        testa.add(schede, BorderLayout.WEST);
-        contatore.setFont(Aspetto.monospaziato(11, Font.PLAIN));
-        contatore.setForeground(Aspetto.TESTO_DEBOLE);
-        testa.add(contatore, BorderLayout.EAST);
+        primaRiga.setAlignmentX(Component.LEFT_ALIGNMENT);
+        secondaRiga.setAlignmentX(Component.LEFT_ALIGNMENT);
+        testa.add(primaRiga);
+        testa.add(Box.createVerticalStrut(6));
+        testa.add(secondaRiga);
 
         JPanel corpo = new JPanel(new BorderLayout());
         corpo.setBackground(Aspetto.PANNELLO);
@@ -103,35 +131,101 @@ public final class PannelloInventario extends JPanel {
     /** Mostra la sezione: sceglie le sotto-schede e apre la prima. */
     public void mostra(Object radice, String nomeSezione) {
         this.radice = radice;
+        this.sezione = nomeSezione;
         inventari = Inventari.esistenti(radice, Inventari.perSezione(radice, nomeSezione));
-        schede.removeAll();
+        principali = Inventari.statistichePrincipali(nomeSezione);
+
+        gruppi = new ArrayList<String>();
+        for (Inventari.Inventario inv : inventari) {
+            if (inv.gruppo != null && !gruppi.contains(inv.gruppo)) {
+                gruppi.add(inv.gruppo);
+            }
+        }
 
         if (inventari.isEmpty()) {
             corrente = null;
+            gruppoCorrente = null;
             contatore.setText("");
+            schedeGruppi.removeAll();
+            schede.removeAll();
             griglia.mostra(null, nomeSezione);
             modulo.svuota();
-            schede.revalidate();
-            schede.repaint();
+            testaAggiornata();
             return;
         }
 
-        javax.swing.ButtonGroup gruppo = new javax.swing.ButtonGroup();
+        gruppoCorrente = gruppi.isEmpty() ? null : gruppi.get(0);
+        corrente = primoDelGruppo(gruppoCorrente);
+        disegnaSchede();
+        apri(corrente);
+    }
+
+    private Inventari.Inventario primoDelGruppo(String gruppo) {
+        for (Inventari.Inventario inv : inventari) {
+            if (gruppo == null ? inv.gruppo == null : gruppo.equals(inv.gruppo)) {
+                return inv;
+            }
+        }
+        return inventari.get(0);
+    }
+
+    /** Ridisegna le due file di schede: le cose e i loro depositi. */
+    private void disegnaSchede() {
+        schedeGruppi.removeAll();
+        if (!gruppi.isEmpty()) {
+            javax.swing.ButtonGroup gruppo = new javax.swing.ButtonGroup();
+            for (final String nome : gruppi) {
+                JToggleButton b = new JToggleButton(nome);
+                b.setFont(b.getFont().deriveFont(12f));
+                b.setSelected(nome.equals(gruppoCorrente));
+                b.addActionListener(new ActionListener() {
+                    public void actionPerformed(ActionEvent e) {
+                        gruppoCorrente = nome;
+                        corrente = primoDelGruppo(nome);
+                        disegnaSchede();
+                        apri(corrente);
+                    }
+                });
+                gruppo.add(b);
+                schedeGruppi.add(b);
+            }
+        }
+        schedeGruppi.setVisible(!gruppi.isEmpty());
+        if (primaRiga != null) {
+            primaRiga.setVisible(!gruppi.isEmpty());
+        }
+
+        schede.removeAll();
+        javax.swing.ButtonGroup gruppo2 = new javax.swing.ButtonGroup();
         for (final Inventari.Inventario inv : inventari) {
-            final JToggleButton b = new JToggleButton(inv.etichetta);
+            boolean suo = gruppoCorrente == null
+                    ? inv.gruppo == null : gruppoCorrente.equals(inv.gruppo);
+            if (!suo) {
+                continue;
+            }
+            JToggleButton b = new JToggleButton(inv.etichetta);
             b.setFont(b.getFont().deriveFont(12f));
-            b.setSelected(inv == inventari.get(0));
+            b.setSelected(inv == corrente);
             b.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
                     apri(inv);
                 }
             });
-            gruppo.add(b);
+            gruppo2.add(b);
             schede.add(b);
         }
+        // Con un solo deposito la seconda fila non serve: si vede gia' tutto.
+        schede.setVisible(schede.getComponentCount() > 1);
+        testaAggiornata();
+    }
+
+    private void testaAggiornata() {
+        schedeGruppi.revalidate();
+        schedeGruppi.repaint();
         schede.revalidate();
         schede.repaint();
-        apri(inventari.get(0));
+        revalidate();
+        repaint();
     }
 
     private void apri(Inventari.Inventario inv) {
@@ -155,30 +249,43 @@ public final class PannelloInventario extends JPanel {
         aggiornaContatore();
     }
 
-    @SuppressWarnings("unchecked")
     private void aggiornaContatore() {
         if (corrente == null) {
             return;
         }
-        Object inv = Inventari.risolvi(radice, corrente.percorso);
-        if (!(inv instanceof Map)) {
-            contatore.setText("");
-            return;
-        }
-        Object elenco = ((Map<String, Object>) inv).get("Slots");
-        int totali = elenco instanceof List ? ((List<Object>) elenco).size() : 0;
-        int occupati = 0;
-        if (elenco instanceof List) {
-            for (Object s : (List<Object>) elenco) {
-                if (s instanceof Map) {
-                    Object id = ((Map<String, Object>) s).get("Id");
-                    if (id != null && !String.valueOf(id).isEmpty() && !"^".equals(String.valueOf(id))) {
-                        occupati++;
-                    }
-                }
+        contatore.setText(griglia.occupati() + " / " + griglia.slotAttivi() + " slot occupati");
+    }
+
+    /**
+     * Un valore che il salvataggio tiene con segno, letto come lo mostra il gioco.
+     *
+     * Le unita' di un giocatore che ne ha due miliardi e settecento milioni sono
+     * scritte nel file come {@code -1598048959}: e' lo stesso numero, visto da
+     * un intero a 32 bit. Nell'editor si mostra quello che si vede nel gioco.
+     */
+    private static String senzaSegno(String testo) {
+        try {
+            long v = Long.parseLong(testo.trim());
+            if (v < 0) {
+                v += 4294967296L;
             }
+            return String.valueOf(v);
+        } catch (NumberFormatException e) {
+            return testo;
         }
-        contatore.setText(occupati + " / " + totali + " slot occupati");
+    }
+
+    /** Il contrario: il numero che si vede, scritto come lo tiene il salvataggio. */
+    private static String conSegno(String testo) {
+        try {
+            long v = Long.parseLong(testo.trim());
+            if (v > 2147483647L) {
+                v -= 4294967296L;
+            }
+            return String.valueOf(v);
+        } catch (NumberFormatException e) {
+            return testo;
+        }
     }
 
     /** Adatta la griglia allo spazio disponibile, dopo un ridimensionamento. */
@@ -236,8 +343,10 @@ public final class PannelloInventario extends JPanel {
         private final JButton cambia = new JButton("Cambia oggetto...");
         private final JButton ripara = new JButton("Ripara");
         private final JButton ricarica = new JButton("Ricarica al massimo");
+        private final JButton svuota = new JButton("Svuota slot");
         private final JLabel posizione = new JLabel();
         private final JPanel statistiche = new JPanel();
+        private final JPanel principaliPanel = new JPanel();
 
         private int indice = -1;
 
@@ -291,17 +400,22 @@ public final class PannelloInventario extends JPanel {
             add(campi);
 
             // --- azioni ---
-            JPanel azioni = new JPanel(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT, 6, 6));
+            // Due colonne e non un FlowLayout: il FlowLayout dichiara l'altezza
+            // come se i pulsanti stessero tutti su una riga, e il secondo giro
+            // finiva sotto il blocco delle statistiche.
+            JPanel azioni = new JPanel(new java.awt.GridLayout(0, 2, 6, 6));
             azioni.setOpaque(false);
-            azioni.setBorder(BorderFactory.createEmptyBorder(0, 10, 12, 10));
+            azioni.setBorder(BorderFactory.createEmptyBorder(0, 16, 12, 16));
             azioni.setAlignmentX(Component.LEFT_ALIGNMENT);
-            azioni.setMaximumSize(new Dimension(Integer.MAX_VALUE, 80));
+            azioni.setMaximumSize(new Dimension(Integer.MAX_VALUE, 120));
             cambia.setFont(cambia.getFont().deriveFont(11.5f));
             ripara.setFont(ripara.getFont().deriveFont(11.5f));
             ricarica.setFont(ricarica.getFont().deriveFont(11.5f));
+            svuota.setFont(svuota.getFont().deriveFont(11.5f));
             azioni.add(cambia);
             azioni.add(ripara);
             azioni.add(ricarica);
+            azioni.add(svuota);
             add(azioni);
 
             // Le statistiche della cosa a cui appartiene questo inventario:
@@ -313,13 +427,23 @@ public final class PannelloInventario extends JPanel {
             statistiche.setAlignmentX(Component.LEFT_ALIGNMENT);
             statistiche.setBorder(BorderFactory.createEmptyBorder(6, 16, 0, 16));
             add(statistiche);
+
+            // Le statistiche principali della sezione: nella tuta sono salute,
+            // scudo, energia, unita', naniti e quicksilver. Il vecchio editor le
+            // chiamava cosi' e le teneva nella scheda della tuta.
+            principaliPanel.setLayout(new BoxLayout(principaliPanel, BoxLayout.Y_AXIS));
+            principaliPanel.setOpaque(false);
+            principaliPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+            principaliPanel.setBorder(BorderFactory.createEmptyBorder(6, 16, 0, 16));
+            add(principaliPanel);
+
             add(Box.createVerticalGlue());
 
             collega();
             svuota();
         }
 
-        private JPanel riga(String etichetta, java.awt.Component editor) {
+        private JPanel riga(String etichetta, Component editor) {
             JPanel r = new JPanel(new BorderLayout(10, 0));
             r.setOpaque(false);
             r.setBorder(BorderFactory.createEmptyBorder(3, 0, 3, 0));
@@ -344,6 +468,11 @@ public final class PannelloInventario extends JPanel {
                     scrivi("Amount", quantita.getText());
                 }
             });
+            massimo.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    scrivi("MaxAmount", massimo.getText());
+                }
+            });
             danno.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
                     scrivi("DamageFactor", danno.getText());
@@ -360,7 +489,7 @@ public final class PannelloInventario extends JPanel {
                     superCaricato.setText(superCaricato.isSelected() ? "sì" : "no");
                     if (indice >= 0) {
                         griglia.alternaSuperCaricato(indice);
-                        scriviSuperCaricati();
+                        griglia.scriviSpeciali();
                         suModifica.run();
                     }
                 }
@@ -374,7 +503,7 @@ public final class PannelloInventario extends JPanel {
                             javax.swing.SwingUtilities.getWindowAncestor(Modulo.this), catalogo, icone);
                     Catalogo.Voce scelta = s.apri(valoreDi("Id"));
                     if (scelta != null) {
-                        griglia.cambiaOggetto(indice, scelta.id);
+                        griglia.imposta(indice, scelta.id);
                         mostra(indice);
                         aggiornaContatore();
                         suModifica.run();
@@ -399,28 +528,26 @@ public final class PannelloInventario extends JPanel {
                     suModifica.run();
                 }
             });
+            svuota.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    if (indice < 0) {
+                        return;
+                    }
+                    griglia.rimuovi(indice);
+                    mostra(indice);
+                    aggiornaContatore();
+                    suModifica.run();
+                }
+            });
         }
 
-        @SuppressWarnings("unchecked")
-        private Map<String, Object> slot(int i) {
-            Object inv = Inventari.risolvi(radice, corrente.percorso);
-            if (!(inv instanceof Map)) {
-                return null;
-            }
-            Object elenco = ((Map<String, Object>) inv).get("Slots");
-            if (!(elenco instanceof List)) {
-                return null;
-            }
-            List<Object> lista = (List<Object>) elenco;
-            if (i < 0 || i >= lista.size()) {
-                return null;
-            }
-            Object s = lista.get(i);
-            return s instanceof Map ? (Map<String, Object>) s : null;
+        /** L'oggetto dello slot scelto, o null se la casella e' libera. */
+        private Map<String, Object> slot() {
+            return indice < 0 ? null : griglia.oggettoDi(indice);
         }
 
         private String valoreDi(String campo) {
-            Map<String, Object> s = slot(indice);
+            Map<String, Object> s = slot();
             if (s == null) {
                 return "";
             }
@@ -435,7 +562,7 @@ public final class PannelloInventario extends JPanel {
         }
 
         private void scrivi(String campo, String valore) {
-            Map<String, Object> s = slot(indice);
+            Map<String, Object> s = slot();
             if (s == null) {
                 return;
             }
@@ -449,22 +576,6 @@ public final class PannelloInventario extends JPanel {
             }
             griglia.repaint();
             suModifica.run();
-        }
-
-        /** Riscrive l'elenco degli slot super-caricati dentro l'inventario. */
-        @SuppressWarnings("unchecked")
-        private void scriviSuperCaricati() {
-            Object inv = Inventari.risolvi(radice, corrente.percorso);
-            if (!(inv instanceof Map)) {
-                return;
-            }
-            List<Object> valori = new ArrayList<Object>();
-            List<Integer> indici = new ArrayList<Integer>(griglia.superCaricati());
-            java.util.Collections.sort(indici);
-            for (Integer i : indici) {
-                valori.add(new Json.Numero(String.valueOf(i)));
-            }
-            ((Map<String, Object>) inv).put("SpecialSlots", valori);
         }
 
         /**
@@ -546,6 +657,108 @@ public final class PannelloInventario extends JPanel {
             return r;
         }
 
+        /**
+         * Le statistiche principali della sezione, quelle che nel salvataggio
+         * sono numeri interi sciolti.
+         *
+         * Nella tuta sono salute, scudo, energia, unita', naniti e quicksilver:
+         * gli stessi valori che il vecchio editor chiamava cosi' e che il gioco
+         * mostra sotto l'inventario. Sono interi, quindi si scrivono senza
+         * virgola: mettere "100.0" dove il gioco si aspetta "100" cambierebbe
+         * il tipo del campo.
+         */
+        void mostraPrincipali() {
+            principaliPanel.removeAll();
+            if (principali.isEmpty() || radice == null) {
+                principaliPanel.revalidate();
+                principaliPanel.repaint();
+                return;
+            }
+            boolean qualcuna = false;
+            JLabel titolo = new JLabel("STATISTICHE PRINCIPALI");
+            titolo.setFont(Aspetto.monospaziato(10f, Font.BOLD));
+            titolo.setForeground(Aspetto.ACCENTO);
+            titolo.setAlignmentX(Component.LEFT_ALIGNMENT);
+            titolo.setBorder(BorderFactory.createEmptyBorder(10, 0, 6, 0));
+            principaliPanel.add(titolo);
+
+            for (final Inventari.Statistica st : principali) {
+                Object contenitore = Inventari.risolvi(radice, st.percorso);
+                if (contenitore == null) {
+                    continue;
+                }
+                final Map<String, Object> padre = padreDi(st.percorso);
+                final String campo = campoDi(st.percorso);
+                if (padre == null) {
+                    continue;
+                }
+                qualcuna = true;
+
+                JPanel r = new JPanel(new BorderLayout(10, 0));
+                r.setOpaque(false);
+                r.setBorder(BorderFactory.createEmptyBorder(2, 0, 2, 0));
+                r.setMaximumSize(new Dimension(Integer.MAX_VALUE, 28));
+                r.setAlignmentX(Component.LEFT_ALIGNMENT);
+                JLabel nome = new JLabel(st.etichetta);
+                nome.setFont(nome.getFont().deriveFont(11.5f));
+                nome.setForeground(Aspetto.TESTO_TENUE);
+                nome.setPreferredSize(new Dimension(126, 24));
+                nome.setToolTipText(Inventari.accorcia(st.percorso));
+                r.add(nome, BorderLayout.WEST);
+
+                Object valore = padre.get(campo);
+                String testo = valore instanceof Json.Numero
+                        ? ((Json.Numero) valore).testo() : String.valueOf(valore);
+                if (testo.endsWith(".0")) {
+                    testo = testo.substring(0, testo.length() - 2);
+                }
+                // Le valute si mostrano senza segno, come nel gioco.
+                if (st.senzaSegno) {
+                    testo = senzaSegno(testo);
+                }
+                final JTextField campoTesto = new JTextField(testo);
+                campoTesto.setFont(Aspetto.monospaziato(12, Font.PLAIN));
+                campoTesto.setHorizontalAlignment(SwingConstants.RIGHT);
+                campoTesto.setToolTipText(Inventari.accorcia(st.percorso) + "  —  modifica e premi Invio");
+                campoTesto.addActionListener(new ActionListener() {
+                    public void actionPerformed(ActionEvent e) {
+                        String v = campoTesto.getText().trim().replace(".0", "");
+                        if (v.isEmpty()) {
+                            return;
+                        }
+                        if (st.senzaSegno) {
+                            v = conSegno(v);
+                        }
+                        padre.put(campo, new Json.Numero(v));
+                        suModifica.run();
+                    }
+                });
+                r.add(campoTesto, BorderLayout.CENTER);
+                principaliPanel.add(r);
+            }
+            if (!qualcuna) {
+                principaliPanel.removeAll();
+            }
+            principaliPanel.revalidate();
+            principaliPanel.repaint();
+        }
+
+        /** La mappa che contiene l'ultimo campo di un percorso. */
+        @SuppressWarnings("unchecked")
+        private Map<String, Object> padreDi(String percorso) {
+            int punto = percorso.lastIndexOf('.');
+            if (punto < 0) {
+                return null;
+            }
+            Object p = Inventari.risolvi(radice, percorso.substring(0, punto));
+            return p instanceof Map ? (Map<String, Object>) p : null;
+        }
+
+        private String campoDi(String percorso) {
+            int punto = percorso.lastIndexOf('.');
+            return punto < 0 ? percorso : percorso.substring(punto + 1);
+        }
+
         void svuota() {
             indice = -1;
             icona.setIcon(Icone.segno("·", 64, Aspetto.TESTO_DEBOLE, true));
@@ -562,36 +775,59 @@ public final class PannelloInventario extends JPanel {
             superCaricato.setText("no");
             abilita(false);
             mostraStatistiche(null);
+            mostraPrincipali();
         }
 
         private void abilita(boolean attivo) {
             quantita.setEnabled(attivo);
+            massimo.setEnabled(attivo);
             danno.setEnabled(attivo);
             installato.setEnabled(attivo);
             superCaricato.setEnabled(attivo);
-            cambia.setEnabled(attivo);
             ripara.setEnabled(attivo);
             ricarica.setEnabled(attivo);
+            svuota.setEnabled(attivo);
         }
 
         void mostra(int i) {
             indice = i;
+            boolean sbloccato = griglia.sbloccato(i);
             String id = valoreDi("Id");
             Catalogo.Voce voce = catalogo.voce(id);
 
             ImageIcon img = voce == null ? null : icone.perFile(voce.icona, 64);
             icona.setIcon(img != null ? img : Icone.segno("·", 64, Aspetto.TESTO_DEBOLE, true));
+            if (!sbloccato) {
+                nome.setText("Slot non sbloccato");
+                categoria.setText("Questo inventario non ha tanti slot");
+                posizione.setText("");
+                identificativo.setText("");
+                quantita.setText("");
+                massimo.setText("");
+                danno.setText("");
+                installato.setSelected(false);
+                installato.setText("no");
+                superCaricato.setSelected(false);
+                superCaricato.setText("no");
+                abilita(false);
+                cambia.setEnabled(false);
+                mostraPrincipali();
+                revalidate();
+                repaint();
+                return;
+            }
             nome.setText(voce != null ? voce.etichetta() : (id.isEmpty() ? "Slot libero" : id));
-            categoria.setText(voce == null ? "oggetto non riconosciuto"
+            categoria.setText(voce == null ? (id.isEmpty() ? "nessun oggetto"
+                    : "oggetto non riconosciuto")
                     : (voce.sottotitolo == null ? "" : voce.sottotitolo));
-            posizione.setText("slot " + (i + 1));
+            posizione.setText("riga " + ((i / Math.max(1, griglia.colonne())) + 1)
+                    + ", colonna " + ((i % Math.max(1, griglia.colonne())) + 1));
             identificativo.setText(id.isEmpty() ? "—" : id);
 
             String q = valoreDi("Amount");
             String m = valoreDi("MaxAmount");
             quantita.setText(togliZero(q));
             massimo.setText(togliZero(m));
-            massimo.setEditable(false);
             danno.setText(togliZero(valoreDi("DamageFactor")));
 
             boolean inst = "true".equals(valoreDi("FullyInstalled"));
@@ -602,7 +838,13 @@ public final class PannelloInventario extends JPanel {
             superCaricato.setSelected(sup);
             superCaricato.setText(sup ? "sì" : "no");
 
+            // Su uno slot libero si puo' fare una cosa sola, ed e' quella che
+            // serve: metterci dentro qualcosa. Gli altri comandi non hanno un
+            // oggetto su cui agire.
+            cambia.setText(id.isEmpty() ? "Metti oggetto..." : "Cambia oggetto...");
             abilita(!id.isEmpty());
+            cambia.setEnabled(true);
+            mostraPrincipali();
             revalidate();
             repaint();
         }
