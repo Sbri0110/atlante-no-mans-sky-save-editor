@@ -94,6 +94,7 @@ public final class Schermate {
                 {"Navi", "atlante-navi"},
                 {"Veicoli", "atlante-veicoli"},
                 {"Mercantile", "atlante-mercantile"},
+                {"Basi e contenitori", "atlante-basi"},
                 {"Traguardi e fazioni", "atlante-traguardi"},
                 {"Conquista stazioni", "atlante-stazioni"},
                 {"Spedizioni", "atlante-spedizioni"},

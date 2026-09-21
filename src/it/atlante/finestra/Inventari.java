@@ -19,11 +19,11 @@ import java.util.Map;
  * I percorsi sono relativi alla radice e usano i nomi leggibili dei campi, gli
  * stessi che si vedono nell'editor.
  *
- * <b>Gruppi.</b> Una nave ha due depositi — l'inventario e le tecnologie — e
- * mostrarne uno solo significa nascondere meta' di quello che c'e' a bordo. Le
- * voci hanno quindi un <i>gruppo</i> — il nome della nave — e la sezione mostra
- * prima le navi e poi i depositi di quella scelta. Le altre sezioni hanno una
- * fila di schede sola: tuta, mercantile e contenitori non si chiamano per nome.
+ * <b>Gruppi.</b> Quando i depositi di una sezione sono tanti, le voci hanno un
+ * <i>gruppo</i> e la sezione mostra prima i gruppi e poi i loro depositi: le navi
+ * (inventario e tecnologie di ognuna), i veicoli, il mercantile con i suoi dieci
+ * contenitori, la base con i suoi e la cucina. Dove il gruppo non serve — la
+ * tuta, il multi-tool — resta una fila di schede sola.
  */
 public final class Inventari {
 
@@ -172,23 +172,22 @@ public final class Inventari {
         }
         PER_SEZIONE.put("Mercantile", Collections.unmodifiableList(mercantile));
 
-        sezione("Basi e contenitori",
-                inv("Deposito 1", base + "Chest1Inventory"),
-                inv("Deposito 2", base + "Chest2Inventory"),
-                inv("Deposito 3", base + "Chest3Inventory"),
-                inv("Deposito 4", base + "Chest4Inventory"),
-                inv("Deposito 5", base + "Chest5Inventory"),
-                inv("Deposito 6", base + "Chest6Inventory"),
-                inv("Deposito 7", base + "Chest7Inventory"),
-                inv("Deposito 8", base + "Chest8Inventory"),
-                inv("Deposito 9", base + "Chest9Inventory"),
-                inv("Deposito 10", base + "Chest10Inventory"),
-                inv("Deposito speciale", base + "ChestMagicInventory"),
-                inv("Deposito del razzo", base + "RocketLockerInventory"),
-                inv("Ingredienti di cucina", base + "CookingIngredientsInventory"),
-                inv("Unita' di cibo", base + "FoodUnitInventory"),
-                inv("Esca da pesca", base + "FishBaitBoxInventory"),
-                inv("Piattaforma da pesca", base + "FishPlatformInventory"));
+        // Sedici contenitori in fila non si leggono: sono due gruppi, e la prima
+        // riga dice solo "Contenitori" o "Cucina e pesca". I nomi delle voci
+        // dicono da soli a quale dei due appartengono.
+        List<Inventario> basi = new ArrayList<Inventario>();
+        for (int i = 1; i <= 10; i++) {
+            basi.add(new Inventario("Contenitori", "Deposito " + i, base + "Chest" + i + "Inventory", null));
+        }
+        basi.add(new Inventario("Contenitori", "Deposito speciale", base + "ChestMagicInventory", null));
+        basi.add(new Inventario("Contenitori", "Deposito del razzo", base + "RocketLockerInventory", null));
+        basi.add(new Inventario("Cucina e pesca", "Ingredienti di cucina",
+                base + "CookingIngredientsInventory", null));
+        basi.add(new Inventario("Cucina e pesca", "Unita' di cibo", base + "FoodUnitInventory", null));
+        basi.add(new Inventario("Cucina e pesca", "Esca da pesca", base + "FishBaitBoxInventory", null));
+        basi.add(new Inventario("Cucina e pesca", "Piattaforma da pesca",
+                base + "FishPlatformInventory", null));
+        PER_SEZIONE.put("Basi e contenitori", Collections.unmodifiableList(basi));
     }
 
     /** Gli inventari di una sezione, o lista vuota se la sezione non ne ha. */
