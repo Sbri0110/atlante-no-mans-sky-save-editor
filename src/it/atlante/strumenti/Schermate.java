@@ -88,14 +88,11 @@ public final class Schermate {
             System.err.println("nessun salvataggio trovato: la schermata sara' vuota");
         }
 
-        // Una schermata per sezione: mostrano la navigazione in uso, non solo
-        // l'elenco completo dei campi. "Partita" ha i valori diretti (unita',
-        // naniti, salute), quindi e' quella che mostra meglio le righe con i
-        // loro editor.
+        // Una schermata per sezione: mostrano la navigazione in uso.
         String[][] viste = {
                 {"Principale", "atlante-principale"},
-                {"Partita", "atlante-partita"},
-                {"Navi", "atlante-navi"},
+                {"Tuta", "atlante-tuta"},
+                {"Multitool", "atlante-multitool"},
         };
         for (String[] vista : viste) {
             finestra.mostraSezionePerNome(vista[0]);
@@ -114,6 +111,11 @@ public final class Schermate {
             finestra.doLayout();
             Thread.sleep(80);
         }
+        // La griglia sceglie le colonne in base allo spazio: va rifatto qui,
+        // perche' durante lo scatto il ridimensionamento e' gia' avvenuto.
+        finestra.ridisponi();
+        finestra.validate();
+        Thread.sleep(150);
         BufferedImage immagine = new BufferedImage(
                 finestra.getWidth(), finestra.getHeight(), BufferedImage.TYPE_INT_RGB);
         Graphics2D g = immagine.createGraphics();

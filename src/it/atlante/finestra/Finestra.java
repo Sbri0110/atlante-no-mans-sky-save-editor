@@ -86,6 +86,7 @@ public final class Finestra extends JFrame {
     private final Testata testata;
     private PannelloDettagli dettagli;
     private PannelloCampi campi;
+    private PannelloInventario inventario;
     private PannelloPrincipale principale;
     private Salvataggio salvataggio;
     private Rilevatore.Voce voceCorrente;
@@ -161,6 +162,14 @@ public final class Finestra extends JFrame {
         });
 
         campi = new PannelloCampi(catalogo, icone, new Runnable() {
+            public void run() {
+                salvataggio.segnaModificato();
+                testata.segnaModificato();
+                messaggio.setText("Modifiche non salvate");
+            }
+        });
+
+        inventario = new PannelloInventario(catalogo, icone, new Runnable() {
             public void run() {
                 salvataggio.segnaModificato();
                 testata.segnaModificato();
@@ -497,6 +506,13 @@ public final class Finestra extends JFrame {
         }
     }
 
+    /** Adatta la griglia allo spazio disponibile, per le schermate. */
+    public void ridisponi() {
+        if (inventario != null) {
+            inventario.ridisponi();
+        }
+    }
+
     /** Seleziona una sezione per nome: usato dal generatore di schermate. */
     public boolean mostraSezionePerNome(String nome) {
         for (int i = 0; i < modelloSezioni.size(); i++) {
@@ -605,6 +621,11 @@ public final class Finestra extends JFrame {
                     voceCorrente == null ? null : voceCorrente.piattaforma,
                     voceCorrente == null ? null : voceCorrente.etichetta);
             centro.add(principale, BorderLayout.CENTER);
+        } else if (sezioneCorrente != null && Inventari.aGriglia(sezioneCorrente.nome)) {
+            // Le sezioni a inventario si mostrano come griglie di slot, non
+            // come elenchi di campi: e' la struttura del vecchio editor.
+            inventario.mostra(salvataggio.albero(), sezioneCorrente.nome);
+            centro.add(inventario, BorderLayout.CENTER);
         } else {
             Navigazione.Sezione sezione = sezioneCorrente != null
                     ? sezioneCorrente : Navigazione.elenco().get(0);
