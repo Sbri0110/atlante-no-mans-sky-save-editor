@@ -150,6 +150,10 @@ public final class Inventari {
         // salvataggio, come i multi-tool. Vedi navi().
         sezione("Navi");
 
+        // I veicoli non stanno qui: come le navi sono una lista, e ognuno ha i
+        // suoi depositi. Vedi veicoli().
+        sezione("Veicoli");
+
         // Il mercantile ha inventario e tecnologie, e nella stiva i dieci
         // contenitori di stoccaggio: nel gioco sono gli stessi della base, e si
         // aprono da tutti e due i posti. Chi cerca il deposito mentre e' a bordo
@@ -205,10 +209,57 @@ public final class Inventari {
         if ("Navi".equals(nomeSezione)) {
             return navi(radice);
         }
+        if ("Veicoli".equals(nomeSezione)) {
+            return veicoli(radice);
+        }
         if ("Multitool".equals(nomeSezione)) {
             return armi(radice);
         }
         return perSezione(nomeSezione);
+    }
+
+    /**
+     * I veicoli posseduti, ognuno con inventario e tecnologie.
+     *
+     * Il salvataggio non dice che veicolo e': il nome e' vuoto e la risorsa
+     * pure. L'ordine della lista invece e' fisso, ed e' quello che il vecchio
+     * editor usava per riconoscerli — 0 e' il Roamer, 1 il Nomad, 2 il Colossus
+     * e cosi' via. Per gli indici che non conosce si ripiega su "Veicolo N",
+     * che e' meglio di un'etichetta inventata.
+     */
+    private static List<Inventario> veicoli(Object radice) {
+        List<Inventario> elenco = new ArrayList<Inventario>();
+        Object posseduti = risolvi(radice, "BaseContext.PlayerStateData.VehicleOwnership");
+        if (!(posseduti instanceof List)) {
+            return elenco;
+        }
+        List<Object> lista = (List<Object>) posseduti;
+        for (int i = 0; i < lista.size(); i++) {
+            String r = "BaseContext.PlayerStateData.VehicleOwnership[" + i + "]";
+            if (!esiste(radice, r + ".Inventory")) {
+                continue;
+            }
+            String nome = tipoVeicolo(i);
+            elenco.add(new Inventario(nome, "Inventario", r + ".Inventory", null));
+            if (esiste(radice, r + ".Inventory_TechOnly")) {
+                elenco.add(new Inventario(nome, "Tecnologie", r + ".Inventory_TechOnly", null));
+            }
+        }
+        return elenco;
+    }
+
+    /** Il nome del veicolo che sta a questo indice nell'elenco del salvataggio. */
+    private static String tipoVeicolo(int indice) {
+        switch (indice) {
+            case 0: return "Roamer";
+            case 1: return "Nomad";
+            case 2: return "Colossus";
+            case 3: return "Pilgrim";
+            case 5: return "Nautilon";
+            case 6: return "Minotaur";
+            case 1000: return "Skiff";
+            default: return "Veicolo " + (indice + 1);
+        }
     }
 
     /**
@@ -341,18 +392,41 @@ public final class Inventari {
     // ------------------------------------------------------------------
 
     /**
+     * Il contesto che si sta giocando.
+     *
+     * Il salvataggio tiene due copie dello stato del giocatore: quella della
+     * partita e quella della spedizione. {@code ActiveContext} dice quale delle
+     * due e' in corso — "Main" oppure "Expedition" — e leggerla e' quello che
+     * permette all'editor di aprire un salvataggio di spedizione senza mostrare
+     * una partita che non c'entra.
+     */
+    public static String contesto(Object radice) {
+        Object attivo = risolvi(radice, "ActiveContext");
+        String nome = attivo == null ? "" : String.valueOf(attivo).toLowerCase();
+        return nome.indexOf("expedition") >= 0 ? "ExpeditionContext" : "BaseContext";
+    }
+
+    /**
      * Risolve un percorso come "BaseContext.PlayerStateData.Inventory".
      *
      * I percorsi usano i nomi leggibili, che sono le chiavi vere della mappa:
      * il salvataggio e' gia' tradotto in memoria. Le parentesi quadre indicano
      * un indice di lista.
      *
+     * Il prefisso del contesto viene sostituito con quello attivo: i percorsi
+     * sono scritti una volta sola e valgono sia per la partita sia per la
+     * spedizione.
+     *
      * @return il valore, o null se il percorso non esiste in questo salvataggio
      */
     @SuppressWarnings("unchecked")
     public static Object risolvi(Object radice, String percorso) {
+        String p = percorso;
+        if (p.startsWith("BaseContext.")) {
+            p = contesto(radice) + p.substring("BaseContext".length());
+        }
         Object corrente = radice;
-        for (String pezzo : percorso.split("\\.")) {
+        for (String pezzo : p.split("\\.")) {
             String nome = pezzo;
             int indice = -1;
             int parentesi = pezzo.indexOf('[');

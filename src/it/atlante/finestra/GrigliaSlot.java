@@ -162,6 +162,8 @@ public final class GrigliaSlot extends JPanel {
         Map<String, Object> mappa = this.inventario;
 
         // --- gli oggetti, ciascuno alla sua posizione ---
+        int massimoX = -1;
+        int massimoY = -1;
         Object elenco = mappa.get("Slots");
         if (elenco instanceof List) {
             for (Object o : (List<Object>) elenco) {
@@ -174,13 +176,13 @@ public final class GrigliaSlot extends JPanel {
                     continue;
                 }
                 oggetti.put(chiave(pos[0], pos[1]), slot);
+                massimoX = Math.max(massimoX, pos[0]);
+                massimoY = Math.max(massimoY, pos[1]);
             }
         }
 
         // --- quali caselle sono sbloccate ---
         Object validi = mappa.get("ValidSlotIndices");
-        int massimoX = -1;
-        int massimoY = -1;
         if (validi instanceof List && !((List<Object>) validi).isEmpty()) {
             for (Object v : (List<Object>) validi) {
                 int[] pos = posizioneDi(v);
@@ -194,10 +196,15 @@ public final class GrigliaSlot extends JPanel {
         }
 
         // --- la geometria: Width e Height, con ripiego su quello che si vede ---
+        // Se il salvataggio non dichiara la griglia, la si ricava dalla casella
+        // piu' lontana fra quelle sbloccate e quelle occupate: un inventario
+        // senza Width ne' Height esiste, e non deve sparire.
         colonne = Inventari.larghezza(mappa);
         righe = Inventari.altezza(mappa);
-        if (colonne <= 0 || righe <= 0) {
+        if (colonne <= 0) {
             colonne = Math.max(1, massimoX + 1);
+        }
+        if (righe <= 0) {
             righe = Math.max(1, massimoY + 1);
         }
         // Se il salvataggio non elenca le caselle sbloccate, la griglia intera

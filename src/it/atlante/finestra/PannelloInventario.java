@@ -311,6 +311,26 @@ public final class PannelloInventario extends JPanel {
         modulo.mostra(indice);
     }
 
+    /**
+     * Collaudo: apre una scheda per nome.
+     *
+     * Serve a fotografare una vista che di solito si raggiunge cliccando, come
+     * i depositi del mercantile.
+     */
+    public boolean apriScheda(String gruppo, String etichetta) {
+        for (Inventari.Inventario inv : inventari) {
+            boolean suo = gruppo == null ? inv.gruppo == null : gruppo.equals(inv.gruppo);
+            if (suo && inv.etichetta.equals(etichetta)) {
+                gruppoCorrente = inv.gruppo;
+                corrente = inv;
+                disegnaSchede();
+                apri(inv);
+                return true;
+            }
+        }
+        return false;
+    }
+
     /** Quanti slot ha l'inventario aperto. */
     public int quantiSlot() {
         return griglia.quanteSchede();

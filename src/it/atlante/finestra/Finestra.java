@@ -571,6 +571,11 @@ public final class Finestra extends JFrame {
         return inventario == null ? -1 : inventario.primoOccupato();
     }
 
+    /** Collaudo: apre una scheda di una sezione a inventario, per nome. */
+    public boolean apriScheda(String gruppo, String etichetta) {
+        return inventario != null && inventario.apriScheda(gruppo, etichetta);
+    }
+
     /** Sceglie uno slot senza passare dal mouse. */
     public void selezionaSlot(int indice) {
         if (inventario != null && indice >= 0) {

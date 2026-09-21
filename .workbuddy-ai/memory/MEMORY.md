@@ -16,6 +16,19 @@ Cartella: `<cartella del progetto>`. Interfaccia e commenti in italiano.
   Deve dire "il giro completo conserva i dati".
 - `Atlante.jar` e' in `.gitignore`: nel repo solo sorgenti e risorse.
 
+## Regole di lavoro (dette da Sbri)
+
+- **Verificare sempre con il gioco, mai supporre.** Prima di aggiungere una
+  scheda, un campo o un'etichetta: guardare il salvataggio vero (e il vecchio
+  editor per i nomi) e portare i numeri misurati. Sbri lo ha chiesto due volte.
+- Un campo di inventario **e' un deposito solo se il gioco ci ha messo qualcosa**:
+  `ValidSlotIndices` non vuoto o `Slots` non vuoto. `Inventory_Cargo` esiste nel
+  salvataggio di tuta, navi e mercantile ma e' sempre vuoto: non va mostrato.
+- Le cose hanno **due** depositi: inventario e tecnologie. Il mercantile ha in
+  piu' i dieci contenitori di stoccaggio (gli stessi `Chest1..10Inventory` della
+  base), raggruppati a parte.
+- Sbri non vuole elenchi di schede in fila quando sono tante: raggruppare.
+
 ## Dove stanno i dati nel salvataggio (verificato sul file, non supposto)
 
 - Stato del giocatore: `BaseContext.PlayerStateData` (e `ExpeditionContext`).

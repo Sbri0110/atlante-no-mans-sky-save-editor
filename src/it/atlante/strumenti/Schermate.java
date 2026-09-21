@@ -92,6 +92,7 @@ public final class Schermate {
         String[][] viste = {
                 {"Multitool", "atlante-multitool"},
                 {"Navi", "atlante-navi"},
+                {"Veicoli", "atlante-veicoli"},
                 {"Mercantile", "atlante-mercantile"},
                 {"Traguardi e fazioni", "atlante-traguardi"},
                 {"Conquista stazioni", "atlante-stazioni"},
@@ -112,6 +113,14 @@ public final class Schermate {
                 System.out.println("  selezionato dopo il clic: " + finestra.slotSelezionato());
             }
             scatta(finestra, new File(uscita, vista[1] + ".png"), vista[0]);
+        }
+
+        // I dieci depositi del mercantile stanno sotto la loro voce: una
+        // schermata in piu' perche' si veda che sono pieni, non solo che ci sono.
+        finestra.mostraSezionePerNome("Mercantile");
+        if (finestra.apriScheda("Depositi", "Deposito 1")) {
+            scatta(finestra, new File(uscita, "atlante-mercantile-depositi.png"),
+                    "Mercantile - Depositi");
         }
 
         finestra.dispose();
