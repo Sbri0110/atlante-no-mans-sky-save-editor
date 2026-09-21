@@ -134,12 +134,7 @@ public final class Navigazione {
                 "TelemetryStats", "ShopTier", "ShopNumber", "SavedInteractionDialogTable",
                 "SavedInteractionIndicies"));
 
-        SEZIONI.add(new Sezione("Account e ricompense", "Drop, sblocchi del profilo e diritti",
-                "R", Contenitore.COMUNE,
-                "EarnedSeasonSpecialRewards", "RedeemedSeasonRewards", "RedeemedTwitchRewards",
-                "RedeemedPlatformRewards", "UsedEntitlements", "SaveUniversalId",
-                "UsedPlatforms"));
-    }
+            }
 
     public static List<Sezione> elenco() {
         return Collections.unmodifiableList(SEZIONI);
