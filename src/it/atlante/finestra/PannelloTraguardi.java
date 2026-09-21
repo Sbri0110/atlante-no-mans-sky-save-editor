@@ -332,7 +332,148 @@ public final class PannelloTraguardi extends JPanel {
             }
         });
         r.add(campo, BorderLayout.CENTER);
+
+        // Accanto alle parole apprese, il pulsante che le impara tutte.
+        if (v.id.contains("WORDS")) {
+            JButton impara = new JButton("Impara tutte");
+            impara.setFont(impara.getFont().deriveFont(11f));
+            impara.setToolTipText("Impara tutte le parole che ti mancano, per tutte le razze");
+            impara.setPreferredSize(new Dimension(120, 26));
+            impara.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    imparaTutteLeParole();
+                }
+            });
+            r.add(impara, BorderLayout.EAST);
+        }
         return r;
+    }
+
+    /**
+     * Impara tutte le parole che mancano.
+     *
+     * Le parole non sono un contatore: il salvataggio tiene
+     * {@code PlayerStateData.KnownWordGroups}, una lista di circa 3800 voci
+     * fatte cosi':
+     *
+     * <pre>
+     *   { Group: "^TRA_A", Races: [true, false, false, ...] }
+     * </pre>
+     *
+     * Il gruppo e' la parola in una lingua, e l'elenco dice quali razze la
+     * conoscono: indice 0 i mercanti, 1 i guerrieri, 2 gli esploratori, 8 gli
+     * autofagi. Per impararle tutte basta portare tutte le caselle a vero.
+     *
+     * I contatori nelle statistiche (^TWORDS_LEARNT e simili) si aggiornano di
+     * conseguenza, con il numero di parole che esistono per ogni razza secondo
+     * {@code risorse/db/words.xml}.
+     */
+    @SuppressWarnings("unchecked")
+    private void imparaTutteLeParole() {
+        if (stato == null) {
+            return;
+        }
+        Object gruppi = stato.get("KnownWordGroups");
+        if (!(gruppi instanceof List)) {
+            javax.swing.JOptionPane.showMessageDialog(this,
+                    "Questo salvataggio non ha l'elenco delle parole.",
+                    "Niente da fare", javax.swing.JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
+        int parole = 0;
+        int caselle = 0;
+        for (Object g : (List<Object>) gruppi) {
+            if (!(g instanceof Map)) {
+                continue;
+            }
+            Object razze = ((Map<String, Object>) g).get("Races");
+            if (!(razze instanceof List)) {
+                continue;
+            }
+            List<Object> elenco = (List<Object>) razze;
+            boolean mancava = false;
+            for (int i = 0; i < elenco.size(); i++) {
+                if (!Boolean.TRUE.equals(elenco.get(i))) {
+                    elenco.set(i, Boolean.TRUE);
+                    caselle++;
+                    mancava = true;
+                }
+            }
+            if (mancava) {
+                parole++;
+            }
+        }
+
+        // I contatori delle statistiche: il massimo e' il numero di parole che
+        // esistono per quella razza.
+        int[] massimi = {contaparole("TRADERS"), contaparole("WARRIORS"),
+                contaparole("EXPLORERS"), contaparole("BUILDERS")};
+        impostaAlmeno("^TWORDS_LEARNT", massimi[0]);
+        impostaAlmeno("^WWORDS_LEARNT", massimi[1]);
+        impostaAlmeno("^EWORDS_LEARNT", massimi[2]);
+        impostaAlmeno("^BWORDS_LEARNT", massimi[3]);
+
+        if (caselle > 0) {
+            suModifica.run();
+        }
+        disegna();
+        javax.swing.JOptionPane.showMessageDialog(this,
+                caselle == 0 ? "Sapevi gia' tutte le parole."
+                        : "Parole imparate: " + parole + "\nCaselle impostate: " + caselle,
+                "Fatto", javax.swing.JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    /**
+     * Quante parole esistono per una razza, secondo words.xml.
+     *
+     * Il file elenca le parole e, per ognuna, un gruppo per razza. Contando i
+     * gruppi si ottiene il massimo che il contatore puo' raggiungere.
+     */
+    private int contaparole(String razza) {
+        if (cacheParole == null) {
+            cacheParole = new LinkedHashMap<String, Integer>();
+        }
+        Integer noto = cacheParole.get(razza);
+        if (noto != null) {
+            return noto.intValue();
+        }
+        int quanti = 0;
+        try {
+            String testo = new String(java.nio.file.Files.readAllBytes(
+                    java.nio.file.Paths.get("risorse", "db", "words.xml")),
+                    java.nio.charset.StandardCharsets.UTF_8);
+            int da = 0;
+            String ago = "race=\"" + razza + "\"";
+            while ((da = testo.indexOf(ago, da)) >= 0) {
+                quanti++;
+                da += ago.length();
+            }
+        } catch (Exception e) {
+            quanti = 0;
+        }
+        cacheParole.put(razza, Integer.valueOf(quanti));
+        return quanti;
+    }
+
+    private static Map<String, Integer> cacheParole;
+
+    /** Porta una statistica almeno a un valore, senza abbassarla. */
+    private void impostaAlmeno(String id, int minimo) {
+        if (minimo <= 0) {
+            return;
+        }
+        Map<String, Object> voce = voceDi(id);
+        if (voce == null) {
+            return;
+        }
+        Object contenuto = voce.get("Value");
+        if (contenuto instanceof Map) {
+            Map<String, Object> v = (Map<String, Object>) contenuto;
+            Object attuale = v.get("IntValue");
+            if (attuale == null || numero(attuale) < minimo) {
+                v.put("IntValue", new Json.Numero(String.valueOf(minimo)));
+            }
+        }
     }
 
     // ------------------------------------------------------------------
