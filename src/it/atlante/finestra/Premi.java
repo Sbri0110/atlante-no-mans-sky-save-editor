@@ -118,6 +118,26 @@ public final class Premi {
         while (t.find()) {
             TWITCH.add(new Premio(t.group(1), t.group(2), false));
         }
+
+        // L'ordine si ricalcola: il file non e' in ordine di numero. Le
+        // spedizioni dalla 22 alla 1 sono in ordine decrescente, ma la 23 e'
+        // stata aggiunta in fondo. Senza ordinare, la piu' recente finiva
+        // sotto la 1.
+        java.util.Collections.sort(spedizioni, new java.util.Comparator<Spedizione>() {
+            public int compare(Spedizione a, Spedizione b) {
+                if (a.numero == b.numero) {
+                    return 0;
+                }
+                // I gruppi senza numero (non dovrebbero essercene) in fondo.
+                if (a.numero < 0) {
+                    return 1;
+                }
+                if (b.numero < 0) {
+                    return -1;
+                }
+                return b.numero - a.numero;
+            }
+        });
         return spedizioni;
     }
 
