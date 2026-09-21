@@ -9,6 +9,17 @@ uscita/
 # Copie di sicurezza dei salvataggi
 backup/
 
+# JDK portatile.
+#
+# Serve ad avviare e compilare senza installare nulla, ma sono 192 MB e non
+# sono codice di questo progetto: restano fuori dal repository. Chi clona
+# trova le istruzioni nel README per procurarsene uno.
+strumenti/jdk8/
+
+# L'archivio avviabile si ricostruisce con compila.bat
+Atlante.jar
+manifest.txt
+
 # Icone degli oggetti di gioco.
 #
 # Sono 3.210 PNG per circa 73 MB: sono l'arte di No Man's Sky, non codice di

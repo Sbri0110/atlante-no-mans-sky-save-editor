@@ -54,22 +54,45 @@ compressi → 9.842.314 byte decompressi, 19 blocchi, durata di gioco 185 h 58 m
 
 ---
 
-## Compilare e avviare
+## Come si prova
 
-Serve un **JDK 8 o superiore**. Nient'altro: la libreria del tema è già dentro il
-progetto, non c'è nulla da scaricare.
+**Su Windows non serve installare nulla.** Il progetto include un JDK portatile in
+`strumenti/jdk8/`: basta avviarlo.
+
+| | |
+|---|---|
+| **Doppio clic su `avvia.bat`** | cerca Java, compila se serve e apre la finestra |
+| **Doppio clic su `Atlante.jar`** | apre direttamente l'interfaccia, se hai già compilato |
+
+`avvia.bat` cerca Java in questo ordine: il JDK dentro il progetto, `java` nel PATH,
+le installazioni in `Program Files`, e infine il JDK portatile del progetto
+precedente. Se non lo trova te lo dice invece di fallire in silenzio.
+
+### Compilare
+
+Serve un **JDK** (non basta il JRE: serve `javac`). Il JDK portatile incluso va bene.
 
 ```bat
 :: Windows
 compila.bat
-avvia.bat
 ```
 
 ```bash
-# Linux / macOS
+# Linux / macOS — serve un JDK nel PATH
 ./compila.sh
 java -cp "classi:lib/flatlaf.jar" it.atlante.Atlante
 ```
+
+Nessuna libreria da scaricare: il tema (`lib/flatlaf.jar`) è già nel progetto.
+
+### Cosa fa all'avvio
+
+Trova i salvataggi sulla macchina e apre il primo. Se non ne trova, usa
+**File → Apri file...**.
+
+Se le icone degli oggetti non compaiono, mancano i PNG in `risorse/icone/`:
+il programma funziona lo stesso, mostrando gli identificatori al posto delle
+immagini. Vedi [NOTICE.md](NOTICE.md) per il motivo per cui non sono incluse.
 
 ### Riga di comando
 
