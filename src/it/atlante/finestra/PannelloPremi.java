@@ -265,19 +265,38 @@ public final class PannelloPremi extends JPanel {
     // ------------------------------------------------------------------
 
     private void cambia(Premi.Premio p, boolean sbloccare) {
-        if (listaSbloccati == null) {
+        // NON si scrive: vedi la nota qui sotto.
+        //
+        // Il salvataggio tiene le ricompense sbloccate in
+        // EarnedSeasonSpecialRewards con identificativi della forma
+        // ^RS_S23_SHIPB, ^RS_S20_TRIM, ^RS_S22_GUN. rewards.xml usa invece
+        // ^EXPD_EGG_23, ^SWARM_HAT, ^EXPD_TITLE22.
+        //
+        // I due elenchi non hanno una sola voce in comune: sono spazi di nomi
+        // diversi. Aggiungere un identificativo di rewards.xml a quella lista
+        // scriverebbe un valore che il gioco non riconosce — nel migliore dei
+        // casi inutile, nel peggiore un dato incoerente nel salvataggio.
+        //
+        // Finche' non si conosce la corrispondenza fra i due (sta nei metadati
+        // REWARDS del gioco, dentro i pak) il pannello resta in sola lettura.
+        avvisaNonModificabile();
+    }
+
+    private boolean avvisato;
+
+    private void avvisaNonModificabile() {
+        if (avvisato) {
             return;
         }
-        if (sbloccare) {
-            if (!sbloccati.contains(p.id)) {
-                sbloccati.add(p.id);
-                listaSbloccati.add(p.id);
-            }
-        } else {
-            sbloccati.remove(p.id);
-            listaSbloccati.remove(p.id);
-        }
-        suModifica.run();
+        avvisato = true;
+        javax.swing.JOptionPane.showMessageDialog(this,
+                "Questo pannello e' in sola lettura.\n\n"
+                + "Gli identificativi dei premi in rewards.xml non sono quelli che il\n"
+                + "salvataggio usa per segnare le ricompense ottenute. Scrivere qui\n"
+                + "metterebbe nel file valori che il gioco non riconosce.\n\n"
+                + "Serve prima ricavare la corrispondenza fra i due elenchi dai\n"
+                + "metadati del gioco.",
+                "Sola lettura", javax.swing.JOptionPane.WARNING_MESSAGE);
     }
 
     private void sbloccaGruppo(Premi.Spedizione s, List<Premi.Premio> premi) {
