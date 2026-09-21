@@ -89,16 +89,19 @@ public final class Schermate {
         }
 
         // Una schermata per sezione: mostrano la navigazione in uso, non solo
-        // l'albero completo.
+        // l'elenco completo dei campi. "Partita" ha i valori diretti (unita',
+        // naniti, salute), quindi e' quella che mostra meglio le righe con i
+        // loro editor.
         String[][] viste = {
-                {"Tuta", "atlante-tuta"},
+                {"Principale", "atlante-principale"},
+                {"Partita", "atlante-partita"},
                 {"Navi", "atlante-navi"},
-                {"Tutto", "atlante-tutto"},
         };
         for (String[] vista : viste) {
             finestra.mostraSezionePerNome(vista[0]);
-            finestra.espandiA(2);
-            finestra.selezionaPrimoOggetto();
+            // Tre livelli bastano per arrivare ai valori in tutte le sezioni:
+            // contenitore, gruppo, campo.
+            finestra.espandiA(3);
             scatta(finestra, new File(uscita, vista[1] + ".png"), vista[0]);
         }
 

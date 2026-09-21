@@ -25,6 +25,8 @@ public final class Navigazione {
 
     /** Dove vivono i campi di una sezione. */
     public enum Contenitore {
+        /** Schermata iniziale: informazioni del file e azioni rapide, non campi. */
+        PRINCIPALE,
         /** BaseContext > PlayerStateData: la quasi totalita' dei campi di gioco. */
         GIOCATORE,
         /** CommonStateData: nome, durata, stagioni, ricompense, foto, musica. */
@@ -55,6 +57,9 @@ public final class Navigazione {
     private static final List<Sezione> SEZIONI = new ArrayList<Sezione>();
 
     static {
+        SEZIONI.add(new Sezione("Principale", "Informazioni del file e azioni rapide",
+                "P", Contenitore.PRINCIPALE));
+
         SEZIONI.add(new Sezione("Tutto", "Il salvataggio completo, campo per campo",
                 "*", Contenitore.RADICE));
 
@@ -299,6 +304,11 @@ public final class Navigazione {
     /** Quanti campi di una sezione esistono davvero nel salvataggio. */
     @SuppressWarnings("unchecked")
     public static int conta(Object radice, Sezione sezione) {
+        // La schermata iniziale non mostra campi: la sua riga nell'elenco deve
+        // riportare la descrizione, non un conteggio.
+        if (sezione.contenitore == Contenitore.PRINCIPALE) {
+            return 0;
+        }
         Object ridotto = filtro(radice, sezione);
         if (!(ridotto instanceof Map)) {
             return 0;

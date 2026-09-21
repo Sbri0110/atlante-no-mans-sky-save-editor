@@ -85,9 +85,10 @@ public final class Finestra extends JFrame {
 
     private final Testata testata;
     private PannelloDettagli dettagli;
-    private AlberoDati albero;
+    private PannelloCampi campi;
+    private PannelloPrincipale principale;
     private Salvataggio salvataggio;
-    private JScrollPane scorrimentoAlbero;
+    private Rilevatore.Voce voceCorrente;
 
     private final JButton apri = new JButton("Apri file...");
     private final JButton salva = new JButton("Salva");
@@ -131,31 +132,52 @@ public final class Finestra extends JFrame {
     private JComponent costruisciCorpo() {
         JPanel sinistra = costruisciNavigazione();
 
-        centro.setBackground(Aspetto.FONDO);
+        centro.setBackground(Aspetto.PANNELLO);
         centro.add(pannelloVuoto(), BorderLayout.CENTER);
 
-        dettagli = new PannelloDettagli(catalogo, icone, new java.util.function.Consumer<Object>() {
-            public void accept(Object nuovoValore) {
-                applicaModifica(nuovoValore);
+        principale = new PannelloPrincipale(catalogo, icone);
+        principale.collega(new Runnable() {
+            public void run() {
+                if (voceCorrente != null) {
+                    apri(voceCorrente.file);
+                }
+            }
+        }, new Runnable() {
+            public void run() {
+                salva();
+            }
+        }, new Runnable() {
+            public void run() {
+                salvaCome();
+            }
+        }, new Runnable() {
+            public void run() {
+                testata.segnaModificato();
+            }
+        }, new java.util.function.Consumer<String>() {
+            public void accept(String testo) {
+                messaggio.setText(testo);
             }
         });
-        dettagli.collegaAscoltatori();
 
-        JSplitPane destro = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, centro, dettagli);
-        destro.setResizeWeight(1.0);
-        destro.setDividerLocation(820);
-        destro.setBorder(BorderFactory.createEmptyBorder());
-
-        JSplitPane principale = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, sinistra, destro);
-        principale.setResizeWeight(0.0);
-        principale.setDividerLocation(290);
-        principale.setBorder(BorderFactory.createEmptyBorder());
-        principale.setDividerSize(6);
+        campi = new PannelloCampi(catalogo, icone, new Runnable() {
+            public void run() {
+                salvataggio.segnaModificato();
+                testata.segnaModificato();
+                messaggio.setText("Modifiche non salvate");
+            }
+        });
 
         JPanel corpo = new JPanel(new BorderLayout());
         corpo.setBackground(Aspetto.FONDO);
         corpo.add(costruisciBarraComandi(), BorderLayout.NORTH);
-        corpo.add(principale, BorderLayout.CENTER);
+
+        JSplitPane principaleSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, sinistra, centro);
+        principaleSplit.setResizeWeight(0.0);
+        principaleSplit.setDividerLocation(252);
+        principaleSplit.setBorder(BorderFactory.createEmptyBorder());
+        principaleSplit.setDividerSize(6);
+        corpo.add(principaleSplit, BorderLayout.CENTER);
         return corpo;
     }
 
@@ -286,16 +308,16 @@ public final class Finestra extends JFrame {
         JMenu vista = new JMenu("Vista");
         vista.add(voce("Espandi tutto", KeyEvent.VK_E, new Runnable() {
             public void run() {
-                if (albero != null) {
-                    albero.espandiFinoA(12);
+                if (campi != null) {
+                    campi.espandiFinoA(12);
                 }
             }
         }));
         vista.add(voce("Comprimi tutto", KeyEvent.VK_C, new Runnable() {
             public void run() {
-                if (albero != null) {
-                    albero.collapseRow(0);
-                    albero.espandiFinoA(1);
+                // Ricostruire il contenuto richiude tutti i gruppi.
+                if (salvataggio != null) {
+                    mostraContenuto();
                 }
             }
         }));
@@ -468,44 +490,10 @@ public final class Finestra extends JFrame {
         return true;
     }
 
-    /**
-     * Seleziona il primo campo che contiene un oggetto di gioco riconosciuto.
-     *
-     * Serve a mostrare il pannello di dettaglio popolato in una schermata: senza
-     * selezione il pannello di destra resta vuoto e l'immagine non racconta
-     * cosa sa fare il programma.
-     */
-    public boolean selezionaPrimoOggetto() {
-        if (albero == null) {
-            return false;
-        }
-        AlberoDati.Nodo trovato = primoOggetto(albero.radice());
-        if (trovato == null) {
-            return false;
-        }
-        albero.rivela(trovato);
-        dettagli.mostra(trovato);
-        return true;
-    }
-
-    private AlberoDati.Nodo primoOggetto(AlberoDati.Nodo nodo) {
-        if (nodo.foglia() && nodo.valore() instanceof String
-                && catalogo.conosciuto((String) nodo.valore())) {
-            return nodo;
-        }
-        for (int i = 0; i < nodo.getChildCount(); i++) {
-            AlberoDati.Nodo trovato = primoOggetto(nodo.getChildAt(i));
-            if (trovato != null) {
-                return trovato;
-            }
-        }
-        return null;
-    }
-
-    /** Porta l'albero a una profondita' di apertura, per le schermate. */
+    /** Porta i campi a una profondita' di apertura, per le schermate. */
     public void espandiA(int profondita) {
-        if (albero != null) {
-            albero.espandiFinoA(profondita);
+        if (campi != null) {
+            campi.espandiFinoA(profondita);
         }
     }
 
@@ -540,13 +528,25 @@ public final class Finestra extends JFrame {
             Salvataggio nuovo = Salvataggio.apri(file, mappaChiavi());
             salvataggio = nuovo;
 
-            // La sezione scelta resta; se non ce n'e' una si parte da "Tutto".
+            // Si tiene traccia di quale voce dell'elenco e' aperta: la schermata
+            // iniziale mostra la piattaforma e lo slot.
+            voceCorrente = null;
+            for (int i = 0; i < comboSalvataggi.getItemCount(); i++) {
+                Rilevatore.Voce v = comboSalvataggi.getItemAt(i);
+                if (v != null && v.file.equals(file)) {
+                    voceCorrente = v;
+                    break;
+                }
+            }
+
+            // La sezione scelta resta; all'apertura si parte dalla schermata
+            // iniziale, che dice cosa si e' aperto.
             if (sezioneCorrente == null) {
                 sezioneCorrente = Navigazione.elenco().get(0);
             }
             elencoSezioni.setSelectedValue(sezioneCorrente, true);
 
-            costruisciAlbero();
+            mostraContenuto();
             // I conteggi per sezione cambiano con il salvataggio: il disegnatore
             // li rilegge a ogni disegno, quindi basta forzare un ridisegno.
             elencoSezioni.repaint();
@@ -576,9 +576,11 @@ public final class Finestra extends JFrame {
             messaggio.setText("Sezione scelta: " + sezione.nome + ". Apri prima un salvataggio.");
             return;
         }
-        costruisciAlbero();
+        mostraContenuto();
         int quanti = Navigazione.conta(salvataggio.albero(), sezione);
-        if (quanti == 0) {
+        if (sezione.contenitore == Navigazione.Contenitore.PRINCIPALE) {
+            messaggio.setText("Principale — " + sezione.descrizione);
+        } else if (quanti == 0) {
             messaggio.setText(sezione.nome + " — nessun campo di questa sezione nel file aperto"
                     + " (forse sono dati account, non un salvataggio di gioco)");
         } else {
@@ -586,50 +588,31 @@ public final class Finestra extends JFrame {
         }
     }
 
-    private void costruisciAlbero() {
-        if (sezioneCorrente == null) {
-            sezioneCorrente = Navigazione.elenco().get(0);
+    /**
+     * Mostra il contenuto della sezione scelta.
+     *
+     * Due pannelli diversi: la schermata iniziale con le informazioni del file e
+     * le azioni rapide, e il pannello dei campi per tutte le altre sezioni.
+     */
+    private void mostraContenuto() {
+        if (salvataggio == null) {
+            return;
         }
-        Object radice = Navigazione.filtro(salvataggio.albero(), sezioneCorrente);
-        albero = new AlberoDati(radice, catalogo, icone, new Runnable() {
-            public void run() {
-                salvataggio.segnaModificato();
-                testata.segnaModificato();
-                messaggio.setText("Modifiche non salvate");
-            }
-        });
-        albero.addTreeSelectionListener(new TreeSelectionListener() {
-            public void valueChanged(TreeSelectionEvent e) {
-                Object ultimo = e.getPath() == null ? null : e.getPath().getLastPathComponent();
-                dettagli.mostra(ultimo instanceof AlberoDati.Nodo ? (AlberoDati.Nodo) ultimo : null);
-            }
-        });
-        scorrimentoAlbero = new JScrollPane(albero);
-        scorrimentoAlbero.setBorder(BorderFactory.createEmptyBorder());
-        scorrimentoAlbero.getVerticalScrollBar().setUnitIncrement(18);
-        scorrimentoAlbero.setBackground(Aspetto.PANNELLO);
-
         centro.removeAll();
-        centro.add(scorrimentoAlbero, BorderLayout.CENTER);
+        if (sezioneCorrente != null
+                && sezioneCorrente.contenitore == Navigazione.Contenitore.PRINCIPALE) {
+            principale.aggiorna(salvataggio,
+                    voceCorrente == null ? null : voceCorrente.piattaforma,
+                    voceCorrente == null ? null : voceCorrente.etichetta);
+            centro.add(principale, BorderLayout.CENTER);
+        } else {
+            Navigazione.Sezione sezione = sezioneCorrente != null
+                    ? sezioneCorrente : Navigazione.elenco().get(0);
+            campi.mostra(Navigazione.filtro(salvataggio.albero(), sezione));
+            centro.add(campi, BorderLayout.CENTER);
+        }
         centro.revalidate();
         centro.repaint();
-        albero.espandiFinoA(2);
-    }
-
-    private void applicaModifica(Object nuovoValore) {
-        if (albero == null) {
-            return;
-        }
-        AlberoDati.Nodo nodo = (AlberoDati.Nodo) albero.getLastSelectedPathComponent();
-        if (nodo == null || !nodo.foglia()) {
-            return;
-        }
-        nodo.scrivi(nuovoValore);
-        salvataggio.segnaModificato();
-        testata.segnaModificato();
-        dettagli.mostra(nodo);
-        albero.repaint();
-        messaggio.setText("Modifiche non salvate");
     }
 
     private void salva() {
@@ -999,17 +982,13 @@ public final class Finestra extends JFrame {
         });
         cerca.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                if (albero == null) {
+                if (campi == null) {
                     return;
                 }
-                AlberoDati.Nodo trovato = albero.cerca(cerca.getText());
-                if (trovato != null) {
-                    albero.rivela(trovato);
-                    dettagli.mostra(trovato);
-                    messaggio.setText("Trovato: " + trovato.chiave());
-                } else {
-                    messaggio.setText("Nessun campo corrisponde a \"" + cerca.getText() + "\"");
-                }
+                String trovato = campi.cerca(cerca.getText());
+                messaggio.setText(trovato != null
+                        ? "Trovato: " + trovato
+                        : "Nessun campo corrisponde a \"" + cerca.getText() + "\"");
             }
         });
     }
