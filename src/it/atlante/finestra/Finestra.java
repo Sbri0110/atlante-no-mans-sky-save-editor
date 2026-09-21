@@ -87,6 +87,7 @@ public final class Finestra extends JFrame {
     private PannelloDettagli dettagli;
     private PannelloCampi campi;
     private PannelloInventario inventario;
+    private PannelloElenco elenco;
     private PannelloPrincipale principale;
     private Salvataggio salvataggio;
     private Rilevatore.Voce voceCorrente;
@@ -170,6 +171,14 @@ public final class Finestra extends JFrame {
         });
 
         inventario = new PannelloInventario(catalogo, icone, new Runnable() {
+            public void run() {
+                salvataggio.segnaModificato();
+                testata.segnaModificato();
+                messaggio.setText("Modifiche non salvate");
+            }
+        });
+
+        elenco = new PannelloElenco(catalogo, icone, new Runnable() {
             public void run() {
                 salvataggio.segnaModificato();
                 testata.segnaModificato();
@@ -650,6 +659,11 @@ public final class Finestra extends JFrame {
             // come elenchi di campi: e' la struttura del vecchio editor.
             inventario.mostra(salvataggio.albero(), sezioneCorrente.nome);
             centro.add(inventario, BorderLayout.CENTER);
+        } else if (sezioneCorrente != null && Elenchi.aElenco(sezioneCorrente.nome)) {
+            // Squadrone, Fregate, Compagni, Veicoli: pochi elementi ricchi di
+            // campi. Si sceglie l'elemento a sinistra e si modifica a destra.
+            elenco.mostra(salvataggio.albero(), sezioneCorrente.nome);
+            centro.add(elenco, BorderLayout.CENTER);
         } else {
             Navigazione.Sezione sezione = sezioneCorrente != null
                     ? sezioneCorrente : Navigazione.elenco().get(0);

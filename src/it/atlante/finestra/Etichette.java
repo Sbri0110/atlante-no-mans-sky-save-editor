@@ -240,6 +240,30 @@ public final class Etichette {
         n("MultiplayerPrivileges", "Permessi multigiocatore");
         n("BuildersKnown", "Costruzioni conosciute");
         n("InteractionProgressTable", "Tabella dei progressi di interazione");
+
+        // Fregate. I nomi composti come NumberOfExpeditions vanno scritti per
+        // esteso: la regola dei prefissi li spezzava in "Numero di Ber Of...".
+        n("NumberOfExpeditions", "Spedizioni completate");
+        n("TotalNumberOfExpeditions", "Spedizioni completate");
+        n("NumberOfSuccessfulEvents", "Eventi riusciti");
+        n("TotalNumberOfSuccessfulEvents", "Eventi riusciti");
+        n("NumberOfFailedEvents", "Eventi falliti");
+        n("TotalNumberOfFailedEvents", "Eventi falliti");
+        n("NumberOfTimesDamaged", "Volte danneggiata");
+        n("TimeOfLastIncomeCollection", "Ultimo incasso");
+        n("ResourceSeed", "Seme della risorsa");
+        n("HomeSystemSeed", "Seme del sistema di origine");
+        n("ForcedTraitsSeed", "Seme dei tratti imposti");
+        n("TraitIDs", "Tratti");
+        n("FrigateClass", "Classe della fregata");
+        n("InventoryClass", "Classe di inventario");
+        n("Race", "Razza");
+        n("CustomName", "Nome dato dal giocatore");
+        n("AlienRace", "Razza");
+        n("ShipResource", "Risorsa della nave");
+        n("NPCResource", "Risorsa dell'equipaggio");
+        n("TraitsSeed", "Seme dei tratti");
+        n("PilotRank", "Grado del pilota");
     }
 
     /** Preposizioni e congiunzioni che restano minuscole nell'etichetta. */
@@ -303,7 +327,9 @@ public final class Etichette {
         PREFISSI.put("Total", "Totale");
         PREFISSI.put("Max", "Massimo");
         PREFISSI.put("Min", "Minimo");
-        PREFISSI.put("Num", "Numero di");
+        // "Num" e' stato tolto: spezzava NumberOfExpeditions in
+        // "Numero di Ber Of Expeditions". I nomi con Numero di... sono
+        // elencati per esteso fra i nomi noti.
         PREFISSI.put("Pet", "Compagno");
         PREFISSI.put("Fleet", "Flotta");
         PREFISSI.put("Fish", "Pesca");

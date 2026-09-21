@@ -93,6 +93,8 @@ public final class Schermate {
                 {"Principale", "atlante-principale"},
                 {"Tuta", "atlante-tuta"},
                 {"Navi", "atlante-navi"},
+                {"Squadrone", "atlante-squadrone"},
+                {"Fregate", "atlante-fregate"},
         };
         for (String[] vista : viste) {
             finestra.mostraSezionePerNome(vista[0]);
