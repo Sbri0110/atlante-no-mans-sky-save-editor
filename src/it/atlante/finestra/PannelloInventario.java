@@ -147,6 +147,11 @@ public final class PannelloInventario extends JPanel {
         } else {
             modulo.svuota();
         }
+        // Le statistiche della cosa a cui appartiene questo inventario: il
+        // danno e lo scudo di questa nave, il danno e la scansione di questo
+        // multi-tool. Vanno mostrate dopo svuota(), che le azzera.
+        modulo.mostraStatistiche(inv.statistiche == null ? null
+                : Inventari.risolvi(radice, inv.statistiche));
         aggiornaContatore();
     }
 
@@ -232,6 +237,7 @@ public final class PannelloInventario extends JPanel {
         private final JButton ripara = new JButton("Ripara");
         private final JButton ricarica = new JButton("Ricarica al massimo");
         private final JLabel posizione = new JLabel();
+        private final JPanel statistiche = new JPanel();
 
         private int indice = -1;
 
@@ -297,6 +303,16 @@ public final class PannelloInventario extends JPanel {
             azioni.add(ripara);
             azioni.add(ricarica);
             add(azioni);
+
+            // Le statistiche della cosa a cui appartiene questo inventario:
+            // il danno e lo scudo di questa nave, il danno e la scansione di
+            // questo multi-tool. Stanno qui, accanto ai suoi slot, non in una
+            // sezione a parte.
+            statistiche.setLayout(new BoxLayout(statistiche, BoxLayout.Y_AXIS));
+            statistiche.setOpaque(false);
+            statistiche.setAlignmentX(Component.LEFT_ALIGNMENT);
+            statistiche.setBorder(BorderFactory.createEmptyBorder(6, 16, 0, 16));
+            add(statistiche);
             add(Box.createVerticalGlue());
 
             collega();
@@ -451,6 +467,85 @@ public final class PannelloInventario extends JPanel {
             ((Map<String, Object>) inv).put("SpecialSlots", valori);
         }
 
+        /**
+         * Mostra le statistiche della cosa, se ce ne sono.
+         *
+         * Gli identificativi ({@code ^SHIP_DAMAGE}, {@code ^WEAPON_MINING})
+         * sono quelli che il salvataggio usa davvero. I valori sono decimali:
+         * scrivendo un intero il salvataggio cambierebbe tipo.
+         */
+        @SuppressWarnings("unchecked")
+        void mostraStatistiche(Object valore) {
+            statistiche.removeAll();
+            if (!(valore instanceof List)) {
+                statistiche.revalidate();
+                statistiche.repaint();
+                return;
+            }
+            List<Object> elenco = (List<Object>) valore;
+            if (elenco.isEmpty()) {
+                statistiche.revalidate();
+                statistiche.repaint();
+                return;
+            }
+            JLabel titolo = new JLabel("STATISTICHE");
+            titolo.setFont(Aspetto.monospaziato(10f, Font.BOLD));
+            titolo.setForeground(Aspetto.ACCENTO);
+            titolo.setAlignmentX(Component.LEFT_ALIGNMENT);
+            titolo.setBorder(BorderFactory.createEmptyBorder(10, 0, 6, 0));
+            statistiche.add(titolo);
+
+            for (Object o : elenco) {
+                if (!(o instanceof Map)) {
+                    continue;
+                }
+                final Map<String, Object> voce = (Map<String, Object>) o;
+                String id = String.valueOf(voce.get("BaseStatID"));
+                statistiche.add(rigaStatistica(id, voce));
+            }
+            statistiche.revalidate();
+            statistiche.repaint();
+        }
+
+        private JPanel rigaStatistica(String id, final Map<String, Object> voce) {
+            JPanel r = new JPanel(new BorderLayout(10, 0));
+            r.setOpaque(false);
+            r.setBorder(BorderFactory.createEmptyBorder(2, 0, 2, 0));
+            r.setMaximumSize(new Dimension(Integer.MAX_VALUE, 28));
+            r.setAlignmentX(Component.LEFT_ALIGNMENT);
+            JLabel nome = new JLabel(Etichette.leggi(id));
+            nome.setFont(nome.getFont().deriveFont(11.5f));
+            nome.setForeground(Aspetto.TESTO_TENUE);
+            nome.setPreferredSize(new Dimension(126, 24));
+            nome.setToolTipText(id);
+            r.add(nome, BorderLayout.WEST);
+
+            Object valore = voce.get("Value");
+            String testo = valore instanceof Json.Numero
+                    ? ((Json.Numero) valore).testo() : String.valueOf(valore);
+            if (testo.endsWith(".0")) {
+                testo = testo.substring(0, testo.length() - 2);
+            }
+            final JTextField campo = new JTextField(testo);
+            campo.setFont(Aspetto.monospaziato(12, Font.PLAIN));
+            campo.setHorizontalAlignment(SwingConstants.RIGHT);
+            campo.setToolTipText(id + "  —  modifica e premi Invio");
+            campo.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    String v = campo.getText().trim().replace(',', '.');
+                    // I valori sono decimali: senza il punto il salvataggio
+                    // cambierebbe tipo e il gioco potrebbe rifiutarlo.
+                    if (!v.contains(".")) {
+                        v = v + ".0";
+                    }
+                    voce.put("Value", new Json.Numero(v));
+                    suModifica.run();
+                }
+            });
+            r.add(campo, BorderLayout.CENTER);
+            return r;
+        }
+
         void svuota() {
             indice = -1;
             icona.setIcon(Icone.segno("·", 64, Aspetto.TESTO_DEBOLE, true));
@@ -466,6 +561,7 @@ public final class PannelloInventario extends JPanel {
             superCaricato.setSelected(false);
             superCaricato.setText("no");
             abilita(false);
+            mostraStatistiche(null);
         }
 
         private void abilita(boolean attivo) {

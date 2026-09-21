@@ -90,7 +90,8 @@ public final class Schermate {
 
         // Una schermata per sezione: mostrano la navigazione in uso.
         String[][] viste = {
-                {"Statistiche", "atlante-statistiche"},
+                {"Multitool", "atlante-multitool"},
+                {"Navi", "atlante-navi"},
                 {"Traguardi e fazioni", "atlante-traguardi"},
                 {"Conquista stazioni", "atlante-stazioni"},
                 {"Spedizioni", "atlante-spedizioni"},

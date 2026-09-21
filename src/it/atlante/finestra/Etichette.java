@@ -119,6 +119,22 @@ public final class Etichette {
         n("SquadronPilots", "Piloti dello squadrone");
         n("SquadronUnlockedPilotSlots", "Slot squadrone sbloccati");
         n("PilotRank", "Grado del pilota");
+
+        // Statistiche delle cose: navi, armi, veicoli. Gli identificativi
+        // arrivano dal salvataggio, con il ^ davanti.
+        n("^SHIP_DAMAGE", "Danno");
+        n("^SHIP_SHIELD", "Scudo");
+        n("^SHIP_HYPERDRIVE", "Iperguida");
+        n("^SHIP_AGILE", "Manovrabilità");
+        n("^WEAPON_DAMAGE", "Danno");
+        n("^WEAPON_MINING", "Estrazione");
+        n("^WEAPON_SCAN", "Scansione");
+        n("^VEHICLE_DAMAGE", "Danno");
+        n("^VEHICLE_SHIELD", "Scudo");
+        n("^VEHICLE_AGILE", "Manovrabilità");
+        n("^VEHICLE_ENGINE", "Motore");
+        n("^ROBOT_SHIP", "Nave robotica");
+        n("^ALIEN_SHIP", "Nave organica");
         n("PilotName", "Nome del pilota");
 
         // --- compagni ---
@@ -264,6 +280,22 @@ public final class Etichette {
         n("NPCResource", "Risorsa dell'equipaggio");
         n("TraitsSeed", "Seme dei tratti");
         n("PilotRank", "Grado del pilota");
+
+        // Statistiche delle cose: navi, armi, veicoli. Gli identificativi
+        // arrivano dal salvataggio, con il ^ davanti.
+        n("^SHIP_DAMAGE", "Danno");
+        n("^SHIP_SHIELD", "Scudo");
+        n("^SHIP_HYPERDRIVE", "Iperguida");
+        n("^SHIP_AGILE", "Manovrabilità");
+        n("^WEAPON_DAMAGE", "Danno");
+        n("^WEAPON_MINING", "Estrazione");
+        n("^WEAPON_SCAN", "Scansione");
+        n("^VEHICLE_DAMAGE", "Danno");
+        n("^VEHICLE_SHIELD", "Scudo");
+        n("^VEHICLE_AGILE", "Manovrabilità");
+        n("^VEHICLE_ENGINE", "Motore");
+        n("^ROBOT_SHIP", "Nave robotica");
+        n("^ALIEN_SHIP", "Nave organica");
     }
 
     /** Preposizioni e congiunzioni che restano minuscole nell'etichetta. */

@@ -25,10 +25,24 @@ public final class Inventari {
     public static final class Inventario {
         public final String etichetta;
         public final String percorso;
+        /**
+         * Dove stanno le statistiche della cosa a cui appartiene questo
+         * inventario, o null.
+         *
+         * Una nave ha il suo danno e il suo scudo, un multi-tool il suo danno e
+         * la sua scansione: sono valori della cosa, non dell'inventario, e
+         * vanno mostrati accanto ad esso — non in una sezione a parte.
+         */
+        public final String statistiche;
 
         Inventario(String etichetta, String percorso) {
+            this(etichetta, percorso, null);
+        }
+
+        Inventario(String etichetta, String percorso, String statistiche) {
             this.etichetta = etichetta;
             this.percorso = percorso;
+            this.statistiche = statistiche;
         }
     }
 
@@ -43,20 +57,28 @@ public final class Inventari {
         return new Inventario(etichetta, percorso);
     }
 
+    private static Inventario inv(String etichetta, String percorso, String statistiche) {
+        return new Inventario(etichetta, percorso, statistiche);
+    }
+
     static {
         // Il contesto va indicato perche' il salvataggio tiene due copie dello
         // stato del giocatore: quella della partita e quella della spedizione.
         String base = "BaseContext.PlayerStateData.";
         String sped = "ExpeditionContext.PlayerStateData.";
 
+        // Il multi-tool non ha inventari fissi: se ne costruisce uno per ogni
+        // multi-tool posseduto, leggendoli dal salvataggio. La voce qui serve
+        // solo a far sapere alla sezione che si mostra a griglia e non come
+        // albero di campi.
+        sezione("Multitool");
+
         sezione("Tuta",
                 inv("Inventario", base + "Inventory"),
                 inv("Stiva", base + "Inventory_Cargo"),
                 inv("Tecnologie", base + "Inventory_TechOnly"));
 
-        sezione("Multitool",
-                inv("Armi", base + "WeaponInventory"),
-                inv("Tecnologie dell'arma", base + "WeaponInventory_TechOnly"));
+
 
         sezione("Navi",
                 inv("Stiva della nave", base + "ShipInventory"),
@@ -105,7 +127,40 @@ public final class Inventari {
         if ("Navi".equals(nomeSezione)) {
             return navi(radice);
         }
+        if ("Multitool".equals(nomeSezione)) {
+            return armi(radice);
+        }
         return perSezione(nomeSezione);
+    }
+
+    /**
+     * I multi-tool posseduti.
+     *
+     * Come le navi: sono una lista, e ognuno ha il suo inventario e le sue
+     * statistiche. Cambiando multi-tool cambiano gli slot e i valori.
+     */
+    @SuppressWarnings("unchecked")
+    private static List<Inventario> armi(Object radice) {
+        List<Inventario> elenco = new ArrayList<Inventario>();
+        Object posseduti = risolvi(radice, "BaseContext.PlayerStateData.Multitools");
+        if (!(posseduti instanceof List)) {
+            return elenco;
+        }
+        List<Object> lista = (List<Object>) posseduti;
+        for (int i = 0; i < lista.size(); i++) {
+            String nome = "Multi-tool " + (i + 1);
+            Object arma = lista.get(i);
+            if (arma instanceof Map) {
+                Object n = ((Map<String, Object>) arma).get("Name");
+                if (n != null && !String.valueOf(n).trim().isEmpty()) {
+                    nome = String.valueOf(n).trim();
+                }
+            }
+            elenco.add(new Inventario(nome,
+                    "BaseContext.PlayerStateData.Multitools[" + i + "].Store",
+                    "BaseContext.PlayerStateData.Multitools[" + i + "].Store.BaseStatValues"));
+        }
+        return elenco;
     }
 
     private static List<Inventario> navi(Object radice) {
@@ -125,7 +180,8 @@ public final class Inventari {
                 }
             }
             elenco.add(new Inventario(nome,
-                    "BaseContext.PlayerStateData.ShipOwnership[" + i + "].Inventory"));
+                    "BaseContext.PlayerStateData.ShipOwnership[" + i + "].Inventory",
+                    "BaseContext.PlayerStateData.ShipOwnership[" + i + "].Inventory.BaseStatValues"));
         }
         return elenco;
     }
