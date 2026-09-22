@@ -428,3 +428,91 @@ tre cose:
    esiste una garanzia ufficiale. Il README lo dice senza allarmismo e senza
    false rassicurazioni: il rischio è basso se il file resta coerente e si
    gioca in singolo, ma la decisione è di chi usa il programma.
+
+---
+
+## 8. La pubblicazione, e quello che è saltato fuori dopo
+
+Il repository è online: **https://github.com/Sbri0110/atlante-no-mans-sky-save-editor**
+(40 commit, `main`, licenza MIT riconosciuta, argomenti `no-mans-sky`,
+`save-editor`, `java`, `swing`, `flatlaf`, `italiano`).
+
+### 8.1 I dati privati nella cronologia, non nei file
+
+I file correnti erano puliti da giorni. La cronologia no: **23 righe** con dati
+che non devono stare in un repository pubblico, in quattro file, nelle versioni
+*intermedie*. Git conserva ogni versione passata, quindi chi clonava le vedeva.
+
+| File | Cosa esponeva |
+|---|---|
+| `assets/schermate/elenca.svg` | il percorso completo dei salvataggi e il nome della partita |
+| `src/it/atlante/nms/ContenitoreWgs.java` | il nome della partita in un commento |
+| `.workbuddy-ai/memory/MEMORY.md` (2 versioni) | il percorso del disco |
+| `compila.bat`, `avvia.bat` | il percorso del vecchio editor |
+
+**Due errori miei, da non ripetere.** Il primo elenco dei file da pulire l'avevo
+*indovinato* (`compila.bat`, `avvia.bat`, `.gitignore`) invece che misurato, e
+mancavano proprio i tre peggiori. E `Salvataggio.java`, che avevo indicato come
+colpevole, non c'entrava niente: il nome della partita sta in
+`ContenitoreWgs.java`. Infine avevo bollato `elenca.svg` come falso positivo del
+grep: era vero positivo. La lezione è sempre la stessa, la terza volta in questo
+progetto: **la lista si ricava dal contenuto, non da un nome di file.**
+
+### 8.2 Come è stata ripulita
+
+`git filter-branch` su questa macchina non parte (il sandbox gli impedisce di
+creare `.git-rewrite`), e `filter-repo` non è installato. Ricostruire gli alberi
+a mano con `ls-tree` + `mktree` + `commit-tree` funziona ma è lentissimo: oltre
+otto minuti e non era finito.
+
+La strada giusta è **`git fast-export | filtro | git fast-import`**: 1,4 secondi.
+Il filtro legge i blocchi `blob` del flusso e ne riscrive il contenuto *in
+loco*, correggendo la lunghezza; i marcatori restano gli stessi, quindi i commit
+che li citano usano da soli la versione pulita.
+
+**Risultato misurato:** 3.597 blob esaminati, 6 riscritti, 13 sostituzioni,
+residui **da 23 a 0**. La punta è passata da `01326fb` a `d566918a`, ma l'albero
+di HEAD è rimasto **`2a071d090dc7f7407e91e3484da530336e9d7fa5`** — lo stesso hash
+di prima. Stesso hash significa stessi file con gli stessi byte: è una garanzia
+crittografica, non una promessa. I 40 commit sono conservati.
+
+### 8.3 Il pacchetto pronto all'uso
+
+Il repository contiene i sorgenti, ma `avvia.bat` avvia dalle classi compilate e
+`Atlante.jar` non è nel repository. Chi clonava doveva avere un **JDK** e
+compilare: funziona, ma per usare il programma è una richiesta assurda.
+
+Quindi c'è una **release** con `Atlante-1.0.zip` (89 MB):
+
+- `Atlante.jar` con le 223 classi già compilate dentro
+- `lib/flatlaf.jar` per il tema
+- `risorse/` con il catalogo e le 3.518 icone
+- `assets/marchio/` con il logo, che serve all'icona della finestra
+- `avvia.bat`, riscritto per il pacchetto: avvia il jar, non compila
+
+Serve **solo un JRE**. Il JDK portatile non è incluso: servirebbe a compilare, e
+non c'è niente da compilare. Così il pacchetto resta sotto i 100 MB.
+
+### 8.4 La verifica del pacchetto
+
+Non ho dato per buona la struttura: ho estratto lo ZIP in una cartella separata
+e l'ho provato come farebbe chi lo scarica.
+
+- tutte le 16 schermate generate **dal pacchetto estratto** sono risultate
+  **identiche byte per byte** a quelle pubblicate;
+- il collaudo di scrittura passa: **26 prove su 26**;
+- il giro completo conserva i dati.
+
+Trovato così un difetto: mancava `assets/marchio/`, e il logo dell'applicazione
+non compariva (in alto a sinistra). Aggiunto, e la schermata è tornata identica
+a quella pubblicata. **Senza questo controllo il pacchetto sarebbe uscito senza
+il marchio.**
+
+### 8.5 Il README
+
+La tabella diceva di poter aprire `Atlante.jar` come se fosse nel repository: non
+c'è, e chi lo cercava perdeva tempo. Ora la sezione *Come si prova* ha due
+strade separate: **usare** il programma (pacchetto dalla release, serve un JRE) o
+**compilare** dai sorgenti (serve un JDK). Con l'avvertenza che il pacchetto va
+estratto intero e `avvia.bat` lanciato da dentro la sua cartella, perché tema e
+icone si caricano da lì.
