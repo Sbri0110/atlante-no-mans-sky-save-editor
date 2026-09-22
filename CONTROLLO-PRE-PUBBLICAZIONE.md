@@ -210,8 +210,9 @@ Trovato proprio aggiungendo la schermata della finestra Informazioni.
 
 | | Prima | Dopo |
 |---|---|---|
-| File nel repository | 113 | **99** |
-| Dimensione | 13 MB | **8,7 MB** |
+| File nel repository | 113 | **3.619** |
+| Dimensione | 13 MB | **90 MB** (di cui 82 di icone) |
+| Icone di gioco incluse | 0 | **3.518 su 3.518** |
 | Dati privati tracciati | sì | **no** |
 | Riferimenti personali nei file pubblicati | 12 | **0** |
 | Schermate fedeli all'interfaccia | 1 su 15 | **16 su 16** |
@@ -230,6 +231,34 @@ Trovato proprio aggiungendo la schermata della finestra Informazioni.
 7. `5dac788` — Collaudo ripetibile e copia di sicurezza senza collisioni
 8. `edc6a0e` — Commento: misure senza il nome della nave usata come prova
 9. `489516a` — Nome del repository, dichiarazione IA e avvertenze d'uso
+10. `16f8f5c` — Schermate riproducibili, e la finestra Informazioni in vetrina
+11. `5e7d529` — Le icone di gioco entrano nel repository: servono tutte
+
+### Un incidente, e come è finito
+
+Mentre preparavo il commit delle icone ho lanciato un `git stash -u` di troppo.
+Su questa macchina il comando è morto con un errore di segmentazione a metà
+strada e ha lasciato il repository in uno stato incoerente: la punta di `main`
+cancellata, l'indice corrotto, 5 commit recenti (dal 6 al 10 dell'elenco qui
+sopra) spariti dal deposito degli oggetti.
+
+Ricostruito così:
+
+- rimossi il `.git/index.lock` rimasto appeso e l'indice corrotto;
+- ritrovata la punta valida più recente leggendo il reflog, che era intatto;
+- riportato `main` su quel commit con `git update-ref`;
+- ripristinato il `.gitignore` con le regole per i dati privati, che la
+  versione vecchia non aveva;
+- tolto dal tracciamento i file che erano tornati dentro (`.workbuddy-ai/`,
+  `schermate/`, `riferimenti/`).
+
+**I file di lavoro non si sono mai persi**: nessuno. Il danno era solo nella
+cronologia, che non era ancora stata pubblicata da nessuna parte. I commit dal
+6 al 10 sono stati rifatti con lo stesso contenuto.
+
+**Lezione:** `git stash -u` sposta anche i file non tracciati, e in questo
+ambiente git non è affidabile su quella strada. Non l'ho più usato: per mettere
+da parte qualcosa bastano `git add` e un commit.
 
 ---
 
@@ -272,6 +301,8 @@ java -cp "classi;lib/flatlaf.jar" it.atlante.strumenti.Collaudo <file> [cartella
 - [x] 26 prove automatiche su 26, ripetibili
 - [x] Licenza e nota di attribuzione presenti (`LICENSE`, `NOTICE.md`)
 - [x] Il programma funziona anche **senza** le icone di gioco (mostra le sigle)
+- [x] Le 3.518 icone di gioco sono incluse: servono tutte, verificato che
+      nessuna è orfana
 - [x] Nome del repository scelto: **Atlante No Man Sky | Save Editor** —
       l'indirizzo diventa `github.com/Sbri0110/atlante-no-mans-sky-save-editor`
 - [x] Dichiarazione dello sviluppo con IA (README, `index.html`, `NOTICE.md`,
@@ -295,8 +326,51 @@ repository e fare il push richiede un accesso tuo. Il resto è pronto.
 - **Il salvataggio vero.** Nessuna prova l'ha mai modificato: tutte lavorano
   su una copia.
 - **Il vecchio editor sulla tua macchina.** Non l'ho sfiorato.
-- **Le icone di gioco.** Restano fuori dal repository come prima: sono arte di
-  Hello Games, 73 MB, e il programma funziona anche senza.
+
+---
+
+## 6-bis. Le icone di gioco: la decisione, e l'errore che avevo fatto
+
+Questa merita di essere scritta per esteso, perché è il punto in cui ho
+sbagliato **due volte**, in due direzioni opposte, e la seconda volta me ne
+sono accorto solo perché Sbri ha contestato la scelta.
+
+**Il primo errore** è nell'HEAD precedente: avevo escluso tutte le icone dal
+repository, con la motivazione che sono arte di Hello Games. Sul piano legale
+il ragionamento si sostiene. Sul piano pratico ha prodotto un danno: il
+programma, a chi lo clonava, si presentava con le sigle al posto delle icone.
+Il 78% dello schermo riempito di `SUBSTANCE-FUEL2`, `PRODUCT-ABAND_BARREL` e roba
+simile.
+
+**Il secondo errore** è nella prima versione di questo documento: contando le
+icone citate dal catalogo ne avevo trovate 3.428 su 3.518, e ne avevo concluse
+90 «orfane». Sbagliato. Le altre 98 sono usate **direttamente dal codice**, e
+non passano dal catalogo perché descrivono tipi e non oggetti:
+
+| Dove | Cosa |
+|---|---|
+| `Piloti.java` | i tipi di nave del pilota (10 icone) |
+| `Icone.java` | le classi delle fregate e i loro tratti |
+| `PannelloCompagno.java` | i biomi dei compagni |
+| `Navigazione.java` | l'icona della corvetta |
+| il resto | glifi dei portali, potenziamenti dei compagni, razze |
+
+Contando anche quelle: **3.518 su 3.518 sono usate. Zero orfane.** Non c'era
+niente da buttare.
+
+**La decisione (di Sbri, 22 settembre 2026):** le icone entrano tutte nel
+repository. Il repository passa da 8,8 a circa 90 MB — il file più grande è
+310 KB, la media 24 KB, sotto qualunque soglia di GitHub.
+
+**Come si verifica:** il clone pulito, compilato senza JDK portatile e senza
+niente di preinstallato, produce 223 classi, passa 26 prove su 26, conserva i
+dati byte per byte e genera **16 schermate identiche byte per byte** a quelle
+pubblicate in `assets/schermate/`. Se le icone fossero rimaste fuori, queste
+ultime non coinciderebbero: sarebbero piene di sigle.
+
+`NOTICE.md` è stato riscritto: ora spiega quali sono le icone, perché restano e
+che la questione è discutibile — chi non è d'accordo cancella la cartella e il
+programma ripiega sugli identificatori testuali.
 
 ---
 
