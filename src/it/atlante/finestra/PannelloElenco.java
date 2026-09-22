@@ -73,8 +73,11 @@ public final class PannelloElenco extends JPanel {
     private final JList<Voce> elenco = new JList<Voce>(modello);
     private final PannelloCampi campi;
     private final PannelloWingman wingman;
-    /** Il pannello a schede che tiene l'albero dei campi e la scheda del pilota. */
+    private final PannelloFregata fregata;
+    /** Il pannello a schede che tiene l'albero dei campi e le schede su misura. */
     private JPanel centro;
+    /** Quale scheda si sta mostrando: "campi", "scheda" o "fregata". */
+    private String scheda = "campi";
     private final JLabel titolo = new JLabel();
     private final JLabel conteggio = new JLabel();
     private final JPanel testata = new JPanel();
@@ -91,6 +94,7 @@ public final class PannelloElenco extends JPanel {
         this.icone = icone;
         this.campi = new PannelloCampi(catalogo, icone, suModifica);
         this.wingman = new PannelloWingman(icone, suModifica);
+        this.fregata = new PannelloFregata(icone, suModifica);
 
         setLayout(new BorderLayout());
         setBackground(Aspetto.PANNELLO);
@@ -159,6 +163,7 @@ public final class PannelloElenco extends JPanel {
         centro.setBackground(Aspetto.PANNELLO);
         centro.add(campi, "campi");
         centro.add(wingman, "scheda");
+        centro.add(fregata, "fregata");
         destra.add(centro, BorderLayout.CENTER);
 
         add(sinistra, BorderLayout.WEST);
@@ -171,15 +176,29 @@ public final class PannelloElenco extends JPanel {
                 }
                 Voce v = elenco.getSelectedValue();
                 if (v != null) {
-                    if (usaScheda) {
-                        wingman.mostra(radice, v.indice);
-                    } else {
-                        campi.mostra(v.valore);
-                    }
+                    apri(v);
                 }
                 aggiornaTestata(v);
             }
         });
+    }
+
+    /**
+     * Apre un elemento nella scheda giusta.
+     *
+     * Lo squadrone e le fregate hanno una scheda su misura — i campi del gioco
+     * con i loro nomi, i menu per la razza e il tipo, i pulsanti per i semi —
+     * perche' il loro albero dei campi dice "Elemento 1, Elemento 2" e non si
+     * capisce cosa si sta modificando. Le altre sezioni restano sull'albero.
+     */
+    private void apri(Voce v) {
+        if ("scheda".equals(scheda)) {
+            wingman.mostra(radice, v.indice);
+        } else if ("fregata".equals(scheda)) {
+            fregata.mostra(radice, v.indice);
+        } else {
+            campi.mostra(v.valore);
+        }
     }
 
     /** Aggiorna la testata a destra con l'elemento scelto. */
@@ -203,9 +222,11 @@ public final class PannelloElenco extends JPanel {
     public void mostra(Object radice, String nomeSezione) {
         Elenchi.Elenco descrizione = Elenchi.perSezione(nomeSezione);
         this.radice = radice;
-        usaScheda = "Squadrone".equals(nomeSezione);
-        ((java.awt.CardLayout) centro.getLayout()).show(centro, usaScheda ? "scheda" : "campi");
-        // La scheda del pilota ha gia' la sua testata con l'icona grande.
+        scheda = "Squadrone".equals(nomeSezione) ? "scheda"
+                : "Fregate".equals(nomeSezione) ? "fregata" : "campi";
+        usaScheda = !"campi".equals(scheda);
+        ((java.awt.CardLayout) centro.getLayout()).show(centro, scheda);
+        // Le schede su misura hanno gia' la loro testata con l'icona grande.
         testata.setVisible(!usaScheda);
         modello.clear();
         titolo.setText(nomeSezione.toUpperCase());
@@ -249,16 +270,13 @@ public final class PannelloElenco extends JPanel {
             // Se l'indice era gia' zero il listener non riceve niente: la prima
             // voce va aperta lo stesso, altrimenti si apre l'elenco con la
             // scheda vuota.
-            if (usaScheda) {
-                wingman.mostra(radice, 0);
-            } else {
-                Voce prima = modello.getElementAt(0);
-                campi.mostra(prima.valore);
-                aggiornaTestata(prima);
-            }
+            Voce prima = modello.getElementAt(0);
+            apri(prima);
+            aggiornaTestata(prima);
         } else {
             campi.mostra(null);
             wingman.svuota();
+            fregata.svuota();
             aggiornaTestata(null);
         }
     }
