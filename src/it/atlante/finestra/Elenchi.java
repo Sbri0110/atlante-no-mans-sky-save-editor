@@ -86,8 +86,10 @@ public final class Elenchi {
                 base + "FleetFrigates", "CustomName", "Fregata", "FrigateClass",
                 "Race", "FrigateClass"));
 
+        // Il nome di un compagno sta in CustomName, non in Name: cercando
+        // "Name" l'elenco restava sempre su "Compagno 1, 2, 3...".
         PER_SEZIONE.put("Compagni", new Elenco(
-                base + "Pets", "Name", "Compagno", "CreatureType",
+                base + "Pets", "CustomName", "Compagno", "CreatureType",
                 null, null, "UI-PET.PNG"));
     }
 

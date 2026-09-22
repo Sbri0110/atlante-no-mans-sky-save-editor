@@ -297,6 +297,18 @@ public final class PannelloElenco extends JPanel {
                 return String.valueOf(n).trim();
             }
         }
+        // Il nome dato dal giocatore c'e' solo se l'ha dato. Per le creature
+        // speciali il salvataggio tiene almeno la specie (^UI_BONEPET_SPECIES):
+        // meglio quella di un numero.
+        if (elemento instanceof Map) {
+            Object specie = ((Map<String, Object>) elemento).get("CustomSpeciesName");
+            if (specie != null) {
+                String t = String.valueOf(specie).replace("^", "").replace("_", " ").trim();
+                if (!t.isEmpty()) {
+                    return t;
+                }
+            }
+        }
         return descrizione.prefisso + " " + (indice + 1);
     }
 
