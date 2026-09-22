@@ -74,6 +74,7 @@ public final class PannelloElenco extends JPanel {
     private final PannelloCampi campi;
     private final PannelloWingman wingman;
     private final PannelloFregata fregata;
+    private final PannelloCompagno compagno;
     /** Il pannello a schede che tiene l'albero dei campi e le schede su misura. */
     private JPanel centro;
     /** Quale scheda si sta mostrando: "campi", "scheda" o "fregata". */
@@ -95,6 +96,7 @@ public final class PannelloElenco extends JPanel {
         this.campi = new PannelloCampi(catalogo, icone, suModifica);
         this.wingman = new PannelloWingman(icone, suModifica);
         this.fregata = new PannelloFregata(icone, suModifica);
+        this.compagno = new PannelloCompagno(icone, suModifica);
 
         setLayout(new BorderLayout());
         setBackground(Aspetto.PANNELLO);
@@ -164,6 +166,7 @@ public final class PannelloElenco extends JPanel {
         centro.add(campi, "campi");
         centro.add(wingman, "scheda");
         centro.add(fregata, "fregata");
+        centro.add(compagno, "compagno");
         destra.add(centro, BorderLayout.CENTER);
 
         add(sinistra, BorderLayout.WEST);
@@ -196,6 +199,8 @@ public final class PannelloElenco extends JPanel {
             wingman.mostra(radice, v.indice);
         } else if ("fregata".equals(scheda)) {
             fregata.mostra(radice, v.indice);
+        } else if ("compagno".equals(scheda)) {
+            compagno.mostra(radice, v.indice);
         } else {
             campi.mostra(v.valore);
         }
@@ -223,7 +228,8 @@ public final class PannelloElenco extends JPanel {
         Elenchi.Elenco descrizione = Elenchi.perSezione(nomeSezione);
         this.radice = radice;
         scheda = "Squadrone".equals(nomeSezione) ? "scheda"
-                : "Fregate".equals(nomeSezione) ? "fregata" : "campi";
+                : "Fregate".equals(nomeSezione) ? "fregata"
+                : "Compagni".equals(nomeSezione) ? "compagno" : "campi";
         usaScheda = !"campi".equals(scheda);
         ((java.awt.CardLayout) centro.getLayout()).show(centro, scheda);
         // Le schede su misura hanno gia' la loro testata con l'icona grande.
@@ -277,6 +283,7 @@ public final class PannelloElenco extends JPanel {
             campi.mostra(null);
             wingman.svuota();
             fregata.svuota();
+            compagno.svuota();
             aggiornaTestata(null);
         }
     }
