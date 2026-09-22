@@ -62,6 +62,9 @@
 > - **Perciò:** il codice è leggibile e commentato, ma se trovi qualcosa di
 >   storto **apri una segnalazione**. È il contributo più utile che puoi dare.
 
+**Vuoi solo usare il programma?** C'è una pagina che lo presenta e il pacchetto
+pronto da scaricare: <https://sbri0110.github.io/atlante-no-mans-sky-save-editor/>
+
 ---
 
 Legge i salvataggi di No Man's Sky, ne decodifica le chiavi cifrate, li mostra in un
