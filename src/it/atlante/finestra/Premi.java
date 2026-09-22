@@ -164,7 +164,7 @@ public final class Premi {
      * La regola: si toglie il numero di stagione (con gli zeri iniziali) dal
      * tipo e lo si sposta davanti, nella forma {@code ^RS_S<n>_<tipo>}.
      *
-     * Verificata su dieci coppie reali lette dal salvataggio di Sbri: dieci
+     * Verificata su dieci coppie reali lette da un salvataggio vero: dieci
      * corrette su dieci. E' quello che permette di riconoscere le ricompense
      * gia' ottenute e di scriverne di nuove senza inventare valori.
      */

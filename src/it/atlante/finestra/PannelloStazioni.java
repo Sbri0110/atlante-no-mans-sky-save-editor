@@ -318,7 +318,7 @@ public final class PannelloStazioni extends JPanel {
         }
         indirizzo.setText(indirizzoTesto);
         // SaveSummary e' il nome della BASE attuale, non del sistema: il campo
-        // si chiama "riassunto" ma contiene una stringa come "In GamX | OASI",
+        // si chiama "riassunto" ma contiene una stringa come "In <giocatore> | <base>",
         // che e' il nome che il giocatore ha dato alla sua base.
         // Il vecchio editor lo presenta come "Sistema Solare Corrente" e sbaglia.
         // Il nome del sistema non e' nel salvataggio: i nomi scoperti stanno in
@@ -399,7 +399,9 @@ public final class PannelloStazioni extends JPanel {
         if (!(radice instanceof Map)) {
             return null;
         }
-        Object base = ((Map<?, ?>) radice).get("BaseContext");
+        // Segue il contesto attivo: le stazioni rivendicate di una spedizione
+        // non sono quelle della partita principale.
+        Object base = ((Map<?, ?>) radice).get(Inventari.contesto(radice));
         return base instanceof Map ? ((Map<?, ?>) base).get("PlayerStateData") : null;
     }
 

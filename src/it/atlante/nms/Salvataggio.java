@@ -240,7 +240,17 @@ public final class Salvataggio {
         if (dove != null && !dove.isDirectory()) {
             dove.mkdirs();
         }
+        // La marca ha il secondo come unita': due salvataggi ravvicinati — o due
+        // esecuzioni del collaudo nello stesso secondo — darebbero lo stesso
+        // nome, e copiare su un file che esiste gia' solleva un'eccezione. Con
+        // il suffisso il secondo salvataggio non perde la sua copia e la
+        // scrittura non si interrompe.
         File copia = new File(dove, file.getName() + "." + marca + ".bak");
+        int suffisso = 1;
+        while (copia.exists()) {
+            copia = new File(dove, file.getName() + "." + marca + "-" + suffisso + ".bak");
+            suffisso++;
+        }
         Files.copy(file.toPath(), copia.toPath());
         return copia;
     }

@@ -75,6 +75,7 @@ public final class PannelloElenco extends JPanel {
     private final PannelloWingman wingman;
     private final PannelloFregata fregata;
     private final PannelloCompagno compagno;
+    private final PannelloInsediamento insediamento;
     /** Il pannello a schede che tiene l'albero dei campi e le schede su misura. */
     private JPanel centro;
     /** Quale scheda si sta mostrando: "campi", "scheda" o "fregata". */
@@ -97,6 +98,7 @@ public final class PannelloElenco extends JPanel {
         this.wingman = new PannelloWingman(icone, suModifica);
         this.fregata = new PannelloFregata(icone, suModifica);
         this.compagno = new PannelloCompagno(icone, suModifica);
+        this.insediamento = new PannelloInsediamento(icone, suModifica);
 
         setLayout(new BorderLayout());
         setBackground(Aspetto.PANNELLO);
@@ -167,6 +169,7 @@ public final class PannelloElenco extends JPanel {
         centro.add(wingman, "scheda");
         centro.add(fregata, "fregata");
         centro.add(compagno, "compagno");
+        centro.add(insediamento, "insediamento");
         destra.add(centro, BorderLayout.CENTER);
 
         add(sinistra, BorderLayout.WEST);
@@ -201,6 +204,8 @@ public final class PannelloElenco extends JPanel {
             fregata.mostra(radice, v.indice);
         } else if ("compagno".equals(scheda)) {
             compagno.mostra(radice, v.indice);
+        } else if ("insediamento".equals(scheda)) {
+            insediamento.mostra(radice, v.indice);
         } else {
             campi.mostra(v.valore);
         }
@@ -225,11 +230,14 @@ public final class PannelloElenco extends JPanel {
 
     /** Mostra l'elenco di una sezione. */
     public void mostra(Object radice, String nomeSezione) {
-        Elenchi.Elenco descrizione = Elenchi.perSezione(nomeSezione);
+        // Il percorso segue il contesto attivo: un salvataggio di spedizione ha
+        // i suoi piloti, le sue fregate, i suoi compagni.
+        Elenchi.Elenco descrizione = Elenchi.perSezione(radice, nomeSezione);
         this.radice = radice;
         scheda = "Squadrone".equals(nomeSezione) ? "scheda"
                 : "Fregate".equals(nomeSezione) ? "fregata"
-                : "Compagni".equals(nomeSezione) ? "compagno" : "campi";
+                : "Compagni".equals(nomeSezione) ? "compagno"
+                : "Insediamenti".equals(nomeSezione) ? "insediamento" : "campi";
         usaScheda = !"campi".equals(scheda);
         ((java.awt.CardLayout) centro.getLayout()).show(centro, scheda);
         // Le schede su misura hanno gia' la loro testata con l'icona grande.
@@ -250,8 +258,15 @@ public final class PannelloElenco extends JPanel {
             elementi.addAll((List<Object>) valore);
         }
 
+        boolean soloPieni = "Insediamenti".equals(nomeSezione);
         for (int i = 0; i < elementi.size(); i++) {
             Object elemento = elementi.get(i);
+            // Il salvataggio tiene cento insediamenti, quasi tutti visitati e
+            // vuoti: senza filtro l'elenco sarebbe una lista di nomi che non
+            // sono del giocatore.
+            if (soloPieni && !insediamentoPieno(elemento)) {
+                continue;
+            }
             String icona = iconaDi(elemento, descrizione.campoIcona);
             if (icona == null) {
                 icona = descrizione.iconaFissa;
@@ -284,8 +299,41 @@ public final class PannelloElenco extends JPanel {
             wingman.svuota();
             fregata.svuota();
             compagno.svuota();
+            insediamento.svuota();
             aggiornaTestata(null);
         }
+    }
+
+    /** Vero se un insediamento ha davvero qualcosa dentro. */
+    @SuppressWarnings("unchecked")
+    private static boolean insediamentoPieno(Object elemento) {
+        if (!(elemento instanceof Map)) {
+            return false;
+        }
+        Map<String, Object> m = (Map<String, Object>) elemento;
+        if (numero(m.get("Population")) > 0) {
+            return true;
+        }
+        Object stats = m.get("Stats");
+        if (stats instanceof List) {
+            for (Object v : (List<Object>) stats) {
+                if (numero(v) != 0) {
+                    return true;
+                }
+            }
+        }
+        Object perks = m.get("Perks");
+        return perks instanceof List && !((List<Object>) perks).isEmpty();
+    }
+
+    private static long numero(Object v) {
+        if (v instanceof it.atlante.json.Json.Numero) {
+            return ((it.atlante.json.Json.Numero) v).comeLong();
+        }
+        if (v instanceof Number) {
+            return ((Number) v).longValue();
+        }
+        return 0;
     }
 
     /** Il nome da mostrare: quello dato dal giocatore, o un numero progressivo. */

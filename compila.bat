@@ -56,13 +56,6 @@ if not defined JAVAC (
 )
 
 if not defined JAVAC (
-  if exist "<cartella del vecchio editor>\tools\jdk8\bin\javac.exe" (
-    set "JAVAC=<cartella del vecchio editor>\tools\jdk8\bin\javac.exe"
-    set "JAR=<cartella del vecchio editor>\tools\jdk8\bin\jar.exe"
-  )
-)
-
-if not defined JAVAC (
   echo.
   echo Non trovo javac su questo computer.
   echo Per compilare serve un JDK, non basta il JRE.

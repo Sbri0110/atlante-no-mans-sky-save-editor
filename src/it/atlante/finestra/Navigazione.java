@@ -96,6 +96,11 @@ public final class Navigazione {
                 "UI-SHIPICON", Contenitore.GIOCATORE,
                 "FleetFrigates", "FleetExpeditions", "FleetSeed"));
 
+        SEZIONI.add(new Sezione("Corvette", "Inventario, tecnologie, parti di costruzione e depositi",
+                "UI-SHIPTYPE-CORVETTE", Contenitore.GIOCATORE,
+                "CorvetteStorageInventory", "CorvetteDraftShipSeed",
+                "CorvetteEditAssociatedShipIndex", "CorvetteEditShipName"));
+
         SEZIONI.add(new Sezione("Veicoli", "Exocraft, piattaforma da pesca e mezzi",
                 "PRODUCT-AM_EXOCRAFTTREE", Contenitore.GIOCATORE,
                 "VehicleOwnership", "PrimaryVehicle", "VehicleAIControlEnabled", "SkiffData",
@@ -236,8 +241,11 @@ public final class Navigazione {
         switch (sezione.contenitore) {
             case GIOCATORE: {
                 // Il contesto principale e quello della spedizione in corso
-                // hanno la stessa struttura: si mostrano entrambi.
-                for (String contesto : new String[]{"BaseContext", "ExpeditionContext"}) {
+                // hanno la stessa struttura: si mostrano entrambi, ma il
+                // contesto in corso per primo, cosi' e' quello che si apre.
+                String attivo = Inventari.contesto(radice);
+                for (String contesto : new String[]{attivo,
+                        "BaseContext".equals(attivo) ? "ExpeditionContext" : "BaseContext"}) {
                     Object c = r.get(contesto);
                     if (!(c instanceof Map)) {
                         continue;

@@ -153,9 +153,11 @@ public final class PannelloStatistiche extends JPanel {
     public void mostra(Object radice) {
         stato = null;
         if (radice instanceof Map) {
-            Object base = ((Map<String, Object>) radice).get("BaseContext");
-            if (base instanceof Map) {
-                Object psd = ((Map<String, Object>) base).get("PlayerStateData");
+            // Il contesto attivo: navi, multi-tool e veicoli di una spedizione
+            // hanno le loro statistiche, non quelle della partita principale.
+            Object contesto = ((Map<String, Object>) radice).get(Inventari.contesto(radice));
+            if (contesto instanceof Map) {
+                Object psd = ((Map<String, Object>) contesto).get("PlayerStateData");
                 if (psd instanceof Map) {
                     stato = (Map<String, Object>) psd;
                 }

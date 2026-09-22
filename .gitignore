@@ -9,6 +9,44 @@ uscita/
 # Copie di sicurezza dei salvataggi
 backup/
 
+# Cartella di lavoro del collaudo.
+#
+# Collaudo ci scrive dentro: il salvataggio di prova, le copie di sicurezza, i
+# file-trappola (vuoto, due byte, cartella). Sono file locali di chi esegue la
+# prova, non hanno niente da pubblicare.
+collaudo/
+
+# Prove mirate fatte durante lo sviluppo: sorgenti usa e getta, copie di
+# salvataggi, dump. Restano sul disco di chi lavora.
+.prova/
+
+# Appunti di lavoro e memoria dell'assistente.
+#
+# Contengono il percorso dei salvataggi veri, i nomi delle partite usate come
+# prova e le misure fatte su quei file: sono cose private, e in un repository
+# pubblico non hanno niente da fare. Restano sul disco di chi lavora.
+.workbuddy-ai/
+.tmpatl/
+
+# Materiale di riferimento interno.
+#
+# I fotogrammi del vecchio editor, la griglia delle icone e l'estratto delle
+# sue funzioni servivano a ricostruire le schede: sono appunti di lavoro, non
+# documentazione del progetto. Fuori dal repository.
+riferimenti/
+
+# Schermate di lavoro non pubblicate.
+#
+# Le immagini della documentazione stanno in assets/schermate/: questa cartella
+# e' l'uscita grezza dello strumento delle schermate.
+#
+# La barra iniziale ancora il percorso alla radice: senza, la regola
+# prenderebbe anche assets/schermate/, e ogni immagine nuova della
+# documentazione resterebbe fuori dal repository senza che si veda il perche'
+# (quelle gia' pubblicate sono tracciate, quindi il problema si nota solo alla
+# prima aggiunta).
+/schermate/
+
 # JDK portatile.
 #
 # Serve ad avviare e compilare senza installare nulla, ma sono 192 MB e non
@@ -20,15 +58,18 @@ strumenti/jdk8/
 Atlante.jar
 manifest.txt
 
-# Icone degli oggetti di gioco.
+# Icone degli oggetti e dell'interfaccia di gioco.
 #
-# Sono 3.210 PNG per circa 73 MB: sono l'arte di No Man's Sky, non codice di
-# questo progetto. Tenendole fuori il repository resta leggero da clonare e non
-# ridistribuisce materiale di Hello Games.
+# Sono 3.518 PNG, 82 MB. Fino al 22 settembre 2026 stavano fuori dal
+# repository, con la motivazione che sono arte di Hello Games. Il ragionamento
+# non regge: servono tutte. Il catalogo ne cita 3.428, e altre 98 sono usate
+# direttamente dal codice per icone che descrivono tipi e non oggetti (i tipi
+# di nave, le classi delle fregate, i biomi, i glifi dei portali). Senza,
+# il programma si presenta con le sigle al posto delle immagini.
 #
-# Per averle in locale basta copiare i PNG in risorse/icone/. Il programma
-# funziona anche senza: mostra le sigle al posto delle icone.
-risorse/icone/
+# Quindi restano dentro: sono il motivo per cui l'interfaccia si legge a colpo
+# d'occhio, ed e' quello che rende utile l'editor. Il file piu' grande e' 310 KB
+# e l'intero repository sta sotto i 100 MB.
 
 # Ambienti di sviluppo
 .idea/

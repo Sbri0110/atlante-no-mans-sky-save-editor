@@ -4,6 +4,23 @@
 
 Rilasciato con licenza MIT. Vedi [LICENSE](LICENSE).
 
+### Sviluppo con l'intelligenza artificiale
+
+Il codice, l'interfaccia, la documentazione e i commenti sono stati scritti con
+l'aiuto di un assistente di **intelligenza artificiale**, sotto la direzione, la
+verifica e le correzioni di un autore umano.
+
+La dichiarazione è esplicita perché riguarda i diritti di chi legge e usa il
+programma: le opere generate con il supporto di strumenti di IA possono avere un
+regime diverso, per esempio, quanto alla protezione del diritto d'autore in
+alcune giurisdizioni e alle condizioni d'uso di piattaforme come GitHub o gli
+store. Chi riusa questo codice deve saperlo prima di farlo.
+
+Per lo stesso motivo il progetto è accompagnato da **prove automatiche
+verificabili** (`strumenti.Collaudo`, il comando `giro`): l'origine del codice
+non è una garanzia di correttezza, e il modo per fidarsi è poterlo controllare ed
+eseguire, non fidarsi della dichiarazione.
+
 ## Librerie incluse
 
 ### FlatLaf
@@ -24,9 +41,25 @@ proprietà, elenco degli oggetti, dimensioni degli inventari. Sono **dati**
 ricavati dai file di gioco, non codice, e servono a mostrare nomi leggibili al
 posto degli identificatori interni.
 
-Le icone degli oggetti **non sono incluse** in questo repository: sono arte di
-gioco e pesano circa 73 MB. Il programma le usa se presenti in `risorse/icone/`
-e funziona ugualmente quando mancano, mostrando gli identificatori.
+### Le icone
+
+`risorse/icone/` contiene **3.518 immagini PNG** (82 MB) estratte
+dall'installazione di No Man's Sky: le icone degli oggetti e quelle
+dell'interfaccia — i tipi di nave, le classi delle fregate, i biomi, i glifi dei
+portali, i potenziamenti dei compagni. Servono tutte, nessuna esclusa: il
+catalogo ne cita 3.428 e il codice ne usa altre 98 per gli elementi che non
+descrivono un oggetto ma una categoria.
+
+Sono **arte di gioco**, e restano di Hello Games. Qui sono incluse nella loro
+forma originale, senza modifiche, per una ragione pratica: sono ciò che rende
+l'interfaccia leggibile a colpo d'occhio. Un editor che mostra
+`SUBSTANCE-FUEL2` al posto dell'icona del carbonio condensato è un editor che
+non si capisce.
+
+Chi non è d'accordo con questa scelta può cancellare la cartella: il programma
+funziona lo stesso e ripiega sugli identificatori testuali. Chi la pensa
+diversamente, e ritiene che l'inclusione non sia opportuna, può aprire una
+segnalazione — la questione è aperta e si discute volentieri.
 
 ## Marchi
 

@@ -46,6 +46,17 @@ public final class PannelloPrincipale extends JPanel {
     private final JLabel formato = new JLabel("—");
     private final JLabel dimensioni = new JLabel("—");
 
+    /**
+     * Data finta per "Ultima modifica", quando serve una schermata ripetibile.
+     *
+     * L'ora vera del file di prova cambia a ogni copia, quindi la stessa
+     * schermata rigenerata il giorno dopo risulterebbe diversa senza che sia
+     * cambiato niente nell'interfaccia. Con una data fissata, il confronto fra
+     * due generazioni dice qualcosa di vero. Vale solo per le schermate: nel
+     * programma la data e' quella del file.
+     */
+    private static Long dataFinta;
+
     private final JButton ricarica = new JButton("Ricarica");
     private final JButton salva = new JButton("Salva modifiche");
     private final JButton salvaCome = new JButton("Salva con nome...");
@@ -57,8 +68,7 @@ public final class PannelloPrincipale extends JPanel {
     private Runnable suSalvaCome;
     private java.util.function.Consumer<String> suMessaggio;
 
-    public PannelloPrincipale(Catalogo catalogo, Icone icone) {
-        this.catalogo = catalogo;
+    public PannelloPrincipale(Catalogo catalogo, Icone icone) {        this.catalogo = catalogo;
         this.icone = icone;
         setLayout(new BorderLayout());
         setBackground(Aspetto.FONDO);
@@ -243,13 +253,23 @@ public final class PannelloPrincipale extends JPanel {
         slotGioco.setText(etichettaSlot == null ? "—" : etichettaSlot);
         file.setText(s.file().getName());
         modificato.setText(new SimpleDateFormat("d MMMM yyyy, HH:mm", java.util.Locale.ITALIAN)
-                .format(new Date(s.file().lastModified())));
+                .format(new Date(dataFinta == null ? s.file().lastModified() : dataFinta.longValue())));
         formato.setText(s.formato().descrizione() + " · " + s.blocchi() + " blocchi");
         dimensioni.setText(Salvataggio.mb(s.dimensioneCompressa()) + " compressi, "
                 + Salvataggio.mb(s.dimensioneDecompressa()) + " decompressi");
         nomeSalvataggio.setText(nomeDalSalvataggio());
         salva.setEnabled(true);
         salvaCome.setEnabled(true);
+    }
+
+    /**
+     * Fissa la data mostrata in "Ultima modifica".
+     *
+     * La usano gli strumenti che generano le schermate della documentazione:
+     * senza, l'immagine cambierebbe ogni giorno da sola.
+     */
+    static void fissaDataModifica(long millisecondi) {
+        dataFinta = Long.valueOf(millisecondi);
     }
 
     /** Il nome del salvataggio, letto dal campo SaveName. */

@@ -364,6 +364,7 @@ public final class PannelloInventario extends JPanel {
         private final JButton ripara = new JButton("Ripara");
         private final JButton ricarica = new JButton("Ricarica al massimo");
         private final JButton svuota = new JButton("Svuota slot");
+        private final JButton importa = new JButton("Importa parti...");
         private final JLabel posizione = new JLabel();
         private final JPanel statistiche = new JPanel();
         private final JPanel principaliPanel = new JPanel();
@@ -432,10 +433,13 @@ public final class PannelloInventario extends JPanel {
             ripara.setFont(ripara.getFont().deriveFont(11.5f));
             ricarica.setFont(ricarica.getFont().deriveFont(11.5f));
             svuota.setFont(svuota.getFont().deriveFont(11.5f));
+            importa.setFont(importa.getFont().deriveFont(11.5f));
+            importa.setToolTipText("Legge un file JSON della Corvette e riempie il deposito dei pezzi");
             azioni.add(cambia);
             azioni.add(ripara);
             azioni.add(ricarica);
             azioni.add(svuota);
+            azioni.add(importa);
             add(azioni);
 
             // Le statistiche della cosa a cui appartiene questo inventario:
@@ -545,6 +549,36 @@ public final class PannelloInventario extends JPanel {
                     }
                     scrivi("Amount", m);
                     quantita.setText(m);
+                    suModifica.run();
+                }
+            });
+            // L'importazione riguarda solo il deposito dei pezzi della Corvette:
+            // e' li' che il gioco tiene le parti con cui si costruisce.
+            importa.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    if (corrente == null) {
+                        return;
+                    }
+                    javax.swing.JFileChooser scelta = new javax.swing.JFileChooser();
+                    scelta.setDialogTitle("Scegli il file JSON della Corvette");
+                    if (scelta.showOpenDialog(Modulo.this) != javax.swing.JFileChooser.APPROVE_OPTION) {
+                        return;
+                    }
+                    Object inv = Inventari.risolvi(radice, corrente.percorso);
+                    if (!(inv instanceof Map)) {
+                        return;
+                    }
+                    ImportaCorvetta.Esito esito = ImportaCorvetta.importa(
+                            (Map<String, Object>) inv, scelta.getSelectedFile());
+                    javax.swing.JOptionPane.showMessageDialog(Modulo.this, esito.messaggio(),
+                            "Importa corvetta", javax.swing.JOptionPane.INFORMATION_MESSAGE);
+                    griglia.mostra(inv, corrente.etichetta);
+                    int primo = griglia.primoOccupato();
+                    if (primo >= 0) {
+                        griglia.seleziona(primo);
+                        mostra(primo);
+                    }
+                    aggiornaContatore();
                     suModifica.run();
                 }
             });
@@ -864,6 +898,8 @@ public final class PannelloInventario extends JPanel {
             cambia.setText(id.isEmpty() ? "Metti oggetto..." : "Cambia oggetto...");
             abilita(!id.isEmpty());
             cambia.setEnabled(true);
+            importa.setEnabled(corrente != null
+                    && corrente.percorso.indexOf("CorvetteStorageInventory") >= 0);
             mostraPrincipali();
             revalidate();
             repaint();

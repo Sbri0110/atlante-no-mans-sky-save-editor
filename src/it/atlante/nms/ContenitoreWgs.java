@@ -49,7 +49,7 @@ public final class ContenitoreWgs {
 
         /** Nome dello slot, letto da containers.index ("Slot3Manual"). */
         public String nomeSlot = "";
-        /** Nome del salvataggio dato dal giocatore ("<nome della partita>"). */
+        /** Nome del salvataggio dato dal giocatore ("La mia partita"). */
         public String nomeSalvataggio = "";
         /** Durata di gioco in secondi, dai metadati. */
         public long durataGioco = -1;
@@ -245,8 +245,9 @@ public final class ContenitoreWgs {
      *   <li>cercare il primo nome <em>dopo</em> il GUID: l'associazione slitta
      *       di una posizione e Slot3Auto diventa Slot3Manual.</li>
      * </ol>
-     * Verificato sui salvataggi di prova: 5FFAB16A = AccountData,
-     * 18C4F9F2 = Slot3Auto, 6D75D8AC = Slot3Manual.
+     * Verificato sui salvataggi di prova: il contenitore dei dati account,
+     * poi i due slot (Automatico e Manuale), nell'ordine in cui compaiono
+     * nell'indice.
      */
     static void associaNomiSlot(byte[] indice, List<Slot> slot) {
         // Posizione nell'indice di ogni GUID, con l'indice dello slot.

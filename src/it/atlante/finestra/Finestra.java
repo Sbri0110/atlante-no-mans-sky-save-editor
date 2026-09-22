@@ -101,7 +101,7 @@ public final class Finestra extends JFrame {
     private final JButton salvaCome = new JButton("Salva con nome...");
 
     public Finestra(Catalogo catalogo, File cartellaIcone, File cartellaBackup) {
-        super("Atlante — editor di salvataggi per No Man's Sky");
+        super("Atlante — No Man's Sky | Save Editor");
         this.catalogo = catalogo;
         this.icone = new Icone(cartellaIcone, catalogo);
         this.cartellaIcone = cartellaIcone;
@@ -558,6 +558,17 @@ public final class Finestra extends JFrame {
         }
     }
 
+    /**
+     * Fissa la data di "Ultima modifica", per le schermate.
+     *
+     * Senza, la stessa immagine rigenerata il giorno dopo risulterebbe
+     * diversa per via dell'ora del file, e il confronto fra due generazioni
+     * non direbbe piu' niente di utile.
+     */
+    public void fissaDataModifica(long millisecondi) {
+        PannelloPrincipale.fissaDataModifica(millisecondi);
+    }
+
     /** Collaudo della selezione degli slot. */
     public String provaSelezione() {
         return inventario == null ? "nessun pannello inventario" : inventario.provaSelezione();
@@ -773,7 +784,20 @@ public final class Finestra extends JFrame {
     }
 
     private void informazioni() {
-        String testo = "Atlante — editor di salvataggi per No Man's Sky\n\n"
+        JOptionPane.showMessageDialog(this, testoInformazioni(), "Informazioni",
+                JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    /**
+     * Il testo della finestra "Informazioni".
+     *
+     * Le avvertenze e la dichiarazione sull'intelligenza artificiale stanno
+     * anche qui, non solo nel README: chi apre il programma puo' non aver mai
+     * visto il repository, e le cose che deve sapere prima di toccare il
+     * salvataggio sono proprio queste.
+     */
+    private String testoInformazioni() {
+        String testo = "Atlante - No Man's Sky | Save Editor\n\n"
                 + "Catalogo di gioco: " + catalogo.dimensione() + " oggetti\n"
                 + "Icone di gioco: " + (cartellaIcone.isDirectory() ? cartellaIcone.getAbsolutePath() : "assenti") + "\n"
                 + "Tema: " + (Aspetto.conFlatlaf() ? "FlatLaf" : "Nimbus (FlatLaf non trovato)") + "\n"
@@ -781,9 +805,33 @@ public final class Finestra extends JFrame {
                 + "Prima di ogni scrittura il contenuto viene ricompattato, riscompattato\n"
                 + "e confrontato campo per campo con l'originale. Se qualcosa cambia,\n"
                 + "il file non viene toccato.\n\n"
+                + "------------------------------------------------------------\n"
+                + "SVILUPPATO CON L'INTELLIGENZA ARTIFICIALE\n\n"
+                + "Codice, interfaccia e documentazione sono nati da sessioni di lavoro\n"
+                + "con un assistente di IA, sotto la direzione e la verifica di un autore\n"
+                + "umano. E' dichiarato apertamente: chi usa il programma ha il diritto\n"
+                + "di saperlo. L'IA sbaglia in modo convincente, quindi un difetto puo'\n"
+                + "essere sfuggito anche alle prove automatiche. Se ne trovi uno,\n"
+                + "segnalalo invece di pensare di aver sbagliato tu.\n\n"
+                + "------------------------------------------------------------\n"
+                + "AVVERTENZE - LEGGILE\n\n"
+                + "Modifica i salvataggi a tuo rischio, e con moderazione.\n\n"
+                + "1. Puoi rovinarti il gioco. No Man's Sky e' fatto di scoperta, attesa\n"
+                + "   e conquista: darsi unita' illimitate o tutti gli oggetti appiattisce\n"
+                + "   l'esperienza fino a renderla noiosa, e non si annulla con un\n"
+                + "   pulsante. Usalo per togliere un ostacolo, non per saltare il gioco.\n\n"
+                + "2. Solo in partita singola. Non portare valori alterati in sessioni\n"
+                + "   multigiocatore: rovinerebbe la partita di chi gioca con te.\n\n"
+                + "3. Il rischio e' tuo. Hello Games non ha approvato questo strumento e\n"
+                + "   non esiste una garanzia ufficiale per il tuo account. Il rischio e'\n"
+                + "   basso se il file resta coerente e giochi in singolo, ma nessuno\n"
+                + "   puo' prometterti niente.\n\n"
+                + "4. Tieni il gioco chiuso mentre l'editor e' aperto, e fai una copia\n"
+                + "   tua del salvataggio prima di aprirlo la prima volta.\n\n"
+                + "------------------------------------------------------------\n"
                 + "No Man's Sky e' un marchio di Hello Games. Questo progetto non e'\n"
-                + "affiliato ne' approvato da Hello Games.";
-        JOptionPane.showMessageDialog(this, testo, "Informazioni", JOptionPane.INFORMATION_MESSAGE);
+                + "affiliato ne' approvato da Hello Games. Licenza MIT.";
+        return testo;
     }
 
     private it.atlante.nms.MappaChiavi mappaChiavi() throws IOException {

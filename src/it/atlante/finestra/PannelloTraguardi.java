@@ -240,9 +240,11 @@ public final class PannelloTraguardi extends JPanel {
     public void mostra(Object radice) {
         stato = null;
         if (radice instanceof Map) {
-            Object base = ((Map<String, Object>) radice).get("BaseContext");
-            if (base instanceof Map) {
-                Object psd = ((Map<String, Object>) base).get("PlayerStateData");
+            // Il contesto attivo, non la partita principale per forza: un
+            // salvataggio di spedizione ha i suoi traguardi.
+            Object contesto = ((Map<String, Object>) radice).get(Inventari.contesto(radice));
+            if (contesto instanceof Map) {
+                Object psd = ((Map<String, Object>) contesto).get("PlayerStateData");
                 if (psd instanceof Map) {
                     stato = (Map<String, Object>) psd;
                 }

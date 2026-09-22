@@ -81,6 +81,13 @@ public final class Schermate {
         Finestra finestra = new Finestra(catalogo,
                 new File("risorse" + File.separator + "icone"),
                 new File("backup"));
+        // La data mostrata in "Ultima modifica" e' quella del file, e il file
+        // di prova viene copiato ogni volta: senza fissarla, ogni generazione
+        // produrrebbe un'immagine diversa dalle precedenti per un motivo che
+        // non ha niente a che vedere con l'interfaccia. 14 agosto 2026, 21:04
+        // (1786734240000 ms) - una data qualunque, scelta una volta e non
+        // piu' toccata.
+        finestra.fissaDataModifica(1786734240000L);
         finestra.setSize(1500, 940);
         finestra.setVisible(true);
 
@@ -93,9 +100,11 @@ public final class Schermate {
                 {"Multitool", "atlante-multitool"},
                 {"Navi", "atlante-navi"},
                 {"Veicoli", "atlante-veicoli"},
+                {"Corvette", "atlante-corvette"},
                 {"Squadrone", "atlante-squadrone"},
                 {"Fregate", "atlante-fregate"},
                 {"Compagni", "atlante-compagni"},
+                {"Insediamenti", "atlante-insediamenti"},
                 {"Mercantile", "atlante-mercantile"},
                 {"Basi e contenitori", "atlante-basi"},
                 {"Traguardi e fazioni", "atlante-traguardi"},
@@ -118,6 +127,12 @@ public final class Schermate {
             }
             scatta(finestra, new File(uscita, vista[1] + ".png"), vista[0]);
         }
+
+        // La prima schermata mostra il programma appena aperto, prima di
+        // scegliere una sezione: e' quella che apre il README, e senza questa
+        // riga andava rifatta a mano ogni volta che cambiava la barra del
+        // titolo.
+        scatta(finestra, new File(uscita, "atlante-partita.png"), "apertura");
 
         // I dieci depositi del mercantile stanno sotto la loro voce: una
         // schermata in piu' perche' si veda che sono pieni, non solo che ci sono.

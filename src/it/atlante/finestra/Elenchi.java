@@ -66,6 +66,12 @@ public final class Elenchi {
             this.campoIcona2 = campoIcona2;
             this.iconaFissa = iconaFissa;
         }
+
+        /** Una copia di questo elenco che punta a un altro percorso. */
+        Elenco conPercorso(String nuovo) {
+            return new Elenco(nuovo, campoNome, prefisso, campoSottotitolo,
+                    campoIcona, campoIcona2, iconaFissa);
+        }
     }
 
     private static final Map<String, Elenco> PER_SEZIONE = new LinkedHashMap<String, Elenco>();
@@ -88,6 +94,13 @@ public final class Elenchi {
 
         // Il nome di un compagno sta in CustomName, non in Name: cercando
         // "Name" l'elenco restava sempre su "Compagno 1, 2, 3...".
+        // Gli insediamenti: nel salvataggio sono una lista di cento voci, quasi
+        // tutte visitate e vuote. Si mostrano solo quelle con qualcosa dentro
+        // (popolazione, statistiche o perk): vedi PannelloElenco.
+        PER_SEZIONE.put("Insediamenti", new Elenco(
+                base + "SettlementStatesV2", "Name", "Insediamento", null,
+                null, null, "UI-BASEICON.PNG"));
+
         PER_SEZIONE.put("Compagni", new Elenco(
                 base + "Pets", "CustomName", "Compagno", "CreatureType",
                 null, null, "UI-PET.PNG"));
@@ -96,6 +109,28 @@ public final class Elenchi {
     /** L'elenco di una sezione, o null se la sezione non e' un elenco. */
     public static Elenco perSezione(String nomeSezione) {
         return PER_SEZIONE.get(nomeSezione);
+    }
+
+    /**
+     * Come {@link #perSezione}, ma con il ramo del contesto attivo.
+     *
+     * I percorsi dell'elenco sono scritti una volta sola a partire da
+     * {@code BaseContext}, e {@link Inventari#risolvi} sostituisce il prefisso
+     * al momento della lettura. Qui invece il percorso viene restituito, e chi
+     * lo riceve potrebbe comporci sopra altri percorsi: in quel caso il
+     * prefisso va scritto per esteso, altrimenti un salvataggio di spedizione
+     * punterebbe alla partita principale.
+     */
+    public static Elenco perSezione(Object radice, String nomeSezione) {
+        Elenco e = PER_SEZIONE.get(nomeSezione);
+        if (e == null) {
+            return null;
+        }
+        String contesto = Inventari.contesto(radice);
+        if (e.percorso.startsWith("BaseContext.")) {
+            return e.conPercorso(contesto + e.percorso.substring("BaseContext".length()));
+        }
+        return e;
     }
 
     /** Vero se la sezione si mostra come elenco di elementi. */

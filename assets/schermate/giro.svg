@@ -9,11 +9,18 @@
 <circle cx="58" cy="19" r="6" fill="#28C840"/>
 <text x="84" y="24" font-size="12.5" fill="#5B6B84" font-family="ui-monospace, SFMono-Regular, Consolas, monospace">Atlante — collaudo del giro completo</text>
 <text x="22" y="60" font-size="14" fill="#4ADE80" font-family="ui-monospace, SFMono-Regular, Consolas, monospace" xml:space="preserve">$ java -cp classi it.atlante.Main giro &lt;file&gt;</text>
-<text x="22" y="85" font-size="14" fill="#38BDF8" font-family="ui-monospace, SFMono-Regular, Consolas, monospace" xml:space="preserve">=== GIRO COMPLETO SU EEC95D8A4074480B94EC48FD53A6C503 ===</text>
-<text x="22" y="106" font-size="14" fill="#9FB0C6" font-family="ui-monospace, SFMono-Regular, Consolas, monospace" xml:space="preserve">  1. letto        : 9,4 MB in 19 blocchi</text>
-<text x="22" y="127" font-size="14" fill="#9FB0C6" font-family="ui-monospace, SFMono-Regular, Consolas, monospace" xml:space="preserve">  2. riscritto    : 1,6 MB in 19 blocchi  (rapporto 5,76:1)</text>
-<text x="22" y="148" font-size="14" fill="#9FB0C6" font-family="ui-monospace, SFMono-Regular, Consolas, monospace" xml:space="preserve">  3. riletto      : 9,4 MB in 19 blocchi</text>
-<text x="22" y="169" font-size="14" fill="#9FB0C6" font-family="ui-monospace, SFMono-Regular, Consolas, monospace" xml:space="preserve">  4. byte identici: si</text>
-<text x="22" y="190" font-size="14" fill="#9FB0C6" font-family="ui-monospace, SFMono-Regular, Consolas, monospace" xml:space="preserve">  5. dati identici: si</text>
-<text x="22" y="232" font-size="14" fill="#4ADE80" font-family="ui-monospace, SFMono-Regular, Consolas, monospace" xml:space="preserve">ESITO: il giro completo conserva i dati.</text>
+<text x="22" y="85" font-size="14" fill="#38BDF8" font-family="ui-monospace, SFMono-Regular, Consolas, monospace" xml:space="preserve">=== GIRO COMPLETO SU A1B2C3D4E5F60718293A4B5C6D7E8F90 ===
+</text>
+<text x="22" y="106" font-size="14" fill="#9FB0C6" font-family="ui-monospace, SFMono-Regular, Consolas, monospace" xml:space="preserve">  1. letto        : 9,4 MB in 19 blocchi
+</text>
+<text x="22" y="127" font-size="14" fill="#9FB0C6" font-family="ui-monospace, SFMono-Regular, Consolas, monospace" xml:space="preserve">  2. riscritto    : 1,6 MB in 19 blocchi  (rapporto 5,76:1)
+</text>
+<text x="22" y="148" font-size="14" fill="#9FB0C6" font-family="ui-monospace, SFMono-Regular, Consolas, monospace" xml:space="preserve">  3. riletto      : 9,4 MB in 19 blocchi
+</text>
+<text x="22" y="169" font-size="14" fill="#9FB0C6" font-family="ui-monospace, SFMono-Regular, Consolas, monospace" xml:space="preserve">  4. byte identici: si
+</text>
+<text x="22" y="190" font-size="14" fill="#9FB0C6" font-family="ui-monospace, SFMono-Regular, Consolas, monospace" xml:space="preserve">  5. dati identici: si
+</text>
+<text x="22" y="232" font-size="14" fill="#4ADE80" font-family="ui-monospace, SFMono-Regular, Consolas, monospace" xml:space="preserve">ESITO: il giro completo conserva i dati.
+</text>
 </svg>

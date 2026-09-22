@@ -7,7 +7,6 @@ rem  Cerca un Java utilizzabile in questo ordine:
 rem    1. il JDK portatile dentro il progetto (strumenti\jdk8)
 rem    2. java nel PATH
 rem    3. le installazioni in Program Files (JRE o JDK)
-rem    4. il JDK portatile del progetto precedente, se esiste
 rem
 rem  Il tema e il catalogo si caricano dalle cartelle del
 rem  progetto: va avviato da qui, non da un'altra cartella.
@@ -53,12 +52,6 @@ if not defined JAVA (
 if not defined JAVA (
   for /d %%D in ("%ProgramFiles%\Eclipse Adoptium\*") do (
     if exist "%%~fD\bin\javaw.exe" set "JAVA=%%~fD\bin\javaw.exe"
-  )
-)
-
-if not defined JAVA (
-  if exist "<cartella del vecchio editor>\tools\jdk8\bin\javaw.exe" (
-    set "JAVA=<cartella del vecchio editor>\tools\jdk8\bin\javaw.exe"
   )
 )
 

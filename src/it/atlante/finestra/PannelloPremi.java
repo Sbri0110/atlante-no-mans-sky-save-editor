@@ -218,7 +218,13 @@ public final class PannelloPremi extends JPanel {
         sbloccati = new LinkedHashSet<String>();
         listeDaScrivere = new ArrayList<List<String>>();
 
-        for (String contesto : new String[]{"BaseContext", "ExpeditionContext"}) {
+        // Si guardano tutti e due i contesti, perche' una ricompensa riscattata
+        // in partita vale anche in spedizione e viceversa. Il contesto attivo
+        // viene pero' per primo, cosi' l'ordine delle liste scritte segue
+        // quello del salvataggio aperto.
+        String attivo = Inventari.contesto(radice);
+        for (String contesto : new String[]{attivo,
+                "BaseContext".equals(attivo) ? "ExpeditionContext" : "BaseContext"}) {
             Object c = radice instanceof Map
                     ? ((Map<String, Object>) radice).get(contesto) : null;
             Object psd = c instanceof Map

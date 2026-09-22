@@ -3,15 +3,15 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Atlante — editor di salvataggi per No Man's Sky</title>
-<meta name="description" content="Editor di salvataggi per No Man's Sky, scritto da zero in Java, senza dipendenze. Interfaccia in italiano, tema scuro, verifica automatica prima di ogni scrittura.">
+<title>Atlante — No Man's Sky | Save Editor</title>
+<meta name="description" content="Atlante, editor di salvataggi per No Man's Sky: scritto da zero in Java, senza dipendenze. Interfaccia in italiano, tema scuro, verifica automatica prima di ogni scrittura. Sviluppato con l'intelligenza artificiale.">
 
 <link rel="icon" href="favicon.ico" sizes="any">
 <link rel="icon" type="image/png" sizes="32x32" href="assets/marchio/favicon-32.png">
 <link rel="icon" type="image/png" sizes="16x16" href="assets/marchio/favicon-16.png">
 <link rel="apple-touch-icon" href="assets/marchio/apple-touch-icon.png">
-<meta property="og:title" content="Atlante — editor di salvataggi per No Man's Sky">
-<meta property="og:description" content="Editor di salvataggi scritto da zero in Java, senza dipendenze.">
+<meta property="og:title" content="Atlante — No Man's Sky | Save Editor">
+<meta property="og:description" content="Editor di salvataggi per No Man's Sky, scritto da zero in Java, senza dipendenze. Sviluppato con l'intelligenza artificiale.">
 <meta property="og:image" content="assets/marchio/logo-512.png">
 <meta property="og:type" content="website">
 
@@ -71,6 +71,32 @@
     background:var(--accento); color:#FFF2F2;
   }
   .pulsante.secondario{background:var(--pannello-alto); color:var(--testo); border:1px solid var(--bordo)}
+
+  .avviso{
+    background:linear-gradient(180deg,#1F1610,var(--pannello));
+    border:1px solid #4A3A1C; border-left:3px solid #FEBC2E;
+    border-radius:12px; padding:20px 24px; margin:26px 0; font-size:15px;
+  }
+  .avviso h3{margin:0 0 6px; font-size:15.5px; color:#FEBC2E}
+  .avviso p{margin:10px 0}
+  .avviso p:last-child{margin-bottom:0}
+  .avviso ul{margin:10px 0 0}
+  .avviso li{margin:6px 0}
+
+  .nota-ia{
+    background:linear-gradient(180deg,#191324,var(--pannello));
+    border:1px solid #3B2C55; border-left:3px solid #8B5CF6;
+    border-radius:12px; padding:20px 24px; margin:26px 0; font-size:15px;
+  }
+  .nota-ia h3{margin:0 0 6px; font-size:15.5px; color:#B79CF5}
+  .nota-ia p{margin:10px 0}
+  .nota-ia p:last-child{margin-bottom:0}
+  .etichetta-ia{
+    display:inline-block; font-size:11.5px; font-weight:600; letter-spacing:.05em;
+    text-transform:uppercase; color:#B79CF5; background:#241B36;
+    border:1px solid #3B2C55; border-radius:6px; padding:3px 9px; margin-bottom:4px;
+  }
+
   footer{margin-top:70px; padding-top:24px; border-top:1px solid var(--bordo); font-size:13px; color:var(--debole)}
 </style>
 </head>
@@ -81,8 +107,9 @@
   <img src="assets/marchio/logo-512.png" alt="Marchio di Atlante: rombo rosso con nucleo incandescente">
   <div>
     <h1>Atlante</h1>
-    <p class="tagline">Editor di salvataggi per No Man's Sky</p>
+    <p class="tagline">No Man's Sky | Save Editor</p>
     <div class="filo"></div>
+    <p style="margin:14px 0 0"><span class="etichetta-ia">Sviluppato con IA</span></p>
   </div>
 </header>
 
@@ -91,15 +118,42 @@
   <p>Prima di ogni scrittura il contenuto viene ricompattato, riscompattato e confrontato campo per campo con l'originale: se anche un solo valore differisce, il file non viene toccato.</p>
 </div>
 
+<div class="avviso">
+  <h3>Prima di usarlo: leggilo con calma</h3>
+  <p><strong>Modifica i tuoi salvataggi a tuo rischio, e con moderazione.</strong> Un editor di salvataggi permette di alterare dati che il gioco non si aspetta di vedere alterati. Tre cose da tenere a mente:</p>
+  <ul>
+    <li><strong>Puoi rovinarti il gioco.</strong> No Man's Sky è fatto di scoperta, attesa e conquista. Darsi unità illimitate, la nave al massimo o tutti gli oggetti appiattisce l'esperienza fino a renderla noiosa, e quello non si annulla con un pulsante. Usane poco, e per togliere un ostacolo — non per saltare il gioco.</li>
+    <li><strong>Il multigiocatore è un'altra cosa.</strong> L'editor è per la partita <strong>in singolo</strong>. Non usarlo per portare valori alterati in sessioni con altri giocatori: rovinerebbe la loro partita.</li>
+    <li><strong>Hello Games non ha approvato questo strumento.</strong> Non esiste una garanzia ufficiale che l'uso di un editor di salvataggi non comporti conseguenze sul tuo account. Il rischio è piccolo se il file resta coerente e giochi in singolo, ma <strong>è tuo</strong>: valuta tu se vale la pena.</li>
+  </ul>
+  <p>Un consiglio pratico che vale più degli altri: <strong>fai una copia del tuo salvataggio prima di aprirlo la prima volta</strong>, e tieni il gioco chiuso mentre l'editor è aperto.</p>
+</div>
+
+<div class="nota-ia">
+  <h3>Questo software è stato sviluppato con l'intelligenza artificiale</h3>
+  <p>Il codice, l'interfaccia, la documentazione e i commenti sono nati da sessioni di lavoro con un assistente di IA, sotto la direzione, la verifica e le correzioni di un autore umano. È dichiarato apertamente perché chi legge il codice ha il diritto di saperlo.</p>
+  <ul>
+    <li><strong>In bene:</strong> il progetto è stato scritto in tempi molto più brevi del solito, con 26 prove automatiche e una verifica che confronta i dati campo per campo prima di ogni scrittura.</li>
+    <li><strong>In male:</strong> l'IA sbaglia, e sbaglia in modo convincente. Un difetto può essersi nascosto dove le prove non arrivano.</li>
+    <li><strong>Perciò:</strong> se trovi qualcosa di storto, apri una segnalazione. È il contributo più utile che puoi dare.</li>
+  </ul>
+  <p>La stessa dichiarazione, con le avvertenze, sta anche dentro il programma: la trovi nella finestra <strong>Informazioni</strong>.</p>
+</div>
+
 <div class="pulsanti">
-  <a class="pulsante" href="https://github.com/Sbri0110/atlante">Vedi su GitHub</a>
-  <a class="pulsante secondario" href="https://github.com/Sbri0110/atlante#readme">Come si usa</a>
+  <a class="pulsante" href="https://github.com/Sbri0110/atlante-no-mans-sky-save-editor">Vedi su GitHub</a>
+  <a class="pulsante secondario" href="https://github.com/Sbri0110/atlante-no-mans-sky-save-editor#readme">Come si usa</a>
 </div>
 
 <h2>L'interfaccia</h2>
 <p>Non è un disegno preparato a parte: l'immagine è la fotografia dell'applicazione vera mentre legge un salvataggio reale. Gli oggetti mostrano l'icona e il nome di gioco presi dal catalogo, non la sigla interna.</p>
 <img class="schermata" src="assets/schermate/atlante-partita.png"
      alt="Finestra di Atlante: elenco dei salvataggi a sinistra, albero dei campi con le icone degli oggetti al centro, scheda dell'oggetto a destra">
+
+<h2>Le avvertenze, dentro il programma</h2>
+<p>Chi apre l'editor può non aver mai visto questa pagina. Per questo la dichiarazione sull'IA e le quattro avvertenze d'uso stanno anche nella finestra <strong>Informazioni</strong> del programma, dove si trovano prima di toccare qualsiasi cosa.</p>
+<img class="schermata" src="assets/schermate/atlante-informazioni.png"
+     alt="Finestra Informazioni di Atlante: catalogo e icone di gioco, la garanzia sul confronto campo per campo, la dichiarazione SVILUPPATO CON L'INTELLIGENZA ARTIFICIALE e le quattro avvertenze d'uso">
 
 <h2>Cosa fa</h2>
 <table>
@@ -135,7 +189,29 @@
 <h2>Requisiti</h2>
 <p>Un <strong>JDK 8 o superiore</strong>. Nient'altro: nessuna libreria da scaricare, nessun gestore di pacchetti. Si compila con <code>compila.bat</code> su Windows o <code>./compila.sh</code> altrove.</p>
 
+<h2>In breve, l'essenziale</h2>
+<div class="due">
+  <div>
+    <h4>Usalo con moderazione</h4>
+    <p>Serve a togliere un ostacolo, non a saltare il gioco. Riempire tutto subito è il modo più veloce per toglierti il divertimento.</p>
+  </div>
+  <div>
+    <h4>Solo in singolo</h4>
+    <p>Non portare partite alterate in sessioni con altri giocatori. Rovineresti la loro esperienza, e non è una cosa che si fa.</p>
+  </div>
+  <div>
+    <h4>Il rischio è tuo</h4>
+    <p>Hello Games non ha approvato questo strumento. Non esiste una garanzia ufficiale per il tuo account: valuta tu se usarlo.</p>
+  </div>
+  <div>
+    <h4>Sviluppato con IA</h4>
+    <p>Codice e documentazione nati con un assistente di intelligenza artificiale. I difetti possono esserci: se ne trovi uno, segnalalo.</p>
+  </div>
+</div>
+
 <footer>
+  <p><strong>Sviluppato con l'intelligenza artificiale</strong>, sotto la direzione e la verifica di un autore umano. Il progetto è dichiarato apertamente perché chi lo usa ha il diritto di saperlo.</p>
+  <p>Un editor di salvataggi modifica dati che il gioco non si aspetta di vedere modificati: usalo a tuo rischio, con moderazione e in partita singola.</p>
   <p>No Man's Sky e tutti i nomi correlati sono marchi di Hello Games Limited. Questo progetto non è affiliato, approvato o sponsorizzato da Hello Games.</p>
   <p>Codice rilasciato con licenza MIT.</p>
 </footer>

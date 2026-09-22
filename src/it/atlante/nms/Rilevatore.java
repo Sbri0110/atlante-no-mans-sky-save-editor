@@ -96,10 +96,10 @@ public final class Rilevatore {
      * (nome di 32 caratteri esadecimali).
      *
      * <pre>
-     *   wgs/000901FF2F07BBDE_29070100B936489ABCE8B9AF3980429C/   utente
+     *   wgs/000901FF2F07BBDE_0000000000000000000000/   utente
      *       containers.index
-     *       18C4F9F24DEB4BDF965C25D080DAF634/                    contenitore
-     *       6D75D8AC158B45E099788DE4B593BD8B/
+     *       0123456789ABCDEF0123456789ABCDEF/           contenitore
+     *       FEDCBA9876543210FEDCBA9876543210/
      * </pre>
      *
      * Il primo tentativo cercava i contenitori direttamente sotto {@code wgs} e

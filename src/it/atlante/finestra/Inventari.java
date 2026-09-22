@@ -24,6 +24,16 @@ import java.util.Map;
  * (inventario e tecnologie di ognuna), i veicoli, il mercantile con i suoi dieci
  * contenitori, la base con i suoi e la cucina. Dove il gruppo non serve — la
  * tuta, il multi-tool — resta una fila di schede sola.
+ *
+ * <b>Il contesto attivo.</b> Il salvataggio tiene due copie dello stato del
+ * giocatore: quella della partita ({@code BaseContext}) e quella della
+ * spedizione ({@code ExpeditionContext}). Quale delle due valga lo dice
+ * {@code ActiveContext}, e {@link #contesto} lo traduce nel nome del ramo da
+ * usare. I percorsi dell'elenco fisso partono percio' da {@code BaseContext},
+ * che {@link #risolvi} sostituisce al momento della lettura; quelli costruiti a
+ * mano — navi, corvette, veicoli, multi-tool, e i depositi che ne dipendono —
+ * scrivono invece il ramo attivo per esteso, perche' il percorso viene poi
+ * riusato per comporre altri percorsi e il prefisso non verrebbe piu' corretto.
  */
 public final class Inventari {
 
@@ -154,6 +164,10 @@ public final class Inventari {
         // suoi depositi. Vedi veicoli().
         sezione("Veicoli");
 
+        // Le corvette non stanno qui: sono navi con il modello BIGGS, e ognuna
+        // ha inventario, tecnologie e il deposito dei pezzi. Vedi corvette().
+        sezione("Corvette");
+
         // Il mercantile ha inventario e tecnologie, e nella stiva i dieci
         // contenitori di stoccaggio: nel gioco sono gli stessi della base, e si
         // aprono da tutti e due i posti. Chi cerca il deposito mentre e' a bordo
@@ -211,10 +225,76 @@ public final class Inventari {
         if ("Veicoli".equals(nomeSezione)) {
             return veicoli(radice);
         }
+        if ("Corvette".equals(nomeSezione)) {
+            return corvette(radice);
+        }
         if ("Multitool".equals(nomeSezione)) {
             return armi(radice);
         }
         return perSezione(nomeSezione);
+    }
+
+    /**
+     * Le corvette possedute.
+     *
+     * Una corvetta e' una nave: si riconosce dal modello, che sta nella cartella
+     * BIGGS. Oltre all'inventario e alle tecnologie ha il <b>deposito dei
+     * pezzi</b> con cui si costruisce, che nel salvataggio sta a parte
+     * ({@code CorvetteStorageInventory}).
+     */
+    private static List<Inventario> corvette(Object radice) {
+        List<Inventario> elenco = new ArrayList<Inventario>();
+        // Come per le navi: il prefisso segue il contesto attivo, altrimenti in
+        // una spedizione si leggerebbero le parti di costruzione della partita.
+        String prefisso = contesto(radice) + ".PlayerStateData.ShipOwnership";
+        Object possedute = risolvi(radice, prefisso);
+        if (!(possedute instanceof List)) {
+            return elenco;
+        }
+        List<Object> lista = (List<Object>) possedute;
+        for (int i = 0; i < lista.size(); i++) {
+            String r = prefisso + "[" + i + "]";
+            Object nave = lista.get(i);
+            if (!(nave instanceof Map)) {
+                continue;
+            }
+            Object risorsa = ((Map<String, Object>) nave).get("Resource");
+            String modello = "";
+            if (risorsa instanceof Map) {
+                Object f = ((Map<String, Object>) risorsa).get("Filename");
+                modello = f == null ? "" : String.valueOf(f);
+            }
+            if (modello.toUpperCase().indexOf("BIGGS") < 0) {
+                continue;
+            }
+            String nome = "Corvetta " + (i + 1);
+            Object n = ((Map<String, Object>) nave).get("Name");
+            if (n != null && !String.valueOf(n).trim().isEmpty()) {
+                nome = String.valueOf(n).trim();
+            }
+            elenco.add(new Inventario(nome, "Inventario", r + ".Inventory",
+                    r + ".Inventory.BaseStatValues"));
+            if (esiste(radice, r + ".Inventory_TechOnly")) {
+                elenco.add(new Inventario(nome, "Tecnologie",
+                        r + ".Inventory_TechOnly", null));
+            }
+            // Anche i depositi della corvetta stanno nel contesto attivo: una
+            // spedizione ha i suoi pezzi di costruzione, non quelli della
+            // partita principale.
+            String corpo = contesto(radice) + ".PlayerStateData.";
+            if (esiste(radice, corpo + "CorvetteStorageInventory")) {
+                elenco.add(new Inventario(nome, "Pezzi di costruzione",
+                        corpo + "CorvetteStorageInventory", null));
+            }
+            // I depositi della base: la corvetta li porta con se'.
+            for (int c = 1; c <= 10; c++) {
+                if (esiste(radice, corpo + "Chest" + c + "Inventory")) {
+                    elenco.add(new Inventario(nome, "Deposito " + c,
+                            corpo + "Chest" + c + "Inventory", null));
+                }
+            }
+        }
+        return elenco;
     }
 
     /**
@@ -228,13 +308,15 @@ public final class Inventari {
      */
     private static List<Inventario> veicoli(Object radice) {
         List<Inventario> elenco = new ArrayList<Inventario>();
-        Object posseduti = risolvi(radice, "BaseContext.PlayerStateData.VehicleOwnership");
+        // Il prefisso segue il contesto attivo, come per navi e corvette.
+        String prefisso = contesto(radice) + ".PlayerStateData.VehicleOwnership";
+        Object posseduti = risolvi(radice, prefisso);
         if (!(posseduti instanceof List)) {
             return elenco;
         }
         List<Object> lista = (List<Object>) posseduti;
         for (int i = 0; i < lista.size(); i++) {
-            String r = "BaseContext.PlayerStateData.VehicleOwnership[" + i + "]";
+            String r = prefisso + "[" + i + "]";
             if (!esiste(radice, r + ".Inventory")) {
                 continue;
             }
@@ -270,7 +352,9 @@ public final class Inventari {
     @SuppressWarnings("unchecked")
     private static List<Inventario> armi(Object radice) {
         List<Inventario> elenco = new ArrayList<Inventario>();
-        Object posseduti = risolvi(radice, "BaseContext.PlayerStateData.Multitools");
+        // Il prefisso segue il contesto attivo, come per navi e veicoli.
+        String prefisso = contesto(radice) + ".PlayerStateData.Multitools";
+        Object posseduti = risolvi(radice, prefisso);
         if (!(posseduti instanceof List)) {
             return elenco;
         }
@@ -284,9 +368,8 @@ public final class Inventari {
                     nome = String.valueOf(n).trim();
                 }
             }
-            elenco.add(new Inventario(nome,
-                    "BaseContext.PlayerStateData.Multitools[" + i + "].Store",
-                    "BaseContext.PlayerStateData.Multitools[" + i + "].Store.BaseStatValues"));
+            String r = prefisso + "[" + i + "].Store";
+            elenco.add(new Inventario(nome, r, r + ".BaseStatValues"));
         }
         return elenco;
     }
@@ -305,13 +388,24 @@ public final class Inventari {
      */
     private static List<Inventario> navi(Object radice) {
         List<Inventario> elenco = new ArrayList<Inventario>();
-        Object possedute = risolvi(radice, "BaseContext.PlayerStateData.ShipOwnership");
+        // Il prefisso segue il contesto attivo: un salvataggio di spedizione ha
+        // la sua copia delle navi, e i percorsi devono puntare a quella.
+        //
+        // Prima qui c'era "BaseContext" scritto a mano. La lista veniva letta
+        // dal contesto giusto (risolvi sostituisce il prefisso) ma i percorsi
+        // degli slot restavano sulla partita principale: in una spedizione si
+        // vedevano i NOMI delle navi della spedizione con dentro gli OGGETTI
+        // della partita. Le due copie dello stato sono due partite diverse —
+        // sul salvataggio di prova, la nave 0 ha 7 oggetti di qua e 16 di la' —
+        // e infatti il difetto si vede solo aprendo il salvataggio di un altro.
+        String prefisso = contesto(radice) + ".PlayerStateData.ShipOwnership";
+        Object possedute = risolvi(radice, prefisso);
         if (!(possedute instanceof List)) {
             return elenco;
         }
         List<Object> lista = (List<Object>) possedute;
         for (int i = 0; i < lista.size(); i++) {
-            String radice2 = "BaseContext.PlayerStateData.ShipOwnership[" + i + "]";
+            String radice2 = prefisso + "[" + i + "]";
             String nome = "Nave " + (i + 1);
             Object nave = lista.get(i);
             if (nave instanceof Map) {

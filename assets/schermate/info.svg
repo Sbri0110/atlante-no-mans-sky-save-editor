@@ -9,16 +9,28 @@
 <circle cx="58" cy="19" r="6" fill="#28C840"/>
 <text x="84" y="24" font-size="12.5" fill="#5B6B84" font-family="ui-monospace, SFMono-Regular, Consolas, monospace">Atlante — riassunto di un salvataggio</text>
 <text x="22" y="60" font-size="14" fill="#4ADE80" font-family="ui-monospace, SFMono-Regular, Consolas, monospace" xml:space="preserve">$ java -cp classi it.atlante.Main info &lt;file&gt;</text>
-<text x="22" y="85" font-size="14" fill="#E6EDF3" font-family="ui-monospace, SFMono-Regular, Consolas, monospace" xml:space="preserve">file        : EEC95D8A4074480B94EC48FD53A6C503</text>
-<text x="22" y="106" font-size="14" fill="#E6EDF3" font-family="ui-monospace, SFMono-Regular, Consolas, monospace" xml:space="preserve">compresso   : 1,7 MB</text>
-<text x="22" y="127" font-size="14" fill="#E6EDF3" font-family="ui-monospace, SFMono-Regular, Consolas, monospace" xml:space="preserve">decompresso : 9,4 MB   (19 blocchi)</text>
-<text x="22" y="148" font-size="14" fill="#E6EDF3" font-family="ui-monospace, SFMono-Regular, Consolas, monospace" xml:space="preserve">rapporto    : 5,65:1</text>
-<text x="22" y="190" font-size="14" fill="#E6EDF3" font-family="ui-monospace, SFMono-Regular, Consolas, monospace" xml:space="preserve">chiavi      : 640510 chiavi riconosciute, 57 ignote ([BFN, ;lF, SuM, SuM, 96H, 96H, @uW, eSZ, &lt;:g, bW7, BBA, s4E])</text>
-<text x="22" y="232" font-size="14" fill="#9FB0C6" font-family="ui-monospace, SFMono-Regular, Consolas, monospace" xml:space="preserve">  Version = 4737</text>
-<text x="22" y="253" font-size="14" fill="#9FB0C6" font-family="ui-monospace, SFMono-Regular, Consolas, monospace" xml:space="preserve">  Platform = Win|Final</text>
-<text x="22" y="274" font-size="14" fill="#9FB0C6" font-family="ui-monospace, SFMono-Regular, Consolas, monospace" xml:space="preserve">  ActiveContext = Main</text>
-<text x="22" y="295" font-size="14" fill="#9FB0C6" font-family="ui-monospace, SFMono-Regular, Consolas, monospace" xml:space="preserve">  CommonStateData   [oggetto, 14 campi]</text>
-<text x="22" y="316" font-size="14" fill="#9FB0C6" font-family="ui-monospace, SFMono-Regular, Consolas, monospace" xml:space="preserve">  BaseContext   [oggetto, 3 campi]</text>
-<text x="22" y="337" font-size="14" fill="#9FB0C6" font-family="ui-monospace, SFMono-Regular, Consolas, monospace" xml:space="preserve">  ExpeditionContext   [oggetto, 3 campi]</text>
-<text x="22" y="358" font-size="14" fill="#9FB0C6" font-family="ui-monospace, SFMono-Regular, Consolas, monospace" xml:space="preserve">  DiscoveryManagerData   [oggetto, 1 campi]</text>
+<text x="22" y="85" font-size="14" fill="#E6EDF3" font-family="ui-monospace, SFMono-Regular, Consolas, monospace" xml:space="preserve">file        : A1B2C3D4E5F60718293A4B5C6D7E8F90
+</text>
+<text x="22" y="106" font-size="14" fill="#E6EDF3" font-family="ui-monospace, SFMono-Regular, Consolas, monospace" xml:space="preserve">compresso   : 1,7 MB
+</text>
+<text x="22" y="127" font-size="14" fill="#E6EDF3" font-family="ui-monospace, SFMono-Regular, Consolas, monospace" xml:space="preserve">decompresso : 9,4 MB   (19 blocchi)
+</text>
+<text x="22" y="148" font-size="14" fill="#E6EDF3" font-family="ui-monospace, SFMono-Regular, Consolas, monospace" xml:space="preserve">rapporto    : 5,65:1
+</text>
+<text x="22" y="190" font-size="14" fill="#E6EDF3" font-family="ui-monospace, SFMono-Regular, Consolas, monospace" xml:space="preserve">chiavi      : 640510 chiavi riconosciute, 57 ignote ([BFN, ;lF, SuM, SuM, 96H, 96H, @uW, eSZ, &lt;:g, bW7, BBA, s4E])
+</text>
+<text x="22" y="232" font-size="14" fill="#9FB0C6" font-family="ui-monospace, SFMono-Regular, Consolas, monospace" xml:space="preserve">  Version = 4737
+</text>
+<text x="22" y="253" font-size="14" fill="#9FB0C6" font-family="ui-monospace, SFMono-Regular, Consolas, monospace" xml:space="preserve">  Platform = Win|Final
+</text>
+<text x="22" y="274" font-size="14" fill="#9FB0C6" font-family="ui-monospace, SFMono-Regular, Consolas, monospace" xml:space="preserve">  ActiveContext = Main
+</text>
+<text x="22" y="295" font-size="14" fill="#9FB0C6" font-family="ui-monospace, SFMono-Regular, Consolas, monospace" xml:space="preserve">  CommonStateData   [oggetto, 14 campi]
+</text>
+<text x="22" y="316" font-size="14" fill="#9FB0C6" font-family="ui-monospace, SFMono-Regular, Consolas, monospace" xml:space="preserve">  BaseContext   [oggetto, 3 campi]
+</text>
+<text x="22" y="337" font-size="14" fill="#9FB0C6" font-family="ui-monospace, SFMono-Regular, Consolas, monospace" xml:space="preserve">  ExpeditionContext   [oggetto, 3 campi]
+</text>
+<text x="22" y="358" font-size="14" fill="#9FB0C6" font-family="ui-monospace, SFMono-Regular, Consolas, monospace" xml:space="preserve">  DiscoveryManagerData   [oggetto, 1 campi]
+</text>
 </svg>

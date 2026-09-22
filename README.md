@@ -5,7 +5,7 @@
 <h1 align="center">Atlante</h1>
 
 <p align="center">
-  <strong>Editor di salvataggi per No Man's Sky</strong><br>
+  <strong>No Man's Sky | Save Editor</strong><br>
   Scritto da zero in Java, senza dipendenze esterne
 </p>
 
@@ -14,7 +14,53 @@
   <a href="https://adoptium.net/"><img src="https://img.shields.io/badge/Java-8%2B-FF7A7A.svg" alt="Java 8 o superiore"></a>
   <img src="https://img.shields.io/badge/dipendenze-nessuna-4ADE80.svg" alt="Nessuna dipendenza">
   <img src="https://img.shields.io/badge/catalogo-5587%20voci-FEBC2E.svg" alt="Catalogo di 5587 voci">
+  <img src="https://img.shields.io/badge/sviluppato%20con-IA-8B5CF6.svg" alt="Sviluppato con l'intelligenza artificiale">
 </p>
+
+> [!WARNING]
+> **Modifica i tuoi salvataggi a tuo rischio, e con moderazione.**
+>
+> Un editor di salvataggi permette di alterare dati che il gioco non si aspetta di
+> vedere alterati. Tre cose da tenere a mente prima di usarlo:
+>
+> - **Puoi rovinarti il gioco.** No Man's Sky è fatto di scoperta, attesa e
+>   conquista. Darsi duemila milioni di unità, una nave al massimo o tutti gli
+>   oggetti appiattisce l'esperienza fino a renderla noiosa, e quello non si
+>   annulla con un pulsante. Usane poco, e per togliere un ostacolo — non per
+>   saltare il gioco.
+> - **Il gioco in multigiocatore è un'altra cosa.** Questo editor è per la partita
+>   **in singolo**. Non usarlo per portare valori alterati in sessioni con altri
+>   giocatori: rovinerebbe la loro partita e non è un comportamento corretto.
+> - **Hello Games non ha approvato questo strumento.** Non esiste una garanzia
+>   ufficiale che l'uso di un editor di salvataggi non comporti conseguenze sul
+>   tuo account. Il rischio è piccolo se il file resta coerente e lo usi in
+>   singolo, ma **è tuo**: valuta tu se vale la pena.
+>
+> Un consiglio pratico che vale più di tutti gli altri: **fai una copia del tuo
+> salvataggio prima di aprirlo la prima volta**, e tieni il gioco chiuso mentre
+> l'editor è aperto. L'editor fa da sé una copia di sicurezza prima di ogni
+> scrittura, ma una copia tua non fa mai male.
+
+> [!NOTE]
+> **Questo software è stato sviluppato con l'intelligenza artificiale.**
+>
+> Il codice, l'interfaccia, la documentazione e i commenti sono nati da sessioni
+> di lavoro con un assistente di IA, sotto la direzione, la verifica e le
+> correzioni di un autore umano. È dichiarato apertamente perché chi legge il
+> codice ha il diritto di saperlo.
+>
+> Cosa significa in pratica, in bene e in male:
+>
+> - **In bene:** il progetto è stato scritto in tempi molto più brevi del solito,
+>   con una copertura di prove superiore alla media — 26 prove automatiche, il
+>   giro completo che confronta i dati campo per campo, e una verifica che nessuna
+>   scrittura tocchi il file se il contenuto non torna identico.
+> - **In male:** l'IA sbaglia, e sbaglia in modo convincente. Un difetto può
+>   essersi nascosto dove le prove non arrivano. Buona parte di questo lavoro è
+>   consistita proprio nel cercare e correggere errori già scritti, compreso uno
+>   che su un salvataggio di spedizione mostrava i dati della partita sbagliata.
+> - **Perciò:** il codice è leggibile e commentato, ma se trovi qualcosa di
+>   storto **apri una segnalazione**. È il contributo più utile che puoi dare.
 
 ---
 
@@ -56,21 +102,22 @@ compressi → 9.842.314 byte decompressi, 19 blocchi, durata di gioco 185 h 58 m
 
 ## Come si prova
 
-**Su Windows non serve installare nulla.** Il progetto include un JDK portatile in
-`strumenti/jdk8/`: basta avviarlo.
+Serve **Java 8 o superiore**. Se hai già un JDK installato (da
+[Adoptium](https://adoptium.net/), o quello che trovi nel PATH) non devi fare
+altro: `avvia.bat` lo cerca e lo usa.
 
 | | |
 |---|---|
 | **Doppio clic su `avvia.bat`** | cerca Java, compila se serve e apre la finestra |
 | **Doppio clic su `Atlante.jar`** | apre direttamente l'interfaccia, se hai già compilato |
 
-`avvia.bat` cerca Java in questo ordine: il JDK dentro il progetto, `java` nel PATH,
-le installazioni in `Program Files`, e infine il JDK portatile del progetto
-precedente. Se non lo trova te lo dice invece di fallire in silenzio.
+`avvia.bat` cerca Java in questo ordine: il JDK dentro il progetto
+(`strumenti\jdk8\`, se c'è), `java` nel PATH e le installazioni in
+`Program Files`. Se non lo trova te lo dice invece di fallire in silenzio.
 
 ### Compilare
 
-Serve un **JDK** (non basta il JRE: serve `javac`). Il JDK portatile incluso va bene.
+Serve un **JDK** (non basta il JRE: serve `javac`).
 
 ```bat
 :: Windows
@@ -90,9 +137,10 @@ Nessuna libreria da scaricare: il tema (`lib/flatlaf.jar`) è già nel progetto.
 Trova i salvataggi sulla macchina e apre il primo. Se non ne trova, usa
 **File → Apri file...**.
 
-Se le icone degli oggetti non compaiono, mancano i PNG in `risorse/icone/`:
-il programma funziona lo stesso, mostrando gli identificatori al posto delle
-immagini. Vedi [NOTICE.md](NOTICE.md) per il motivo per cui non sono incluse.
+Le icone degli oggetti e dell'interfaccia sono incluse: le trovi già in
+`risorse/icone/` appena cloni, senza scaricare altro. Se le togli, il programma
+funziona lo stesso mostrando gli identificatori al posto delle immagini — vedi
+[NOTICE.md](NOTICE.md) per il perché di quella cartella.
 
 ### Riga di comando
 
@@ -109,6 +157,30 @@ java -cp "classi;lib/flatlaf.jar" it.atlante.Main giro   <file>
 | `info <file>` | riassunto: blocchi, rapporto, chiavi riconosciute, campi di primo livello |
 | `dump <file> [uscita]` | scrive il salvataggio in JSON con i nomi dei campi leggibili |
 | `giro <file>` | **il collaudo che conta**: legge, riscrive, rilegge e verifica che i dati coincidano |
+
+### Il collaudo completo
+
+`giro` lavora tutto in memoria e non tocca mai il disco. Lo strumento
+`Collaudo` copre le parti che invece ci scrivono: apre il file, lo salva,
+controlla la copia di sicurezza, modifica un valore e verifica che sopravviva,
+poi prova i casi storti (un file qualunque, un file vuoto, una cartella, un
+file che non esiste) per accertarsi che diano un errore e non un arresto.
+
+L'ultima prova riguarda il **contesto attivo**. Un salvataggio tiene due copie
+dello stato del giocatore — la partita e la spedizione — e `ActiveContext` dice
+quale delle due è in corso. La prova mette il contesto a spedizione, in
+memoria, e controlla che il percorso di ogni scheda segua quel ramo: se una
+scheda restasse attaccata alla partita principale, in spedizione si vedrebbero
+i nomi di una partita con dentro gli oggetti dell'altra.
+
+Lavora su una copia, in una cartella a parte: **il salvataggio vero non viene
+mai toccato.** Esce con codice 1 se una prova fallisce, quindi si può usare in
+una catena automatica. Si può rilanciare quante volte si vuole: la copia di
+lavoro viene rifatta da capo ogni volta.
+
+```bash
+java -cp "classi;lib/flatlaf.jar" it.atlante.strumenti.Collaudo <file> [cartella]
+```
 
 ### Dove sono i salvataggi
 
@@ -173,13 +245,9 @@ caratteri, seguita da UTF-16LE. Ogni voce ha questa forma:
 ```
 
 Il nome dello slot **precede** il GUID, che compare in forma binaria con i primi tre
-campi invertiti (ordine .NET). Verificato:
-
-| GUID | Slot |
-|---|---|
-| `5FFAB16A…` | `AccountData` |
-| `18C4F9F2…` | `Slot3Auto` |
-| `6D75D8AC…` | `Slot3Manual` |
+campi invertiti (ordine .NET). Verificato: nell'indice compare prima il contenitore
+dei dati account, poi i due slot di salvataggio (Automatico e Manuale), nell'ordine
+in cui sono elencati.
 
 ### 5. I metadati
 
@@ -233,6 +301,7 @@ src/it/atlante/
     Finestra.java           finestra principale
   strumenti/
     Schermate.java          genera le schermate della documentazione
+    Collaudo.java           prova lettura e scrittura su una copia del file
 lib/
   flatlaf.jar               tema dell'interfaccia (Apache 2.0)
 risorse/
@@ -269,6 +338,88 @@ licenza. Modificarlo o ridistribuirlo significherebbe usare codice altrui senza 
 Questo progetto non contiene codice di terzi: legge un formato di file, e i formati non
 sono protetti dal diritto d'autore. L'unica libreria inclusa è FlatLaf (Apache 2.0), il
 tema dell'interfaccia, con la sua licenza.
+
+---
+
+## Avvertenze
+
+Le stesse cose scritte in cima, spiegate meglio — perché sono le uniche che
+potrebbero costarti qualcosa.
+
+### Non rovinarti il gioco
+
+Un editor di salvataggi è uno strumento potente, e la potenza va dosata. I due
+errori classici:
+
+- **Riempire tutto subito.** Unità illimitate, la nave al massimo, ogni oggetto
+  nello zaino. Sembra bello per un pomeriggio, poi il gioco non ha più niente da
+  darti: le missioni perdono senso, le risorse non servono, le navi non
+  incuriosiscono. Il divertimento di No Man's Sky sta nell'attesa, e l'attesa
+  cancellata non si ricostruisce.
+- **Saltare i passaggi che insegnano.** Il gioco spiega le meccaniche attraverso
+  la fatica: riparare, cercare, sopravvivere. Chi salta quella parte si ritrova
+  con un gioco che non capisce, e con la sensazione di essersi perso qualcosa.
+
+Il modo sano di usarlo è un altro: **togliere un ostacolo che ti blocca.** Sei
+bloccato in una grotta per un bug, hai perso una nave per un difetto del gioco,
+vuoi solo correggere un valore sballato. Va benissimo. Se invece lo apri per
+"diventare forte", stai togliendo valore alla tua stessa partita.
+
+### Sì, e il multigiocatore?
+
+Questa è la parte seria. **L'editor è pensato per la partita in singolo.**
+
+No Man's Sky ha un multigiocatore condiviso: se porti una partita alterata in una
+sessione con altre persone, porti con te valori che loro non hanno. Può
+sembrare generoso regalare unità a tutti, ma rovinare la partita di qualcun
+altro non è una cosa che si fa — e le regole di condotta di Hello Games non
+prevedono eccezioni per le buone intenzioni. **Non usare l'editor per giocare
+con altri.**
+
+### Il rischio del ban
+
+Va detto con onestà, senza allarmismo e senza false rassicurazioni:
+
+- **Questo non è uno strumento approvato da Hello Games.** Il gioco non prevede
+  un editor di salvataggi ufficiale, e nessuno può garantirti che l'uso di uno
+  strumento esterno sia privo di conseguenze.
+- **Il rischio, in pratica, è basso** se il file resta **coerente** con quello
+  che il gioco sa leggere e se giochi per conto tuo. Hello Games non ha mai
+  annunciato una caccia a chi modifica i salvataggi in singolo, e i valori che
+  questo editor scrive rispettano i tipi e le caselle che il gioco si aspetta.
+- **Il rischio cresce con le cose assurde**: valori fuori dai limiti previsti,
+  oggetti che non dovrebbero esistere, dati incoerenti fra loro. Sono proprio le
+  situazioni in cui il gioco può accorgersi che qualcosa non torna.
+- **La decisione è tua.** Nessuno qui può prometterti niente. La scrivo perché
+  tu possa valutarla con le informazioni in mano, non per spaventarti.
+
+Se vuoi ridurre il rischio al minimo: usa l'editor **a gioco chiuso**, cambia il
+meno possibile, e **tieni una copia tua del salvataggio** prima di iniziare.
+
+### Sugli sviluppatori di IA
+
+Il progetto è stato scritto con l'aiuto di un assistente di intelligenza
+artificiale, e questo è dichiarato apertamente in cima al file. Non è una
+formalità: serve a dirti che **i difetti possono esserci**, anche in un progetto
+con molte prove automatiche, perché l'IA sbaglia in modo convincente e non si
+stanca mai di avere torto.
+
+Se qualcosa non funziona — un salvataggio che non si legge, un valore che cambia
+dopo il salvataggio, una sezione che mostra dati che non c'entrano — **non
+pensare di aver sbagliato tu**: quasi sempre è un difetto, e si corregge in
+fretta. Apri una segnalazione.
+
+### Dove sta scritto, dentro il programma
+
+La dichiarazione e le avvertenze non stanno solo qui: sono anche nella finestra
+**Informazioni** del programma, perché chi lo apre può non aver mai visto questo
+repository, e quelle sono proprio le cose da sapere prima di toccare il
+salvataggio. Il testo è lo stesso metodo, non una copia — se cambia nel
+programma, cambia anche nell'immagine qui sotto.
+
+<p align="center">
+  <img src="assets/schermate/atlante-informazioni.png" width="70%" alt="Finestra Informazioni di Atlante: catalogo e icone di gioco, la garanzia sul confronto campo per campo, la dichiarazione SVILUPPATO CON L'INTELLIGENZA ARTIFICIALE e le quattro avvertenze d'uso">
+</p>
 
 ---
 
