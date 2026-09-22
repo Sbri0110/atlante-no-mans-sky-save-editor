@@ -73,6 +73,8 @@ public final class PannelloElenco extends JPanel {
     private final JList<Voce> elenco = new JList<Voce>(modello);
     private final PannelloCampi campi;
     private final PannelloWingman wingman;
+    /** Il pannello a schede che tiene l'albero dei campi e la scheda del pilota. */
+    private JPanel centro;
     private final JLabel titolo = new JLabel();
     private final JLabel conteggio = new JLabel();
     private final JPanel testata = new JPanel();
@@ -150,10 +152,14 @@ public final class PannelloElenco extends JPanel {
         destra.add(testata, BorderLayout.NORTH);
         // Due modi di modificare lo stesso elemento: l'albero dei campi, che va
         // bene per le fregate, e la scheda del pilota, che per lo squadrone e'
-        // l'unico modo di non perdersi. Se ne vede uno alla volta.
-        destra.add(campi, BorderLayout.CENTER);
-        destra.add(wingman, BorderLayout.CENTER);
-        wingman.setVisible(false);
+        // l'unico modo di non perdersi. Vanno in un pannello a schede: metterli
+        // tutti e due al centro di un BorderLayout non funziona, perche' il
+        // secondo prende il posto del primo e il form sparisce.
+        centro = new JPanel(new java.awt.CardLayout());
+        centro.setBackground(Aspetto.PANNELLO);
+        centro.add(campi, "campi");
+        centro.add(wingman, "scheda");
+        destra.add(centro, BorderLayout.CENTER);
 
         add(sinistra, BorderLayout.WEST);
         add(destra, BorderLayout.CENTER);
@@ -198,8 +204,7 @@ public final class PannelloElenco extends JPanel {
         Elenchi.Elenco descrizione = Elenchi.perSezione(nomeSezione);
         this.radice = radice;
         usaScheda = "Squadrone".equals(nomeSezione);
-        campi.setVisible(!usaScheda);
-        wingman.setVisible(usaScheda);
+        ((java.awt.CardLayout) centro.getLayout()).show(centro, usaScheda ? "scheda" : "campi");
         // La scheda del pilota ha gia' la sua testata con l'icona grande.
         testata.setVisible(!usaScheda);
         modello.clear();
@@ -246,6 +251,10 @@ public final class PannelloElenco extends JPanel {
             // scheda vuota.
             if (usaScheda) {
                 wingman.mostra(radice, 0);
+            } else {
+                Voce prima = modello.getElementAt(0);
+                campi.mostra(prima.valore);
+                aggiornaTestata(prima);
             }
         } else {
             campi.mostra(null);

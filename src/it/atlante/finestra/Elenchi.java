@@ -79,9 +79,12 @@ public final class Elenchi {
                 base + "SquadronPilots", null, "Pilota", "PilotRank",
                 "NPCResource", "ShipResource"));
 
+        // Le fregate: la razza dice chi le ha costruite, la classe dice che
+        // fregata e' (Exploration, Mining, Diplomacy, Pirate, DeepSpace,
+        // GhostShip, Normandy) e ogni classe ha la sua icona.
         PER_SEZIONE.put("Fregate", new Elenco(
                 base + "FleetFrigates", "CustomName", "Fregata", "FrigateClass",
-                "Race", null));
+                "Race", "FrigateClass"));
 
         PER_SEZIONE.put("Compagni", new Elenco(
                 base + "Pets", "Name", "Compagno", "CreatureType",

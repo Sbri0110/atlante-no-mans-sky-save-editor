@@ -79,21 +79,28 @@ public final class Piloti {
 
         String sc = "MODELS/COMMON/SPACECRAFT/";
         List<Nave> navi = new ArrayList<Nave>();
-        // Le icone: dove il gioco ha davvero l'immagine di quella nave si usa
-        // quella — le navi-premio ce l'hanno, perche' sono oggetti del catalogo
-        // (Golden Vector e' ^EXPD_SHIP01, Utopia Speeder ^EXPD_SHIP09 e cosi'
-        // via). Per i tipi normali il gioco non ha nessuna immagine: le navi
-        // sono modelli 3D generati proceduralmente, non esistono icone di
-        // "Fighter" o di "Shuttle" nei pak. Li' resta l'icona dell'interfaccia.
-        navi.add(new Nave("Fighter", sc + "FIGHTERS/FIGHTER_PROC.SCENE.MBIN"));
-        navi.add(new Nave("Shuttle", sc + "SHUTTLE/SHUTTLE_PROC.SCENE.MBIN"));
-        navi.add(new Nave("Hauler", sc + "DROPSHIPS/DROPSHIP_PROC.SCENE.MBIN"));
-        navi.add(new Nave("Explorer", sc + "SCIENTIFIC/SCIENTIFIC_PROC.SCENE.MBIN"));
-        navi.add(new Nave("Exotic", sc + "S-CLASS/S-CLASS_PROC.SCENE.MBIN"));
-        navi.add(new Nave("Living", sc + "S-CLASS/BIOPARTS/BIOSHIP_PROC.SCENE.MBIN"));
-        navi.add(new Nave("Solar", sc + "SAILSHIP/SAILSHIP_PROC.SCENE.MBIN"));
-        navi.add(new Nave("Robot", sc + "SENTINELSHIP/SENTINELSHIP_PROC.SCENE.MBIN"));
-        navi.add(new Nave("Corvette", sc + "BIGGS/BIGGS.SCENE.MBIN"));
+        // Le icone sono quelle del gioco, estratte da icons/shiptypes: il gioco
+        // le usa nel menu del tipo di nave. Per le navi-premio c'e' in piu'
+        // l'immagine della nave esatta, che e' un oggetto del catalogo (Golden
+        // Vector e' ^EXPD_SHIP01, Utopia Speeder ^EXPD_SHIP09 e cosi' via).
+        navi.add(new Nave("Fighter", sc + "FIGHTERS/FIGHTER_PROC.SCENE.MBIN",
+                "UI-SHIPTYPE-FIGHTER.PNG"));
+        navi.add(new Nave("Shuttle", sc + "SHUTTLE/SHUTTLE_PROC.SCENE.MBIN",
+                "UI-SHIPTYPE-SHUTTLE.PNG"));
+        navi.add(new Nave("Hauler", sc + "DROPSHIPS/DROPSHIP_PROC.SCENE.MBIN",
+                "UI-SHIPTYPE-HAULER.PNG"));
+        navi.add(new Nave("Explorer", sc + "SCIENTIFIC/SCIENTIFIC_PROC.SCENE.MBIN",
+                "UI-SHIPTYPE-EXPLORER.PNG"));
+        navi.add(new Nave("Exotic", sc + "S-CLASS/S-CLASS_PROC.SCENE.MBIN",
+                "UI-SHIPTYPE-EXOTIC.PNG"));
+        navi.add(new Nave("Living", sc + "S-CLASS/BIOPARTS/BIOSHIP_PROC.SCENE.MBIN",
+                "UI-SHIPTYPE-LIVING.PNG"));
+        navi.add(new Nave("Solar", sc + "SAILSHIP/SAILSHIP_PROC.SCENE.MBIN",
+                "UI-SHIPTYPE-SOLAR.PNG"));
+        navi.add(new Nave("Robot", sc + "SENTINELSHIP/SENTINELSHIP_PROC.SCENE.MBIN",
+                "UI-SHIPTYPE-ROBOT.PNG"));
+        navi.add(new Nave("Corvette", sc + "BIGGS/BIGGS.SCENE.MBIN",
+                "UI-SHIPTYPE-CORVETTE.PNG"));
         navi.add(new Nave("Utopia Speeder", sc + "FIGHTERS/VRSPEEDER.SCENE.MBIN",
                 "PRODUCT-EXPD_SHIP09.PNG"));
         navi.add(new Nave("Golden Vector", sc + "FIGHTERS/FIGHTERCLASSICGOLD.SCENE.MBIN",

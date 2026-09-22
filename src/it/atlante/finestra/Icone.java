@@ -154,6 +154,38 @@ public final class Icone {
         if (r.indexOf("SPACECRAFT") >= 0 || r.indexOf("/SHIP") >= 0) {
             return "UI-SHIPICON.PNG";
         }
+        // Le classi di fregata: sono sette nel salvataggio — Exploration,
+        // Mining, Diplomacy, Pirate, DeepSpace, GhostShip, Normandy — e il
+        // gioco le illustra in icons/fleet/frigate. Le tre speciali hanno
+        // l'immagine della nave esatta, perche' sono oggetti del catalogo.
+        if (r.indexOf("GHOSTSHIP") >= 0 || r.indexOf("GHOST") >= 0) {
+            return "PRODUCT-EXPD_GHOSTFRIG.PNG";
+        }
+        if (r.indexOf("NORMANDY") >= 0) {
+            return "PRODUCT-EXPD_SPEC02.PNG";
+        }
+        if (r.indexOf("BIOFRIG") >= 0 || r.indexOf("ORGANIC") >= 0 || r.indexOf("LIVING") >= 0) {
+            return "PRODUCT-EXPD_BIOFRIG.PNG";
+        }
+        if (r.indexOf("EXPLORATION") >= 0) {
+            return "UI-FRIGATE-EXPLORATION.PNG";
+        }
+        if (r.indexOf("MINING") >= 0 || r.indexOf("INDUSTRIAL") >= 0) {
+            return "UI-FRIGATE-INDUSTRIAL.PNG";
+        }
+        if (r.indexOf("DIPLOMACY") >= 0 || r.indexOf("DIPLOMATIC") >= 0
+                || r.indexOf("SUPPORT") >= 0) {
+            return "UI-FRIGATE-DIPLOMATIC.PNG";
+        }
+        if (r.indexOf("PIRATE") >= 0 || r.indexOf("COMBAT") >= 0) {
+            return "UI-FRIGATE-COMBAT.PNG";
+        }
+        if (r.indexOf("DEEPSPACE") >= 0) {
+            return "UI-FRIGATE-DEEPSPACE.PNG";
+        }
+        if (r.indexOf("TRADE") >= 0 || r.indexOf("MERCANTILE") >= 0) {
+            return "UI-FRIGATE-MERCANTILE.PNG";
+        }
         return null;
     }
 
