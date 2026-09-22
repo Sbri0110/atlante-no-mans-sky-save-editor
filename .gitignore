@@ -58,6 +58,15 @@ strumenti/jdk8/
 Atlante.jar
 manifest.txt
 
+# Il pacchetto pronto all'uso, quello allegato alle release.
+#
+# Si costruisce dallo script di impacchettamento e pesa 89 MB: nel repository
+# non ci va, perche' il contenuto e' la somma di file che ci sono gia' (le
+# classi dentro il jar, il tema, le icone) e ogni nuova release lo
+# raddoppierebbe. Chi vuole il programma lo scarica dalla pagina delle
+# release, dove il file e' gia' pronto e non gonfia la storia del progetto.
+Atlante-*.zip
+
 # Icone degli oggetti e dell'interfaccia di gioco.
 #
 # Sono 3.518 PNG, 82 MB. Fino al 22 settembre 2026 stavano fuori dal
