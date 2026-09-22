@@ -102,22 +102,35 @@ compressi → 9.842.314 byte decompressi, 19 blocchi, durata di gioco 185 h 58 m
 
 ## Come si prova
 
-Serve **Java 8 o superiore**. Se hai già un JDK installato (da
-[Adoptium](https://adoptium.net/), o quello che trovi nel PATH) non devi fare
-altro: `avvia.bat` lo cerca e lo usa.
+Ci sono due strade, e servono cose diverse. **Se vuoi solo usare il programma,
+prendi il pacchetto pronto e salta alla prima.** Se invece vuoi leggere e
+modificare il codice, ti serve un JDK e vai alla seconda.
 
-| | |
-|---|---|
-| **Doppio clic su `avvia.bat`** | cerca Java, compila se serve e apre la finestra |
-| **Doppio clic su `Atlante.jar`** | apre direttamente l'interfaccia, se hai già compilato |
+### 1. Usare il programma
 
-`avvia.bat` cerca Java in questo ordine: il JDK dentro il progetto
-(`strumenti\jdk8\`, se c'è), `java` nel PATH e le installazioni in
-`Program Files`. Se non lo trova te lo dice invece di fallire in silenzio.
+Scarica `Atlante-1.0.zip` dalla pagina delle
+[release](https://github.com/Sbri0110/atlante-no-mans-sky-save-editor/releases),
+estrailo dove vuoi e fai doppio clic su `avvia.bat`.
 
-### Compilare
+L'unica cosa che serve è **Java 8 o superiore** installato
+([Adoptium](https://adoptium.net/) va benissimo): basta il JRE, non serve il
+JDK, perché le classi sono già compilate dentro `Atlante.jar`. Il pacchetto si
+porta dietro il tema, il catalogo e le 3.518 icone del gioco, quindi non c'è
+nient'altro da scaricare.
 
-Serve un **JDK** (non basta il JRE: serve `javac`).
+`avvia.bat` cerca Java in questo ordine: un JRE in una cartella `jre\` messa
+accanto al programma, `java` nel PATH, e le installazioni in `Program Files`.
+Se non lo trova te lo dice invece di fallire in silenzio.
+
+> Il pacchetto va estratto tutto intero e `avvia.bat` va lanciato da dentro la
+> sua cartella: il tema e le icone si caricano da lì. Se sposti solo il `.jar`,
+> il programma parte ma si presenta con gli identificatori al posto delle
+> immagini.
+
+### 2. Compilare dai sorgenti
+
+Se hai clonato il repository, `Atlante.jar` non c'è: va costruito. Serve un
+**JDK** (non basta il JRE: serve `javac`).
 
 ```bat
 :: Windows
@@ -131,6 +144,9 @@ java -cp "classi:lib/flatlaf.jar" it.atlante.Atlante
 ```
 
 Nessuna libreria da scaricare: il tema (`lib/flatlaf.jar`) è già nel progetto.
+
+In alternativa `avvia.bat` fa tutto da solo: cerca Java, compila se le classi
+non ci sono e apre la finestra.
 
 ### Cosa fa all'avvio
 
