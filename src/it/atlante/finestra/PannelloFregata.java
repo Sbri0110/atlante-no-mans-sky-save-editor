@@ -10,12 +10,16 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JTextField;
+import javax.swing.Scrollable;
 import javax.swing.SwingConstants;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.GridLayout;
+import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
@@ -23,33 +27,28 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * La scheda di una fregata.
+ * La scheda di una fregata, divisa in gruppi invece che in una colonna sola.
  *
- * Come per il pilota dello squadrone, il salvataggio tiene la fregata come una
- * matassa di campi: mostrarli tutti come albero costringe a leggere "Seme della
- * risorsa, Elemento 1, Elemento 2" per arrivare a "Eventi riusciti". Qui ci sono
- * le cose che si guardano davvero, con i nomi del vecchio editor:
+ * Il salvataggio tiene la fregata come una matassa di campi, e mostrarli tutti
+ * di fila costringeva a scorrere: qui si vedono quattro gruppi, su due colonne
+ * come nel vecchio editor.
  *
- * <ul>
- *   <li><b>Nome</b> — quello dato dal giocatore ({@code CustomName});</li>
- *   <li><b>Classe</b> — Exploration, Mining, Diplomacy, Pirate, DeepSpace,
- *       GhostShip, Normandy: sono le sette che il salvataggio usa;</li>
- *   <li><b>Razza</b> — chi l'ha costruita: Warriors (Vy'keen), Traders (Gek),
- *       Explorers (Korvax);</li>
- *   <li><b>Classe di inventario</b> — S, A, B, C;</li>
- *   <li><b>Danni, riparazioni, volte danneggiata</b>;</li>
- *   <li><b>Spedizioni</b> — completate, eventi riusciti, eventi falliti;</li>
- *   <li><b>I tre semi</b> — risorsa, sistema di origine, tratti imposti, con
- *       <i>Genera</i>.</li>
- * </ul>
+ * <pre>
+ *   INFORMAZIONI FREGATA          STATS
+ *     Nome                          Combat, Exploration, Industry, Trading,
+ *     Tipo, Classe, Razza           costo per salto, carburante, durata,
+ *     Seed casa, Seed modello       bottino, riparazione, danni, furtivita'
  *
- * I campi annidati ({@code FrigateClass}, {@code Race}, {@code InventoryClass})
- * sono oggetti con dentro un solo valore: si scrive dentro l'oggetto, non al
- * posto suo, altrimenti il gioco non riconoscerebbe piu' il campo.
+ *   TRATTI                        TOTALI
+ *     cinque menu a tendina         spedizioni, riuscite, non riuscite, danni
+ * </pre>
+ *
+ * I tratti non si scrivono a mano: si scelgono da un menu con tutti quelli del
+ * gioco, ognuno con il suo effetto ("Exploration Specialist (+15 Exploration)").
  */
 public final class PannelloFregata extends JPanel {
 
-    /** Una classe di fregata: il valore nel salvataggio e come si chiama. */
+    /** Le classi di fregata: il valore nel salvataggio e come si chiama. */
     private static final String[][] CLASSI = {
             {"Exploration", "Exploration"},
             {"Mining", "Mining"},
@@ -67,6 +66,9 @@ public final class PannelloFregata extends JPanel {
             {"Explorers", "Korvax"},
     };
 
+    /** Quanti tratti puo' avere una fregata. */
+    private static final int QUANTI_TRATTI = 5;
+
     private final Icone icone;
     private final Runnable suModifica;
 
@@ -76,17 +78,17 @@ public final class PannelloFregata extends JPanel {
 
     private final JTextField nomeDato = new JTextField();
     private final JComboBox<String> classe = new JComboBox<String>();
-    private final JComboBox<String> razza = new JComboBox<String>();
     private final JComboBox<String> inventario = new JComboBox<String>();
-    private final JTextField danni = new JTextField();
-    private final JTextField riparazioni = new JTextField();
-    private final JTextField volteDanneggiata = new JTextField();
+    private final JComboBox<String> razza = new JComboBox<String>();
+    private final JTextField seedCasa = new JTextField();
+    private final JTextField seedModello = new JTextField();
+
+    private final List<JComboBox<Tratti.Tratto>> tratti = new ArrayList<JComboBox<Tratti.Tratto>>();
+    private final List<JTextField> stats = new ArrayList<JTextField>();
     private final JTextField spedizioni = new JTextField();
-    private final JTextField riusciti = new JTextField();
-    private final JTextField falliti = new JTextField();
-    private final JTextField seedRisorsa = new JTextField();
-    private final JTextField seedOrigine = new JTextField();
-    private final JTextField seedTratti = new JTextField();
+    private final JTextField riuscite = new JTextField();
+    private final JTextField nonRiuscite = new JTextField();
+    private final JTextField danneggiata = new JTextField();
 
     private Object radice;
     private int indice = -1;
@@ -96,7 +98,7 @@ public final class PannelloFregata extends JPanel {
         this.icone = icone;
         this.suModifica = suModifica;
 
-        setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+        setLayout(new BorderLayout());
         setBackground(Aspetto.PANNELLO);
 
         for (String[] c : CLASSI) {
@@ -109,12 +111,19 @@ public final class PannelloFregata extends JPanel {
             inventario.addItem(c);
         }
 
+        add(testata(), BorderLayout.NORTH);
+        add(corpo(), BorderLayout.CENTER);
+        collega();
+        svuota();
+    }
+
+    // ------------------------------------------------------------------
+
+    private JPanel testata() {
         JPanel testa = new JPanel(new BorderLayout(14, 0));
-        testa.setOpaque(false);
-        testa.setBorder(BorderFactory.createEmptyBorder(16, 18, 12, 18));
-        testa.setAlignmentX(Component.LEFT_ALIGNMENT);
-        testa.setMaximumSize(new Dimension(Integer.MAX_VALUE, 92));
-        icona.setPreferredSize(new Dimension(64, 40));
+        testa.setBackground(Aspetto.PANNELLO);
+        testa.setBorder(BorderFactory.createEmptyBorder(14, 18, 12, 18));
+        icona.setPreferredSize(new Dimension(72, 44));
         testa.add(icona, BorderLayout.WEST);
         JPanel testi = new JPanel();
         testi.setOpaque(false);
@@ -129,42 +138,145 @@ public final class PannelloFregata extends JPanel {
         testi.add(Box.createVerticalStrut(4));
         testi.add(sotto);
         testa.add(testi, BorderLayout.CENTER);
-        add(testa);
-
-        JPanel campi = new JPanel();
-        campi.setOpaque(false);
-        campi.setLayout(new BoxLayout(campi, BoxLayout.Y_AXIS));
-        campi.setBorder(BorderFactory.createEmptyBorder(0, 18, 12, 18));
-        campi.setAlignmentX(Component.LEFT_ALIGNMENT);
-
-        nomeDato.setFont(nomeDato.getFont().deriveFont(12f));
-        campi.add(riga("Nome", nomeDato));
-        classe.setFont(classe.getFont().deriveFont(12f));
-        campi.add(riga("Classe", classe));
-        razza.setFont(razza.getFont().deriveFont(12f));
-        campi.add(riga("Razza", razza));
-        inventario.setFont(inventario.getFont().deriveFont(12f));
-        campi.add(riga("Classe di inventario", inventario));
-        campi.add(riga("Danni subiti", numero(danni)));
-        campi.add(riga("Riparazioni", numero(riparazioni)));
-        campi.add(riga("Volte danneggiata", numero(volteDanneggiata)));
-        campi.add(riga("Spedizioni completate", numero(spedizioni)));
-        campi.add(riga("Eventi riusciti", numero(riusciti)));
-        campi.add(riga("Eventi falliti", numero(falliti)));
-        campi.add(riga("Seme della risorsa", conPulsante(seedRisorsa, "Risorsa")));
-        campi.add(riga("Seme del sistema", conPulsante(seedOrigine, "Sistema")));
-        campi.add(riga("Seme dei tratti", conPulsante(seedTratti, "Tratti")));
-
-        add(campi);
-        add(Box.createVerticalGlue());
-
-        collega();
-        svuota();
+        return testa;
     }
 
-    private JTextField numero(JTextField campo) {
+    /** Le due colonne, ognuna con i suoi gruppi. */
+    private JScrollPane corpo() {
+        JPanel colonne = new Colonne();
+        colonne.setBackground(Aspetto.PANNELLO);
+        colonne.setBorder(BorderFactory.createEmptyBorder(0, 18, 14, 18));
+
+        JPanel sinistra = colonna();
+        sinistra.add(titolo("INFORMAZIONI FREGATA"));
+        nomeDato.setFont(nomeDato.getFont().deriveFont(12f));
+        sinistra.add(riga("Nome", nomeDato));
+        classe.setFont(classe.getFont().deriveFont(12f));
+        sinistra.add(riga("Tipo", classe));
+        inventario.setFont(inventario.getFont().deriveFont(12f));
+        sinistra.add(riga("Classe", inventario));
+        razza.setFont(razza.getFont().deriveFont(12f));
+        sinistra.add(riga("Razza NPC", razza));
+        seedCasa.setFont(Aspetto.monospaziato(11.5f, Font.PLAIN));
+        sinistra.add(riga("Seed casa", seedCasa));
+        seedModello.setFont(Aspetto.monospaziato(11.5f, Font.PLAIN));
+        sinistra.add(riga("Seed modello", conPulsante(seedModello, "Modello")));
+        sinistra.add(Box.createVerticalStrut(10));
+        sinistra.add(titolo("TRATTI"));
+        for (int i = 0; i < QUANTI_TRATTI; i++) {
+            final int posizione = i;
+            JComboBox<Tratti.Tratto> menu = new JComboBox<Tratti.Tratto>();
+            menu.setFont(menu.getFont().deriveFont(11.5f));
+            for (Tratti.Tratto t : Tratti.tutti()) {
+                menu.addItem(t);
+            }
+            menu.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    if (caricando) {
+                        return;
+                    }
+                    Object scelta = ((JComboBox<?>) e.getSource()).getSelectedItem();
+                    scriviTratto(posizione, scelta instanceof Tratti.Tratto
+                            ? ((Tratti.Tratto) scelta).id : null);
+                }
+            });
+            tratti.add(menu);
+            sinistra.add(riga("Tratto " + (i + 1), menu));
+        }
+
+        JPanel destra = colonna();
+        destra.add(titolo("STATS"));
+        for (String nomeStat : Tratti.STATS) {
+            JTextField campo = new JTextField();
+            campo.setFont(Aspetto.monospaziato(12, Font.PLAIN));
+            campo.setHorizontalAlignment(SwingConstants.RIGHT);
+            final int posizione = stats.size();
+            campo.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    scriviStat(posizione, ((JTextField) e.getSource()).getText().trim());
+                }
+            });
+            stats.add(campo);
+            destra.add(riga(nomeStat, campo));
+        }
+        destra.add(Box.createVerticalStrut(10));
+        destra.add(titolo("TOTALI"));
+        destra.add(riga("Spedizioni", numero(spedizioni, "TotalNumberOfExpeditions")));
+        destra.add(riga("Riuscite", numero(riuscite, "TotalNumberOfSuccessfulEvents")));
+        destra.add(riga("Non riuscite", numero(nonRiuscite, "TotalNumberOfFailedEvents")));
+        destra.add(riga("Danneggiata", numero(danneggiata, "NumberOfTimesDamaged")));
+
+        colonne.add(sinistra);
+        colonne.add(destra);
+
+        JScrollPane scorrimento = new JScrollPane(colonne);
+        scorrimento.setBorder(BorderFactory.createEmptyBorder());
+        scorrimento.setBackground(Aspetto.PANNELLO);
+        scorrimento.getVerticalScrollBar().setUnitIncrement(16);
+        return scorrimento;
+    }
+
+    private JPanel colonna() {
+        JPanel p = new JPanel();
+        p.setBackground(Aspetto.PANNELLO);
+        p.setLayout(new BoxLayout(p, BoxLayout.Y_AXIS));
+        p.setAlignmentX(Component.LEFT_ALIGNMENT);
+        return p;
+    }
+
+    /**
+     * Le due colonne, che si adattano alla larghezza disponibile.
+     *
+     * Dentro un pannello scorrevole un {@code GridLayout} dichiara la larghezza
+     * come somma di quello che chiedono le colonne: se chiedono piu' dello
+     * spazio disponibile la seconda finisce fuori dalla vista, e i campi
+     * allineati a destra sembrano vuoti perche' il loro testo resta fuori dal
+     * bordo. Qui la larghezza segue quella della finestra.
+     */
+    private static final class Colonne extends JPanel implements Scrollable {
+
+        Colonne() {
+            setLayout(new GridLayout(1, 2, 18, 0));
+        }
+
+        public Dimension getPreferredScrollableViewportSize() {
+            return getPreferredSize();
+        }
+
+        public int getScrollableUnitIncrement(Rectangle visibile, int orientamento, int direzione) {
+            return 16;
+        }
+
+        public int getScrollableBlockIncrement(Rectangle visibile, int orientamento, int direzione) {
+            return visibile.height;
+        }
+
+        public boolean getScrollableTracksViewportWidth() {
+            return true;
+        }
+
+        public boolean getScrollableTracksViewportHeight() {
+            return false;
+        }
+    }
+
+    private JLabel titolo(String testo) {
+        JLabel l = new JLabel(testo);
+        l.setFont(Aspetto.monospaziato(10f, Font.BOLD));
+        l.setForeground(Aspetto.ACCENTO);
+        l.setAlignmentX(Component.LEFT_ALIGNMENT);
+        l.setBorder(BorderFactory.createEmptyBorder(8, 0, 6, 0));
+        return l;
+    }
+
+    private JTextField numero(final JTextField campo, final String nomeCampo) {
         campo.setFont(Aspetto.monospaziato(12, Font.PLAIN));
         campo.setHorizontalAlignment(SwingConstants.RIGHT);
+        campo.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                scriviNumero(nomeCampo, campo.getText().trim());
+            }
+        });
         return campo;
     }
 
@@ -172,11 +284,12 @@ public final class PannelloFregata extends JPanel {
         JPanel r = new JPanel(new BorderLayout(10, 0));
         r.setOpaque(false);
         r.setBorder(BorderFactory.createEmptyBorder(3, 0, 3, 0));
-        r.setMaximumSize(new Dimension(Integer.MAX_VALUE, 30));
+        r.setMaximumSize(new Dimension(Integer.MAX_VALUE, 32));
+        r.setAlignmentX(Component.LEFT_ALIGNMENT);
         JLabel l = new JLabel(etichetta);
         l.setFont(l.getFont().deriveFont(11.5f));
         l.setForeground(Aspetto.TESTO_DEBOLE);
-        l.setPreferredSize(new Dimension(150, 24));
+        l.setPreferredSize(new Dimension(136, 24));
         r.add(l, BorderLayout.WEST);
         r.add(editor, BorderLayout.CENTER);
         return r;
@@ -186,8 +299,7 @@ public final class PannelloFregata extends JPanel {
     private JPanel conPulsante(final JTextField campo, final String quale) {
         JPanel p = new JPanel(new BorderLayout(6, 0));
         p.setOpaque(false);
-        campo.setFont(Aspetto.monospaziato(12, Font.PLAIN));
-        final JButton genera = new JButton("Genera");
+        JButton genera = new JButton("Genera");
         genera.setFont(genera.getFont().deriveFont(11.5f));
         genera.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -208,6 +320,8 @@ public final class PannelloFregata extends JPanel {
                     return;
                 }
                 fregata().put("CustomName", nomeDato.getText().trim());
+                nome.setText(nomeDato.getText().trim().isEmpty()
+                        ? "Fregata " + (indice + 1) : nomeDato.getText().trim());
                 suModifica.run();
             }
         });
@@ -228,38 +342,9 @@ public final class PannelloFregata extends JPanel {
                         scelta == null ? null : String.valueOf(scelta));
             }
         });
-        collegaNumero(danni, "DamageTaken");
-        collegaNumero(riparazioni, "RepairsMade");
-        collegaNumero(volteDanneggiata, "NumberOfTimesDamaged");
-        collegaNumero(spedizioni, "TotalNumberOfExpeditions");
-        collegaNumero(riusciti, "TotalNumberOfSuccessfulEvents");
-        collegaNumero(falliti, "TotalNumberOfFailedEvents");
-        collegaSeme(seedRisorsa, "Risorsa");
-        collegaSeme(seedOrigine, "Sistema");
-        collegaSeme(seedTratti, "Tratti");
-    }
-
-    private void collegaNumero(final JTextField campo, final String nomeCampo) {
-        campo.addActionListener(new ActionListener() {
+        seedCasa.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                Map<String, Object> f = fregata();
-                if (caricando || f == null) {
-                    return;
-                }
-                String v = campo.getText().trim();
-                if (v.isEmpty()) {
-                    return;
-                }
-                f.put(nomeCampo, new Json.Numero(v));
-                suModifica.run();
-            }
-        });
-    }
-
-    private void collegaSeme(final JTextField campo, final String quale) {
-        campo.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                scriviSeme(quale, campo.getText().trim());
+                scriviSeme("Casa", seedCasa.getText().trim());
             }
         });
     }
@@ -291,28 +376,34 @@ public final class PannelloFregata extends JPanel {
             }
             String dato = testo(f.get("CustomName"));
             nome.setText(dato.isEmpty() ? "Fregata " + (i + 1) : dato);
+            nomeDato.setText(dato);
 
-            String c = annidato(f, "FrigateClass", "FrigateClass");
-            int pc = posizione(CLASSI, c);
+            int pc = posizione(CLASSI, annidato(f, "FrigateClass", "FrigateClass"));
             classe.setSelectedIndex(pc >= 0 ? pc : 0);
-
-            String r = annidato(f, "Race", "AlienRace");
-            int pr = posizione(RAZZE, r);
+            int pr = posizione(RAZZE, annidato(f, "Race", "AlienRace"));
             razza.setSelectedIndex(pr >= 0 ? pr : 0);
-
             String ci = annidato(f, "InventoryClass", "InventoryClass");
             inventario.setSelectedItem(ci == null || ci.isEmpty() ? "C" : ci);
 
-            nomeDato.setText(dato);
-            danni.setText(testo(f.get("DamageTaken")));
-            riparazioni.setText(testo(f.get("RepairsMade")));
-            volteDanneggiata.setText(testo(f.get("NumberOfTimesDamaged")));
+            seedCasa.setText(seme(f, "HomeSystemSeed"));
+            seedModello.setText(seme(f, "ResourceSeed"));
+
+            List<Object> ids = trattiDi(f);
+            for (int k = 0; k < tratti.size(); k++) {
+                String id = k < ids.size() ? String.valueOf(ids.get(k)) : null;
+                Tratti.Tratto t = Tratti.perId(id);
+                tratti.get(k).setSelectedItem(t);
+            }
+
+            List<Object> valori = valoriStats(f);
+            for (int k = 0; k < stats.size(); k++) {
+                stats.get(k).setText(k < valori.size() ? testo(valori.get(k)) : "");
+            }
+
             spedizioni.setText(testo(f.get("TotalNumberOfExpeditions")));
-            riusciti.setText(testo(f.get("TotalNumberOfSuccessfulEvents")));
-            falliti.setText(testo(f.get("TotalNumberOfFailedEvents")));
-            seedRisorsa.setText(seme(f, "ResourceSeed"));
-            seedOrigine.setText(seme(f, "HomeSystemSeed"));
-            seedTratti.setText(seme(f, "ForcedTraitsSeed"));
+            riuscite.setText(testo(f.get("TotalNumberOfSuccessfulEvents")));
+            nonRiuscite.setText(testo(f.get("TotalNumberOfFailedEvents")));
+            danneggiata.setText(testo(f.get("NumberOfTimesDamaged")));
 
             aggiornaTesta();
         } finally {
@@ -322,14 +413,11 @@ public final class PannelloFregata extends JPanel {
         repaint();
     }
 
-    /** La testata: icona della classe, nome e riga di riconoscimento. */
     private void aggiornaTesta() {
         Object c = classe.getSelectedItem();
         Object r = razza.getSelectedItem();
-        String chiave = c == null ? "" : String.valueOf(c);
-        ImageIcon img = icone.perFile(Icone.iconaDiRisorsa(chiave), 64);
-        icona.setIcon(img != null ? img
-                : Icone.segno("F", 40, Aspetto.ACCENTO, true));
+        ImageIcon img = icone.perFile(Icone.iconaDiRisorsa(c == null ? "" : String.valueOf(c)), 72);
+        icona.setIcon(img != null ? img : Icone.segno("F", 44, Aspetto.ACCENTO, true));
         StringBuilder s = new StringBuilder();
         if (r != null) {
             s.append(r);
@@ -352,19 +440,22 @@ public final class PannelloFregata extends JPanel {
         indice = -1;
         caricando = true;
         try {
-            icona.setIcon(Icone.segno("·", 40, Aspetto.TESTO_DEBOLE, true));
+            icona.setIcon(Icone.segno("·", 44, Aspetto.TESTO_DEBOLE, true));
             nome.setText("Nessuna fregata scelta");
             sotto.setText("");
             nomeDato.setText("");
-            danni.setText("");
-            riparazioni.setText("");
-            volteDanneggiata.setText("");
+            seedCasa.setText("");
+            seedModello.setText("");
+            for (JComboBox<Tratti.Tratto> menu : tratti) {
+                menu.setSelectedItem(null);
+            }
+            for (JTextField campo : stats) {
+                campo.setText("");
+            }
             spedizioni.setText("");
-            riusciti.setText("");
-            falliti.setText("");
-            seedRisorsa.setText("");
-            seedOrigine.setText("");
-            seedTratti.setText("");
+            riuscite.setText("");
+            nonRiuscite.setText("");
+            danneggiata.setText("");
         } finally {
             caricando = false;
         }
@@ -391,7 +482,19 @@ public final class PannelloFregata extends JPanel {
         return f instanceof Map ? (Map<String, Object>) f : null;
     }
 
-    /** Il valore di un campo annidato, per esempio {@code FrigateClass.FrigateClass}. */
+    @SuppressWarnings("unchecked")
+    private List<Object> trattiDi(Map<String, Object> f) {
+        Object v = f.get("TraitIDs");
+        return v instanceof List ? (List<Object>) v : new ArrayList<Object>();
+    }
+
+    /** I valori di {@code Stats}: undici numeri in fila. */
+    @SuppressWarnings("unchecked")
+    private List<Object> valoriStats(Map<String, Object> f) {
+        Object v = f.get("Stats");
+        return v instanceof List ? (List<Object>) v : new ArrayList<Object>();
+    }
+
     @SuppressWarnings("unchecked")
     private String annidato(Map<String, Object> f, String campo, String dentro) {
         Object v = f.get(campo);
@@ -406,8 +509,7 @@ public final class PannelloFregata extends JPanel {
      * Scrive dentro un campo annidato.
      *
      * Il salvataggio tiene {@code FrigateClass: {FrigateClass: "Mining"}}: si
-     * tocca il valore interno, non l'oggetto. Sostituendolo con una stringa il
-     * gioco non riconoscerebbe piu' la classe.
+     * tocca il valore interno, non l'oggetto.
      */
     @SuppressWarnings("unchecked")
     private void scriviAnnidato(String campo, String dentro, String valore) {
@@ -424,6 +526,61 @@ public final class PannelloFregata extends JPanel {
             aggiornaTesta();
             suModifica.run();
         }
+    }
+
+    /** Cambia un tratto nella posizione data. */
+    @SuppressWarnings("unchecked")
+    private void scriviTratto(int posizione, String id) {
+        if (caricando || id == null) {
+            return;
+        }
+        Map<String, Object> f = fregata();
+        if (f == null) {
+            return;
+        }
+        List<Object> lista = trattiDi(f);
+        if (!(f.get("TraitIDs") instanceof List)) {
+            f.put("TraitIDs", lista);
+        }
+        while (lista.size() <= posizione) {
+            lista.add("^");
+        }
+        lista.set(posizione, id);
+        suModifica.run();
+    }
+
+    /** Scrive una delle undici statistiche. */
+    @SuppressWarnings("unchecked")
+    private void scriviStat(int posizione, String valore) {
+        if (caricando || valore.isEmpty()) {
+            return;
+        }
+        Map<String, Object> f = fregata();
+        if (f == null) {
+            return;
+        }
+        Object v = f.get("Stats");
+        if (!(v instanceof List)) {
+            return;
+        }
+        List<Object> lista = (List<Object>) v;
+        while (lista.size() <= posizione) {
+            lista.add(new Json.Numero("0"));
+        }
+        lista.set(posizione, new Json.Numero(valore));
+        suModifica.run();
+    }
+
+    private void scriviNumero(String campo, String valore) {
+        if (caricando || valore.isEmpty()) {
+            return;
+        }
+        Map<String, Object> f = fregata();
+        if (f == null) {
+            return;
+        }
+        f.put(campo, new Json.Numero(valore));
+        suModifica.run();
     }
 
     private String seme(Map<String, Object> f, String campo) {
@@ -444,8 +601,7 @@ public final class PannelloFregata extends JPanel {
         if (f == null) {
             return;
         }
-        String campo = "Risorsa".equals(quale) ? "ResourceSeed"
-                : "Sistema".equals(quale) ? "HomeSystemSeed" : "ForcedTraitsSeed";
+        String campo = "Casa".equals(quale) ? "HomeSystemSeed" : "ResourceSeed";
         Object s = f.get(campo);
         if (s instanceof List && ((List<Object>) s).size() >= 2) {
             ((List<Object>) s).set(1, valore);
