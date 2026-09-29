@@ -59,6 +59,9 @@ public final class Icone {
         if (nomeFile == null || nomeFile.isEmpty()) {
             return null;
         }
+        // Il lato arriva in misura nominale: si ingrandisce qui, cosi' le icone
+        // seguono l'interfaccia senza che ogni chiamante debba ricordarsene.
+        lato = Aspetto.px(lato);
         String chiave = nomeFile + "@" + lato;
         ImageIcon inCache = CACHE.get(chiave);
         if (inCache != null) {
@@ -90,6 +93,9 @@ public final class Icone {
      * @param riempito  se vero il fondo e' pieno, altrimenti solo il contorno
      */
     public static ImageIcon segno(String segno, int lato, Color colore, boolean riempito) {
+        // Come per le icone di gioco: la misura arriva nominale e si ingrandisce
+        // qui, insieme al carattere del segno.
+        lato = Aspetto.px(lato);
         String chiave = "segno:" + segno + "@" + lato + ":" + colore.getRGB() + ":" + riempito;
         ImageIcon inCache = CACHE.get(chiave);
         if (inCache != null) {

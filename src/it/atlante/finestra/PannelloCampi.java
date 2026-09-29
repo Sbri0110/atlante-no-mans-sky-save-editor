@@ -109,12 +109,12 @@ public final class PannelloCampi extends JPanel {
 
         JScrollPane scorrimento = new JScrollPane(involucro);
         scorrimento.setBorder(BorderFactory.createEmptyBorder());
-        scorrimento.getVerticalScrollBar().setUnitIncrement(18);
+        scorrimento.getVerticalScrollBar().setUnitIncrement(Aspetto.px(18));
         scorrimento.setBackground(Aspetto.PANNELLO);
         add(scorrimento, BorderLayout.CENTER);
 
         vuoto.setForeground(Aspetto.TESTO_DEBOLE);
-        vuoto.setFont(vuoto.getFont().deriveFont(12.5f));
+        vuoto.setFont(vuoto.getFont().deriveFont(Aspetto.punti(12.5f)));
     }
 
     // ------------------------------------------------------------------
@@ -258,17 +258,17 @@ public final class PannelloCampi extends JPanel {
 
             JPanel testa = new JPanel(new BorderLayout(8, 0));
             testa.setBackground(Aspetto.PANNELLO);
-            testa.setBorder(BorderFactory.createEmptyBorder(6, rientro(livello), 6, 14));
+            testa.setBorder(Aspetto.bordo(6, rientro(livello), 6, 14));
             testa.setCursor(java.awt.Cursor.getPredefinedCursor(java.awt.Cursor.HAND_CURSOR));
 
             freccia.setText("▸");
             freccia.setForeground(Aspetto.TESTO_DEBOLE);
-            freccia.setFont(freccia.getFont().deriveFont(12f));
-            freccia.setPreferredSize(new Dimension(14, 16));
+            freccia.setFont(freccia.getFont().deriveFont(Aspetto.punti(12f)));
+            freccia.setPreferredSize(Aspetto.dim(14, 16));
             testa.add(freccia, BorderLayout.WEST);
 
             titolo.setText(etichetta);
-            titolo.setFont(titolo.getFont().deriveFont(Font.BOLD, 12.5f));
+            titolo.setFont(titolo.getFont().deriveFont(Font.BOLD, Aspetto.punti(12.5f)));
             titolo.setForeground(Aspetto.TESTO);
             testa.add(titolo, BorderLayout.CENTER);
 
@@ -325,7 +325,7 @@ public final class PannelloCampi extends JPanel {
                         JLabel resto = new JLabel("   ... e altri " + (lista.size() - mostrati) + " elementi");
                         resto.setFont(Aspetto.monospaziato(11, Font.PLAIN));
                         resto.setForeground(Aspetto.TESTO_DEBOLE);
-                        resto.setBorder(BorderFactory.createEmptyBorder(6, rientro(livello + 1), 6, 14));
+                        resto.setBorder(Aspetto.bordo(6, rientro(livello + 1), 6, 14));
                         corpo.add(resto);
                     }
                 }
@@ -367,14 +367,14 @@ public final class PannelloCampi extends JPanel {
             this.nomeCampo = chiave;
             setLayout(new BorderLayout(12, 0));
             setBackground(Aspetto.PANNELLO);
-            setBorder(BorderFactory.createEmptyBorder(3, rientro(livello), 3, 14));
+            setBorder(Aspetto.bordo(3, rientro(livello), 3, 14));
             setAlignmentX(Component.LEFT_ALIGNMENT);
-            setMaximumSize(new Dimension(Integer.MAX_VALUE, 34));
+            setMaximumSize(Aspetto.dim(Integer.MAX_VALUE, 34));
 
             JLabel nome = new JLabel(etichetta);
-            nome.setFont(nome.getFont().deriveFont(12f));
+            nome.setFont(nome.getFont().deriveFont(Aspetto.punti(12f)));
             nome.setForeground(Aspetto.TESTO_TENUE);
-            nome.setPreferredSize(new Dimension(larghezzaEtichette - rientro(livello), 26));
+            nome.setPreferredSize(Aspetto.dim(larghezzaEtichette - rientro(livello), 26));
             nome.setToolTipText(chiave + (Etichette.conosciuto(chiave) ? "" : "  (nome non tradotto)"));
             add(nome, BorderLayout.WEST);
 
@@ -386,8 +386,8 @@ public final class PannelloCampi extends JPanel {
                 JToggleButton interruttore = new JToggleButton();
                 interruttore.setSelected(((Boolean) valore).booleanValue());
                 interruttore.setText(((Boolean) valore).booleanValue() ? "sì" : "no");
-                interruttore.setFont(interruttore.getFont().deriveFont(11.5f));
-                interruttore.setPreferredSize(new Dimension(72, 26));
+                interruttore.setFont(interruttore.getFont().deriveFont(Aspetto.punti(11.5f)));
+                interruttore.setPreferredSize(Aspetto.dim(72, 26));
                 interruttore.addActionListener(new ActionListener() {
                     public void actionPerformed(ActionEvent e) {
                         JToggleButton t = (JToggleButton) e.getSource();
@@ -412,8 +412,8 @@ public final class PannelloCampi extends JPanel {
             JTextField campo = new JTextField(valore == null ? "" : testoDi(valore));
             campo.setFont(Aspetto.monospaziato(12, Font.PLAIN));
             campo.setHorizontalAlignment(SwingConstants.RIGHT);
-            campo.setPreferredSize(new Dimension(240, 26));
-            campo.setMaximumSize(new Dimension(240, 26));
+            campo.setPreferredSize(Aspetto.dim(240, 26));
+            campo.setMaximumSize(Aspetto.dim(240, 26));
             campo.setToolTipText("Modifica e premi Invio");
             campo.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
@@ -433,17 +433,17 @@ public final class PannelloCampi extends JPanel {
             JLabel immagine = new JLabel();
             ImageIcon img = icone.perFile(voce.icona, 26);
             immagine.setIcon(img != null ? img : Icone.segno("?", 26, Aspetto.TESTO_DEBOLE, true));
-            immagine.setPreferredSize(new Dimension(28, 28));
+            immagine.setPreferredSize(Aspetto.dim(28, 28));
             p.add(immagine, BorderLayout.WEST);
 
             JLabel nome = new JLabel(voce.etichetta());
-            nome.setFont(nome.getFont().deriveFont(Font.BOLD, 12.5f));
+            nome.setFont(nome.getFont().deriveFont(Font.BOLD, Aspetto.punti(12.5f)));
             nome.setForeground(Aspetto.ATTENZIONE);
             p.add(nome, BorderLayout.CENTER);
 
             JButton cambia = new JButton("Cambia...");
-            cambia.setFont(cambia.getFont().deriveFont(11.5f));
-            cambia.setPreferredSize(new Dimension(96, 26));
+            cambia.setFont(cambia.getFont().deriveFont(Aspetto.punti(11.5f)));
+            cambia.setPreferredSize(Aspetto.dim(96, 26));
             cambia.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
                     PannelloDettagli.SelettoreOggetto s = new PannelloDettagli.SelettoreOggetto(

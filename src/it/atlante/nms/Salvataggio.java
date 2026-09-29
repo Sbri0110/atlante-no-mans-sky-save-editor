@@ -49,6 +49,8 @@ public final class Salvataggio {
     private long dimensioneCompressa;
     private long dimensioneDecompressa;
     private int blocchi;
+    /** Nota sull'ultima scrittura: come e' andata con l'indice dei contenitori. */
+    private String notaIndice = "";
 
     private Salvataggio(File file, MappaChiavi mappa, Formato formato, Object albero) {
         this.file = file;
@@ -118,6 +120,11 @@ public final class Salvataggio {
         return blocchi;
     }
 
+    /** Come e' andata con l'indice dei contenitori nell'ultima scrittura. */
+    public String notaIndice() {
+        return notaIndice;
+    }
+
     /** Riassunto per la barra di stato. */
     public String riepilogo() {
         return String.format("%s · %s · %s compressi, %s decompressi, %d blocchi",
@@ -159,7 +166,15 @@ public final class Salvataggio {
         mappa.cifra(albero);
         String json = Json.scrivi(albero);
         mappa.traduci(albero);
-        return json.getBytes(UTF8);
+        byte[] utf8 = json.getBytes(UTF8);
+        // Il motore di No Man's Sky (C++) tratta il buffer di salvataggio scompattato
+        // come stringa C a terminazione nulla (char*). Se il byte nullo finale manca,
+        // la lettura supera il buffer di JSON o genera errori di sintassi provocando
+        // il reset del giocatore ("Avviare l'inizializzazione?").
+        byte[] conTerminatore = new byte[utf8.length + 1];
+        System.arraycopy(utf8, 0, conTerminatore, 0, utf8.length);
+        conTerminatore[utf8.length] = 0;
+        return conTerminatore;
     }
 
     /**
@@ -215,6 +230,14 @@ public final class Salvataggio {
         dimensioneDecompressa = testo.length;
         blocchi = r.blocchi;
         modificato = false;
+
+        // Su Xbox Game Pass il salvataggio non e' un file sciolto ma un
+        // contenitore, e containers.index ne registra la dimensione: riscrivere
+        // il payload la cambia, e se l'indice resta indietro il gioco non
+        // riconosce piu' la partita. Inoltre il file dei metadati memorizza
+        // la dimensione scompattata al byte 16, usata dal gioco per allocare
+        // il buffer di decompressione LZ4.
+        notaIndice = ContenitoreWgs.aggiornaContenitore(file, dimensioneDecompressa);
         return backup;
     }
 

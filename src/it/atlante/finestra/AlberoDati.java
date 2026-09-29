@@ -51,7 +51,7 @@ public final class AlberoDati extends JTree {
 
         setRootVisible(true);
         setShowsRootHandles(true);
-        setRowHeight(0);              // altezza decisa dal renderer
+        setRowHeight(Aspetto.px(0));              // altezza decisa dal renderer
         setBackground(Aspetto.PANNELLO);
         setForeground(Aspetto.TESTO);
         setCellRenderer(new Disegnatore());
@@ -323,7 +323,7 @@ public final class AlberoDati extends JTree {
 
         Disegnatore() {
             pannello.setOpaque(true);
-            pannello.setBorder(javax.swing.BorderFactory.createEmptyBorder(2, 2, 2, 6));
+            pannello.setBorder(Aspetto.bordo(2, 2, 2, 6));
             pannello.add(icona, BorderLayout.WEST);
             pannello.add(testo, BorderLayout.CENTER);
         }
@@ -471,6 +471,6 @@ public final class AlberoDati extends JTree {
     /** Dimensione preferita dell'albero, per i calcoli di layout. */
     @Override
     public Dimension getPreferredScrollableViewportSize() {
-        return new Dimension(520, 600);
+        return Aspetto.dim(520, 600);
     }
 }

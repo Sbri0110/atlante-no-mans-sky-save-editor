@@ -88,7 +88,7 @@ public final class Schermate {
         // (1786734240000 ms) - una data qualunque, scelta una volta e non
         // piu' toccata.
         finestra.fissaDataModifica(1786734240000L);
-        finestra.setSize(1500, 940);
+        finestra.setSize(Aspetto.px(1500), Aspetto.px(940));
         finestra.setVisible(true);
 
         if (!finestra.apriPrimoTrovato()) {

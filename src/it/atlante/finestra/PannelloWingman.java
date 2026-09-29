@@ -88,18 +88,18 @@ public final class PannelloWingman extends JPanel {
         // --- testa: l'icona della razza e il nome del pilota ---
         JPanel testa = new JPanel(new BorderLayout(14, 0));
         testa.setOpaque(false);
-        testa.setBorder(BorderFactory.createEmptyBorder(16, 18, 12, 18));
+        testa.setBorder(Aspetto.bordo(16, 18, 12, 18));
         testa.setAlignmentX(Component.LEFT_ALIGNMENT);
-        testa.setMaximumSize(new Dimension(Integer.MAX_VALUE, 92));
-        icona.setPreferredSize(new Dimension(56, 56));
+        testa.setMaximumSize(Aspetto.dim(Integer.MAX_VALUE, 92));
+        icona.setPreferredSize(Aspetto.dim(56, 56));
         testa.add(icona, BorderLayout.WEST);
         JPanel testi = new JPanel();
         testi.setOpaque(false);
         testi.setLayout(new BoxLayout(testi, BoxLayout.Y_AXIS));
-        nome.setFont(nome.getFont().deriveFont(Font.BOLD, 15f));
+        nome.setFont(nome.getFont().deriveFont(Font.BOLD, Aspetto.punti(15f)));
         nome.setForeground(Aspetto.TESTO);
         nome.setAlignmentX(Component.LEFT_ALIGNMENT);
-        sotto.setFont(sotto.getFont().deriveFont(11.5f));
+        sotto.setFont(sotto.getFont().deriveFont(Aspetto.punti(11.5f)));
         sotto.setForeground(Aspetto.TESTO_TENUE);
         sotto.setAlignmentX(Component.LEFT_ALIGNMENT);
         testi.add(nome);
@@ -112,23 +112,23 @@ public final class PannelloWingman extends JPanel {
         JPanel campi = new JPanel();
         campi.setOpaque(false);
         campi.setLayout(new BoxLayout(campi, BoxLayout.Y_AXIS));
-        campi.setBorder(BorderFactory.createEmptyBorder(0, 18, 12, 18));
+        campi.setBorder(Aspetto.bordo(0, 18, 12, 18));
         campi.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         attivo.setOpaque(false);
-        attivo.setFont(attivo.getFont().deriveFont(12f));
+        attivo.setFont(attivo.getFont().deriveFont(Aspetto.punti(12f)));
         attivo.setForeground(Aspetto.TESTO);
         campi.add(rigaSemplice(attivo));
 
-        iconaRazza.setPreferredSize(new Dimension(26, 26));
-        razza.setFont(razza.getFont().deriveFont(12f));
+        iconaRazza.setPreferredSize(Aspetto.dim(26, 26));
+        razza.setFont(razza.getFont().deriveFont(Aspetto.punti(12f)));
         campi.add(riga("Razza NPC", conIcona(iconaRazza, razza)));
 
         seedNpc.setFont(Aspetto.monospaziato(12, Font.PLAIN));
         campi.add(riga("Seed NPC", conPulsante(seedNpc, generaNpc)));
 
-        iconaNave.setPreferredSize(new Dimension(26, 26));
-        nave.setFont(nave.getFont().deriveFont(12f));
+        iconaNave.setPreferredSize(Aspetto.dim(26, 26));
+        nave.setFont(nave.getFont().deriveFont(Aspetto.punti(12f)));
         campi.add(riga("Tipo di astronave", conIcona(iconaNave, nave)));
 
         seedNave.setFont(Aspetto.monospaziato(12, Font.PLAIN));
@@ -148,8 +148,8 @@ public final class PannelloWingman extends JPanel {
     private JPanel rigaSemplice(Component editor) {
         JPanel r = new JPanel(new BorderLayout(10, 0));
         r.setOpaque(false);
-        r.setBorder(BorderFactory.createEmptyBorder(4, 0, 4, 0));
-        r.setMaximumSize(new Dimension(Integer.MAX_VALUE, 30));
+        r.setBorder(Aspetto.bordo(4, 0, 4, 0));
+        r.setMaximumSize(Aspetto.dim(Integer.MAX_VALUE, 30));
         r.add(editor, BorderLayout.WEST);
         return r;
     }
@@ -157,12 +157,12 @@ public final class PannelloWingman extends JPanel {
     private JPanel riga(String etichetta, Component editor) {
         JPanel r = new JPanel(new BorderLayout(10, 0));
         r.setOpaque(false);
-        r.setBorder(BorderFactory.createEmptyBorder(4, 0, 4, 0));
-        r.setMaximumSize(new Dimension(Integer.MAX_VALUE, 32));
+        r.setBorder(Aspetto.bordo(4, 0, 4, 0));
+        r.setMaximumSize(Aspetto.dim(Integer.MAX_VALUE, 32));
         JLabel l = new JLabel(etichetta);
-        l.setFont(l.getFont().deriveFont(11.5f));
+        l.setFont(l.getFont().deriveFont(Aspetto.punti(11.5f)));
         l.setForeground(Aspetto.TESTO_DEBOLE);
-        l.setPreferredSize(new Dimension(126, 24));
+        l.setPreferredSize(Aspetto.dim(126, 24));
         r.add(l, BorderLayout.WEST);
         r.add(editor, BorderLayout.CENTER);
         return r;
@@ -181,7 +181,7 @@ public final class PannelloWingman extends JPanel {
     private JPanel conPulsante(JTextField campo, JButton pulsante) {
         JPanel p = new JPanel(new BorderLayout(6, 0));
         p.setOpaque(false);
-        pulsante.setFont(pulsante.getFont().deriveFont(11.5f));
+        pulsante.setFont(pulsante.getFont().deriveFont(Aspetto.punti(11.5f)));
         p.add(campo, BorderLayout.CENTER);
         p.add(pulsante, BorderLayout.EAST);
         return p;

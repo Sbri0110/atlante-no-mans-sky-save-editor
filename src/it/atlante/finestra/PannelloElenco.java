@@ -107,19 +107,19 @@ public final class PannelloElenco extends JPanel {
         elenco.setBackground(Aspetto.PANNELLO);
         elenco.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         elenco.setCellRenderer(new Disegnatore());
-        elenco.setFixedCellHeight(50);
+        elenco.setFixedCellHeight(Aspetto.px(50));
 
         JScrollPane scorrimento = new JScrollPane(elenco);
         scorrimento.setBorder(BorderFactory.createEmptyBorder());
-        scorrimento.getVerticalScrollBar().setUnitIncrement(16);
+        scorrimento.getVerticalScrollBar().setUnitIncrement(Aspetto.px(16));
 
         titolo.setFont(Aspetto.monospaziato(10.5f, Font.BOLD));
         titolo.setForeground(Aspetto.ACCENTO);
-        titolo.setBorder(BorderFactory.createEmptyBorder(14, 14, 6, 14));
+        titolo.setBorder(Aspetto.bordo(14, 14, 6, 14));
 
         conteggio.setFont(Aspetto.monospaziato(10.5f, Font.PLAIN));
         conteggio.setForeground(Aspetto.TESTO_DEBOLE);
-        conteggio.setBorder(BorderFactory.createEmptyBorder(0, 14, 10, 14));
+        conteggio.setBorder(Aspetto.bordo(0, 14, 10, 14));
 
         JPanel testa = new JPanel(new BorderLayout());
         testa.setBackground(Aspetto.PANNELLO);
@@ -128,26 +128,26 @@ public final class PannelloElenco extends JPanel {
 
         JPanel sinistra = new JPanel(new BorderLayout());
         sinistra.setBackground(Aspetto.PANNELLO);
-        sinistra.setBorder(BorderFactory.createMatteBorder(0, 0, 0, 1, Aspetto.BORDO));
+        sinistra.setBorder(Aspetto.matte(0, 0, 0, 1, Aspetto.BORDO));
         sinistra.add(testa, BorderLayout.NORTH);
         sinistra.add(scorrimento, BorderLayout.CENTER);
-        sinistra.setPreferredSize(new Dimension(320, 500));
+        sinistra.setPreferredSize(Aspetto.dim(320, 500));
 
         // --- testata a destra: quello che hai scelto, con la sua icona ---
         testata.setBackground(Aspetto.FONDO_ALTO);
         testata.setLayout(new BorderLayout(12, 0));
         testata.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createMatteBorder(0, 0, 1, 0, Aspetto.BORDO),
-                BorderFactory.createEmptyBorder(12, 16, 12, 16)));
-        testataIcona.setPreferredSize(new Dimension(52, 52));
+                Aspetto.matte(0, 0, 1, 0, Aspetto.BORDO),
+                Aspetto.bordo(12, 16, 12, 16)));
+        testataIcona.setPreferredSize(Aspetto.dim(52, 52));
         testata.add(testataIcona, BorderLayout.WEST);
         JPanel testiTestata = new JPanel();
         testiTestata.setOpaque(false);
         testiTestata.setLayout(new javax.swing.BoxLayout(testiTestata, javax.swing.BoxLayout.Y_AXIS));
-        testataNome.setFont(testataNome.getFont().deriveFont(Font.BOLD, 15f));
+        testataNome.setFont(testataNome.getFont().deriveFont(Font.BOLD, Aspetto.punti(15f)));
         testataNome.setForeground(Aspetto.TESTO);
         testataNome.setAlignmentX(Component.LEFT_ALIGNMENT);
-        testataSotto.setFont(testataSotto.getFont().deriveFont(11.5f));
+        testataSotto.setFont(testataSotto.getFont().deriveFont(Aspetto.punti(11.5f)));
         testataSotto.setForeground(Aspetto.TESTO_TENUE);
         testataSotto.setAlignmentX(Component.LEFT_ALIGNMENT);
         testiTestata.add(testataNome);
@@ -496,7 +496,7 @@ public final class PannelloElenco extends JPanel {
 
         Disegnatore() {
             setLayout(new BorderLayout(10, 0));
-            setBorder(BorderFactory.createEmptyBorder(6, 10, 6, 10));
+            setBorder(Aspetto.bordo(6, 10, 6, 10));
 
             // L'icona della cosa e, piu' piccola accanto, quella della sua
             // navicella: un pilota dello squadrone si riconosce dalla razza e
@@ -504,10 +504,10 @@ public final class PannelloElenco extends JPanel {
             JPanel immagini = new JPanel();
             immagini.setOpaque(false);
             immagini.setLayout(new javax.swing.BoxLayout(immagini, javax.swing.BoxLayout.X_AXIS));
-            icona.setPreferredSize(new Dimension(34, 34));
-            icona.setMaximumSize(new Dimension(34, 34));
-            icona2.setPreferredSize(new Dimension(26, 26));
-            icona2.setMaximumSize(new Dimension(26, 26));
+            icona.setPreferredSize(Aspetto.dim(34, 34));
+            icona.setMaximumSize(Aspetto.dim(34, 34));
+            icona2.setPreferredSize(Aspetto.dim(26, 26));
+            icona2.setMaximumSize(Aspetto.dim(26, 26));
             immagini.add(icona);
             immagini.add(javax.swing.Box.createHorizontalStrut(4));
             immagini.add(icona2);
@@ -516,8 +516,8 @@ public final class PannelloElenco extends JPanel {
             JPanel testi = new JPanel();
             testi.setOpaque(false);
             testi.setLayout(new javax.swing.BoxLayout(testi, javax.swing.BoxLayout.Y_AXIS));
-            nome.setFont(nome.getFont().deriveFont(Font.BOLD, 12.5f));
-            sotto.setFont(sotto.getFont().deriveFont(10.5f));
+            nome.setFont(nome.getFont().deriveFont(Font.BOLD, Aspetto.punti(12.5f)));
+            sotto.setFont(sotto.getFont().deriveFont(Aspetto.punti(10.5f)));
             sotto.setForeground(Aspetto.TESTO_DEBOLE);
             testi.add(nome);
             testi.add(sotto);

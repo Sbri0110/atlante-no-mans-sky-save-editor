@@ -145,6 +145,13 @@ public final class Rilevatore {
                 if (!s.nomeSalvataggio.isEmpty()) {
                     etichetta = etichetta + " — " + s.nomeSalvataggio;
                 }
+                // Dove si trovava il giocatore: e' l'unica cosa che distingue
+                // l'automatico dal manuale, che hanno lo stesso nome. Senza,
+                // nella tendina i due slot sono identici — e il gioco carica il
+                // piu' recente dei due, quindi modificare l'altro non si vede.
+                if (!s.doveTiTrovi.isEmpty()) {
+                    etichetta = etichetta + " · " + s.doveTiTrovi;
+                }
                 dentro.add(new Voce("Xbox Game Pass", etichetta, s.payload, Formato.BLOCCHI));
             }
         }

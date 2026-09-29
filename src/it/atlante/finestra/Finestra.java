@@ -109,8 +109,8 @@ public final class Finestra extends JFrame {
         this.testata = new Testata();
 
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setMinimumSize(new Dimension(1180, 720));
-        setSize(1440, 900);
+        setMinimumSize(Aspetto.dim(1180, 720));
+        setSize(Aspetto.px(1440), Aspetto.px(900));
         setLocationRelativeTo(null);
         // Il marchio rosso su finestra, barra delle applicazioni e anteprime.
         Marchio.applicaA(this);
@@ -228,7 +228,7 @@ public final class Finestra extends JFrame {
 
         JSplitPane principaleSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, sinistra, centro);
         principaleSplit.setResizeWeight(0.0);
-        principaleSplit.setDividerLocation(252);
+        principaleSplit.setDividerLocation(Aspetto.px(252));
         principaleSplit.setBorder(BorderFactory.createEmptyBorder());
         principaleSplit.setDividerSize(6);
         corpo.add(principaleSplit, BorderLayout.CENTER);
@@ -239,21 +239,23 @@ public final class Finestra extends JFrame {
         JPanel barra = new JPanel(new BorderLayout(12, 0));
         barra.setBackground(Aspetto.FONDO_ALTO);
         barra.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createMatteBorder(0, 0, 1, 0, Aspetto.BORDO),
-                BorderFactory.createEmptyBorder(10, 16, 10, 16)));
+                Aspetto.matte(0, 0, 1, 0, Aspetto.BORDO),
+                Aspetto.bordo(10, 16, 10, 16)));
 
         JPanel comandi = new JPanel(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT, 8, 0));
         comandi.setOpaque(false);
-        apri.setFont(apri.getFont().deriveFont(12.5f));
-        salva.setFont(salva.getFont().deriveFont(Font.BOLD, 12.5f));
-        salvaCome.setFont(salvaCome.getFont().deriveFont(12.5f));
+        apri.setFont(apri.getFont().deriveFont(Aspetto.punti(12.5f)));
+        salva.setFont(salva.getFont().deriveFont(Font.BOLD, Aspetto.punti(12.5f)));
+        salvaCome.setFont(salvaCome.getFont().deriveFont(Aspetto.punti(12.5f)));
         salva.setEnabled(false);
         salvaCome.setEnabled(false);
 
         // I salvataggi trovati stanno qui invece che in una colonna: si scelgono
         // una volta all'inizio, mentre le sezioni si cambiano di continuo.
-        comboSalvataggi.setPreferredSize(new Dimension(330, 30));
-        comboSalvataggi.setFont(comboSalvataggi.getFont().deriveFont(12.5f));
+        // Larghezza pensata per l'etichetta piu' lunga possibile: nome dello
+        // slot, nome della partita e luogo, che insieme passano i 400 pixel.
+        comboSalvataggi.setPreferredSize(Aspetto.dim(430, 30));
+        comboSalvataggi.setFont(comboSalvataggi.getFont().deriveFont(Aspetto.punti(12.5f)));
         comboSalvataggi.setRenderer(new DisegnatoreSalvataggio());
         comboSalvataggi.setToolTipText("Salvataggi trovati sulla macchina");
 
@@ -263,8 +265,8 @@ public final class Finestra extends JFrame {
         comandi.add(salvaCome);
         barra.add(comandi, BorderLayout.WEST);
 
-        cerca.setPreferredSize(new Dimension(300, 30));
-        cerca.setFont(cerca.getFont().deriveFont(12.5f));
+        cerca.setPreferredSize(Aspetto.dim(300, 30));
+        cerca.setFont(cerca.getFont().deriveFont(Aspetto.punti(12.5f)));
         cerca.putClientProperty("JTextField.placeholderText", "Cerca un campo o un oggetto...");
         cerca.putClientProperty("JTextField.leadingIcon",
                 Icone.segno("?", 16, Aspetto.TESTO_DEBOLE, false));
@@ -286,23 +288,23 @@ public final class Finestra extends JFrame {
         elencoSezioni.setBackground(Aspetto.PANNELLO);
         elencoSezioni.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         elencoSezioni.setCellRenderer(new DisegnatoreSezione());
-        elencoSezioni.setFixedCellHeight(46);
+        elencoSezioni.setFixedCellHeight(Aspetto.px(46));
 
         JScrollPane scorrimento = new JScrollPane(elencoSezioni);
         scorrimento.setBorder(BorderFactory.createEmptyBorder());
-        scorrimento.getVerticalScrollBar().setUnitIncrement(16);
+        scorrimento.getVerticalScrollBar().setUnitIncrement(Aspetto.px(16));
 
         JLabel titolo = new JLabel("  SEZIONI");
         titolo.setFont(Aspetto.monospaziato(10, Font.BOLD));
         titolo.setForeground(Aspetto.TESTO_DEBOLE);
-        titolo.setBorder(BorderFactory.createEmptyBorder(12, 8, 8, 8));
+        titolo.setBorder(Aspetto.bordo(12, 8, 8, 8));
 
         JPanel pannello = new JPanel(new BorderLayout());
         pannello.setBackground(Aspetto.PANNELLO);
-        pannello.setBorder(BorderFactory.createMatteBorder(0, 0, 0, 1, Aspetto.BORDO));
+        pannello.setBorder(Aspetto.matte(0, 0, 0, 1, Aspetto.BORDO));
         pannello.add(titolo, BorderLayout.NORTH);
         pannello.add(scorrimento, BorderLayout.CENTER);
-        pannello.setPreferredSize(new Dimension(252, 600));
+        pannello.setPreferredSize(Aspetto.dim(252, 600));
 
         for (Navigazione.Sezione s : Navigazione.elenco()) {
             modelloSezioni.addElement(s);
@@ -314,11 +316,11 @@ public final class Finestra extends JFrame {
         JPanel barra = new JPanel(new BorderLayout(12, 0));
         barra.setBackground(Aspetto.FONDO_ALTO);
         barra.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createMatteBorder(1, 0, 0, 0, Aspetto.BORDO),
-                BorderFactory.createEmptyBorder(7, 16, 7, 16)));
+                Aspetto.matte(1, 0, 0, 0, Aspetto.BORDO),
+                Aspetto.bordo(7, 16, 7, 16)));
         stato.setFont(Aspetto.monospaziato(11.5f, Font.PLAIN));
         stato.setForeground(Aspetto.TESTO_TENUE);
-        messaggio.setFont(messaggio.getFont().deriveFont(11.5f));
+        messaggio.setFont(messaggio.getFont().deriveFont(Aspetto.punti(11.5f)));
         messaggio.setForeground(Aspetto.TESTO_DEBOLE);
         barra.add(stato, BorderLayout.WEST);
         barra.add(messaggio, BorderLayout.EAST);
@@ -749,12 +751,15 @@ public final class Finestra extends JFrame {
             File backup = salvataggio.salva(cartellaBackup);
             testata.aggiorna(salvataggio);
             aggiornaStato(salvataggio.riepilogo());
+            String nota = salvataggio.notaIndice();
             messaggio.setText(backup == null
                     ? "Salvato"
                     : "Salvato. Copia di sicurezza: " + backup.getName());
             JOptionPane.showMessageDialog(this,
                     "Salvataggio scritto e verificato.\n\n"
-                            + (backup == null ? "" : "Copia di sicurezza:\n" + backup.getAbsolutePath()),
+                            + (backup == null ? "" : "Copia di sicurezza:\n" + backup.getAbsolutePath()
+                                    + "\n\n")
+                            + (nota.isEmpty() ? "" : nota),
                     "Fatto", JOptionPane.INFORMATION_MESSAGE);
         } catch (IOException e) {
             JOptionPane.showMessageDialog(this,
@@ -867,8 +872,8 @@ public final class Finestra extends JFrame {
         Testata() {
             setLayout(new BorderLayout(16, 0));
             setOpaque(false);
-            setBorder(BorderFactory.createEmptyBorder(16, 22, 16, 22));
-            setPreferredSize(new Dimension(1000, 104));
+            setBorder(Aspetto.bordo(16, 22, 16, 22));
+            setPreferredSize(Aspetto.dim(1000, 104));
 
             // Il marchio occupa una colonna propria: dipingerlo sopra il testo
             // lo faceva sovrapporre al titolo.
@@ -882,20 +887,20 @@ public final class Finestra extends JFrame {
                 marchio = new ImageIcon(logo.getAbsolutePath());
                 JLabel etichettaMarchio = new JLabel(marchio);
                 etichettaMarchio.setVerticalAlignment(SwingConstants.CENTER);
-                etichettaMarchio.setPreferredSize(new Dimension(72, 72));
+                etichettaMarchio.setPreferredSize(Aspetto.dim(72, 72));
                 colonnaMarchio.add(etichettaMarchio, BorderLayout.CENTER);
             }
-            colonnaMarchio.setPreferredSize(new Dimension(80, 72));
+            colonnaMarchio.setPreferredSize(Aspetto.dim(80, 72));
             add(colonnaMarchio, BorderLayout.WEST);
 
             JPanel testi = new JPanel();
             testi.setOpaque(false);
             testi.setLayout(new BoxLayout(testi, BoxLayout.Y_AXIS));
             JLabel titolo = new JLabel("ATLANTE");
-            titolo.setFont(titolo.getFont().deriveFont(Font.BOLD, 20f));
+            titolo.setFont(titolo.getFont().deriveFont(Font.BOLD, Aspetto.punti(20f)));
             titolo.setForeground(Aspetto.TESTO);
             titolo.setAlignmentX(Component.LEFT_ALIGNMENT);
-            nomeSalvataggio.setFont(nomeSalvataggio.getFont().deriveFont(14f));
+            nomeSalvataggio.setFont(nomeSalvataggio.getFont().deriveFont(Aspetto.punti(14f)));
             nomeSalvataggio.setForeground(Aspetto.ACCENTO_CHIARO);
             nomeSalvataggio.setAlignmentX(Component.LEFT_ALIGNMENT);
             percorso.setFont(Aspetto.monospaziato(10.5f, Font.PLAIN));
@@ -1001,10 +1006,12 @@ public final class Finestra extends JFrame {
         @Override
         public Dimension getPreferredSize() {
             if (testo == null) {
-                return new Dimension(0, 0);
+                return Aspetto.dim(0, 0);
             }
             java.awt.FontMetrics fm = getFontMetrics(getFont());
-            return new Dimension(fm.stringWidth(testo) + 24, 24);
+            // Il testo e' gia' misurato con il carattere ingrandito: si
+            // ingrandisce solo il margine.
+            return new Dimension(fm.stringWidth(testo) + Aspetto.px(24), Aspetto.px(24));
         }
 
         @Override
@@ -1035,13 +1042,13 @@ public final class Finestra extends JFrame {
 
         DisegnatoreSezione() {
             setLayout(new BorderLayout(10, 0));
-            setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 8));
+            setBorder(Aspetto.bordo(5, 10, 5, 8));
             add(icona, BorderLayout.WEST);
             JPanel testi = new JPanel();
             testi.setOpaque(false);
             testi.setLayout(new BoxLayout(testi, BoxLayout.Y_AXIS));
-            titolo.setFont(titolo.getFont().deriveFont(Font.BOLD, 12.5f));
-            dettaglio.setFont(dettaglio.getFont().deriveFont(10.5f));
+            titolo.setFont(titolo.getFont().deriveFont(Font.BOLD, Aspetto.punti(12.5f)));
+            dettaglio.setFont(dettaglio.getFont().deriveFont(Aspetto.punti(10.5f)));
             dettaglio.setForeground(Aspetto.TESTO_DEBOLE);
             testi.add(titolo);
             testi.add(dettaglio);
@@ -1076,13 +1083,13 @@ public final class Finestra extends JFrame {
 
         DisegnatoreSalvataggio() {
             setLayout(new BorderLayout(9, 0));
-            setBorder(BorderFactory.createEmptyBorder(3, 8, 3, 8));
+            setBorder(Aspetto.bordo(3, 8, 3, 8));
             add(icona, BorderLayout.WEST);
             JPanel testi = new JPanel();
             testi.setOpaque(false);
             testi.setLayout(new BoxLayout(testi, BoxLayout.Y_AXIS));
-            titolo.setFont(titolo.getFont().deriveFont(Font.BOLD, 12f));
-            dettaglio.setFont(dettaglio.getFont().deriveFont(10.5f));
+            titolo.setFont(titolo.getFont().deriveFont(Font.BOLD, Aspetto.punti(12f)));
+            dettaglio.setFont(dettaglio.getFont().deriveFont(Aspetto.punti(10.5f)));
             dettaglio.setForeground(Aspetto.TESTO_DEBOLE);
             testi.add(titolo);
             testi.add(dettaglio);

@@ -93,17 +93,17 @@ public final class PannelloPremi extends JPanel {
         setLayout(new BorderLayout());
         setBackground(Aspetto.PANNELLO);
         contenitore.setBackground(Aspetto.PANNELLO);
-        contenitore.setBorder(BorderFactory.createEmptyBorder(10, 14, 20, 14));
+        contenitore.setBorder(Aspetto.bordo(10, 14, 20, 14));
 
         add(costruisciBarra(), BorderLayout.NORTH);
 
         JScrollPane scorrimento = new JScrollPane(contenitore);
         scorrimento.setBorder(BorderFactory.createEmptyBorder());
-        scorrimento.getVerticalScrollBar().setUnitIncrement(18);
+        scorrimento.getVerticalScrollBar().setUnitIncrement(Aspetto.px(18));
         add(scorrimento, BorderLayout.CENTER);
 
         vuoto.setForeground(Aspetto.TESTO_DEBOLE);
-        vuoto.setFont(vuoto.getFont().deriveFont(12.5f));
+        vuoto.setFont(vuoto.getFont().deriveFont(Aspetto.punti(12.5f)));
     }
 
     /** Contenitore che si adatta in larghezza ma non in altezza. */
@@ -140,16 +140,16 @@ public final class PannelloPremi extends JPanel {
         JPanel barra = new JPanel(new BorderLayout(12, 0));
         barra.setBackground(Aspetto.FONDO_ALTO);
         barra.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createMatteBorder(0, 0, 1, 0, Aspetto.BORDO),
-                BorderFactory.createEmptyBorder(10, 16, 10, 16)));
+                Aspetto.matte(0, 0, 1, 0, Aspetto.BORDO),
+                Aspetto.bordo(10, 16, 10, 16)));
 
         JPanel schede = new JPanel(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT, 6, 0));
         schede.setOpaque(false);
         final javax.swing.JToggleButton sped = new javax.swing.JToggleButton("Spedizioni");
         final javax.swing.JToggleButton twit = new javax.swing.JToggleButton("Twitch Drops");
         sped.setSelected(true);
-        sped.setFont(sped.getFont().deriveFont(12f));
-        twit.setFont(twit.getFont().deriveFont(12f));
+        sped.setFont(sped.getFont().deriveFont(Aspetto.punti(12f)));
+        twit.setFont(twit.getFont().deriveFont(Aspetto.punti(12f)));
         javax.swing.ButtonGroup gruppo = new javax.swing.ButtonGroup();
         gruppo.add(sped);
         gruppo.add(twit);
@@ -175,7 +175,7 @@ public final class PannelloPremi extends JPanel {
         contatore.setForeground(Aspetto.TESTO_TENUE);
         destra.add(contatore);
 
-        cerca.setPreferredSize(new Dimension(190, 28));
+        cerca.setPreferredSize(Aspetto.dim(190, 28));
         cerca.setToolTipText("Cerca un premio per nome");
         cerca.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -185,7 +185,7 @@ public final class PannelloPremi extends JPanel {
         destra.add(cerca);
 
         JButton tutto = new JButton("Sblocca tutti i mancanti");
-        tutto.setFont(tutto.getFont().deriveFont(11.5f));
+        tutto.setFont(tutto.getFont().deriveFont(Aspetto.punti(11.5f)));
         tutto.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 sbloccaTutto();
@@ -391,7 +391,7 @@ public final class PannelloPremi extends JPanel {
             setLayout(new BorderLayout());
             setBackground(Aspetto.PANNELLO);
             setAlignmentX(Component.LEFT_ALIGNMENT);
-            setBorder(BorderFactory.createEmptyBorder(0, 0, 8, 0));
+            setBorder(Aspetto.bordo(0, 0, 8, 0));
 
             int fatti = 0;
             for (Premi.Premio p : premi) {
@@ -403,15 +403,15 @@ public final class PannelloPremi extends JPanel {
             JPanel testa = new JPanel(new BorderLayout(10, 0));
             testa.setBackground(Aspetto.FONDO_ALTO);
             testa.setBorder(BorderFactory.createCompoundBorder(
-                    BorderFactory.createMatteBorder(0, 0, 1, 0, Aspetto.BORDO),
-                    BorderFactory.createEmptyBorder(9, 12, 9, 12)));
+                    Aspetto.matte(0, 0, 1, 0, Aspetto.BORDO),
+                    Aspetto.bordo(9, 12, 9, 12)));
 
             JPanel sinistra = new JPanel(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT, 8, 0));
             sinistra.setOpaque(false);
             freccia.setForeground(Aspetto.TESTO_DEBOLE);
             sinistra.add(freccia);
             JLabel nome = new JLabel(titolo);
-            nome.setFont(nome.getFont().deriveFont(Font.BOLD, 13f));
+            nome.setFont(nome.getFont().deriveFont(Font.BOLD, Aspetto.punti(13f)));
             nome.setForeground(Aspetto.TESTO);
             sinistra.add(nome);
             JLabel stato = new JLabel(fatti + " / " + premi.size()
@@ -423,7 +423,7 @@ public final class PannelloPremi extends JPanel {
 
             if (fatti < premi.size()) {
                 JButton sblocca = new JButton("Sblocca questa spedizione");
-                sblocca.setFont(sblocca.getFont().deriveFont(11f));
+                sblocca.setFont(sblocca.getFont().deriveFont(Aspetto.punti(11f)));
                 sblocca.addActionListener(new ActionListener() {
                     public void actionPerformed(ActionEvent e) {
                         sbloccaGruppo(spedizione, premiDelGruppo(spedizione));
@@ -466,19 +466,19 @@ public final class PannelloPremi extends JPanel {
         Riga(final Premi.Premio premio) {
             setLayout(new BorderLayout(10, 0));
             setBackground(Aspetto.PANNELLO);
-            setBorder(BorderFactory.createEmptyBorder(4, 26, 4, 14));
+            setBorder(Aspetto.bordo(4, 26, 4, 14));
             setAlignmentX(Component.LEFT_ALIGNMENT);
-            setMaximumSize(new Dimension(Integer.MAX_VALUE, 36));
+            setMaximumSize(Aspetto.dim(Integer.MAX_VALUE, 36));
 
             JLabel immagine = new JLabel();
             Catalogo.Voce voce = catalogo.voce(premio.id);
             ImageIcon img = voce == null ? null : icone.perFile(voce.icona, 26);
             immagine.setIcon(img != null ? img : Icone.segno("◆", 26, Aspetto.TESTO_DEBOLE, true));
-            immagine.setPreferredSize(new Dimension(30, 28));
+            immagine.setPreferredSize(Aspetto.dim(30, 28));
             add(immagine, BorderLayout.WEST);
 
             JLabel nome = new JLabel(premio.nome);
-            nome.setFont(nome.getFont().deriveFont(12.5f));
+            nome.setFont(nome.getFont().deriveFont(Aspetto.punti(12.5f)));
             nome.setForeground(Aspetto.TESTO);
             nome.setToolTipText(premio.id);
             add(nome, BorderLayout.CENTER);

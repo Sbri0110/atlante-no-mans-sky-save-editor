@@ -122,16 +122,16 @@ public final class PannelloFregata extends JPanel {
     private JPanel testata() {
         JPanel testa = new JPanel(new BorderLayout(14, 0));
         testa.setBackground(Aspetto.PANNELLO);
-        testa.setBorder(BorderFactory.createEmptyBorder(14, 18, 12, 18));
-        icona.setPreferredSize(new Dimension(72, 44));
+        testa.setBorder(Aspetto.bordo(14, 18, 12, 18));
+        icona.setPreferredSize(Aspetto.dim(72, 44));
         testa.add(icona, BorderLayout.WEST);
         JPanel testi = new JPanel();
         testi.setOpaque(false);
         testi.setLayout(new BoxLayout(testi, BoxLayout.Y_AXIS));
-        nome.setFont(nome.getFont().deriveFont(Font.BOLD, 15f));
+        nome.setFont(nome.getFont().deriveFont(Font.BOLD, Aspetto.punti(15f)));
         nome.setForeground(Aspetto.TESTO);
         nome.setAlignmentX(Component.LEFT_ALIGNMENT);
-        sotto.setFont(sotto.getFont().deriveFont(11.5f));
+        sotto.setFont(sotto.getFont().deriveFont(Aspetto.punti(11.5f)));
         sotto.setForeground(Aspetto.TESTO_TENUE);
         sotto.setAlignmentX(Component.LEFT_ALIGNMENT);
         testi.add(nome);
@@ -145,17 +145,17 @@ public final class PannelloFregata extends JPanel {
     private JScrollPane corpo() {
         JPanel colonne = new Colonne();
         colonne.setBackground(Aspetto.PANNELLO);
-        colonne.setBorder(BorderFactory.createEmptyBorder(0, 18, 14, 18));
+        colonne.setBorder(Aspetto.bordo(0, 18, 14, 18));
 
         JPanel sinistra = colonna();
         sinistra.add(titolo("INFORMAZIONI FREGATA"));
-        nomeDato.setFont(nomeDato.getFont().deriveFont(12f));
+        nomeDato.setFont(nomeDato.getFont().deriveFont(Aspetto.punti(12f)));
         sinistra.add(riga("Nome", nomeDato));
-        classe.setFont(classe.getFont().deriveFont(12f));
+        classe.setFont(classe.getFont().deriveFont(Aspetto.punti(12f)));
         sinistra.add(riga("Tipo", classe));
-        inventario.setFont(inventario.getFont().deriveFont(12f));
+        inventario.setFont(inventario.getFont().deriveFont(Aspetto.punti(12f)));
         sinistra.add(riga("Classe", inventario));
-        razza.setFont(razza.getFont().deriveFont(12f));
+        razza.setFont(razza.getFont().deriveFont(Aspetto.punti(12f)));
         sinistra.add(riga("Razza NPC", razza));
         seedCasa.setFont(Aspetto.monospaziato(11.5f, Font.PLAIN));
         sinistra.add(riga("Seed casa", seedCasa));
@@ -166,7 +166,7 @@ public final class PannelloFregata extends JPanel {
         for (int i = 0; i < QUANTI_TRATTI; i++) {
             final int posizione = i;
             JComboBox<Tratti.Tratto> menu = new JComboBox<Tratti.Tratto>();
-            menu.setFont(menu.getFont().deriveFont(11.5f));
+            menu.setFont(menu.getFont().deriveFont(Aspetto.punti(11.5f)));
             for (Tratti.Tratto t : Tratti.tutti()) {
                 menu.addItem(t);
             }
@@ -212,7 +212,7 @@ public final class PannelloFregata extends JPanel {
         JScrollPane scorrimento = new JScrollPane(colonne);
         scorrimento.setBorder(BorderFactory.createEmptyBorder());
         scorrimento.setBackground(Aspetto.PANNELLO);
-        scorrimento.getVerticalScrollBar().setUnitIncrement(16);
+        scorrimento.getVerticalScrollBar().setUnitIncrement(Aspetto.px(16));
         return scorrimento;
     }
 
@@ -265,7 +265,7 @@ public final class PannelloFregata extends JPanel {
         l.setFont(Aspetto.monospaziato(10f, Font.BOLD));
         l.setForeground(Aspetto.ACCENTO);
         l.setAlignmentX(Component.LEFT_ALIGNMENT);
-        l.setBorder(BorderFactory.createEmptyBorder(8, 0, 6, 0));
+        l.setBorder(Aspetto.bordo(8, 0, 6, 0));
         return l;
     }
 
@@ -283,13 +283,13 @@ public final class PannelloFregata extends JPanel {
     private JPanel riga(String etichetta, Component editor) {
         JPanel r = new JPanel(new BorderLayout(10, 0));
         r.setOpaque(false);
-        r.setBorder(BorderFactory.createEmptyBorder(3, 0, 3, 0));
-        r.setMaximumSize(new Dimension(Integer.MAX_VALUE, 32));
+        r.setBorder(Aspetto.bordo(3, 0, 3, 0));
+        r.setMaximumSize(Aspetto.dim(Integer.MAX_VALUE, 32));
         r.setAlignmentX(Component.LEFT_ALIGNMENT);
         JLabel l = new JLabel(etichetta);
-        l.setFont(l.getFont().deriveFont(11.5f));
+        l.setFont(l.getFont().deriveFont(Aspetto.punti(11.5f)));
         l.setForeground(Aspetto.TESTO_DEBOLE);
-        l.setPreferredSize(new Dimension(136, 24));
+        l.setPreferredSize(Aspetto.dim(136, 24));
         r.add(l, BorderLayout.WEST);
         r.add(editor, BorderLayout.CENTER);
         return r;
@@ -300,7 +300,7 @@ public final class PannelloFregata extends JPanel {
         JPanel p = new JPanel(new BorderLayout(6, 0));
         p.setOpaque(false);
         JButton genera = new JButton("Genera");
-        genera.setFont(genera.getFont().deriveFont(11.5f));
+        genera.setFont(genera.getFont().deriveFont(Aspetto.punti(11.5f)));
         genera.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 String nuovo = Piloti.semeNuovo();

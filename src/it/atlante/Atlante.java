@@ -83,24 +83,24 @@ public final class Atlante {
         JWindow finestra = new JWindow();
         JPanel pannello = new JPanel(new BorderLayout(14, 0));
         pannello.setBackground(Aspetto.PANNELLO);
-        pannello.setBorder(new EmptyBorder(26, 38, 26, 38));
+        pannello.setBorder(Aspetto.bordo(26, 38, 26, 38));
 
         // Il marchio compare anche durante il caricamento: e' la prima cosa che
         // l'utente vede dell'applicazione.
         java.awt.Image icona = it.atlante.finestra.Marchio.icona();
         if (icona != null) {
             JLabel marchio = new JLabel(new javax.swing.ImageIcon(
-                    icona.getScaledInstance(56, 56, java.awt.Image.SCALE_SMOOTH)));
+                    icona.getScaledInstance(Aspetto.px(56), Aspetto.px(56), java.awt.Image.SCALE_SMOOTH)));
             pannello.add(marchio, BorderLayout.WEST);
         }
 
         JPanel testi = new JPanel(new BorderLayout(0, 6));
         testi.setOpaque(false);
         JLabel titolo = new JLabel("ATLANTE", SwingConstants.LEFT);
-        titolo.setFont(titolo.getFont().deriveFont(Font.BOLD, 22f));
+        titolo.setFont(titolo.getFont().deriveFont(Font.BOLD, Aspetto.punti(22f)));
         titolo.setForeground(Aspetto.TESTO);
         JLabel sotto = new JLabel("caricamento del catalogo di gioco...", SwingConstants.LEFT);
-        sotto.setFont(sotto.getFont().deriveFont(12f));
+        sotto.setFont(sotto.getFont().deriveFont(Aspetto.punti(12f)));
         sotto.setForeground(Aspetto.TESTO_TENUE);
         testi.add(titolo, BorderLayout.NORTH);
         testi.add(sotto, BorderLayout.SOUTH);
@@ -108,7 +108,7 @@ public final class Atlante {
 
         pannello.setBorder(javax.swing.BorderFactory.createCompoundBorder(
                 javax.swing.BorderFactory.createLineBorder(new Color(0x4A3238)),
-                new EmptyBorder(24, 34, 24, 40)));
+                Aspetto.bordo(24, 34, 24, 40)));
 
         finestra.setContentPane(pannello);
         it.atlante.finestra.Marchio.applicaA(finestra);

@@ -102,15 +102,15 @@ public final class PannelloInventario extends JPanel {
         secondaRiga.add(schede, BorderLayout.WEST);
         contatore.setFont(Aspetto.monospaziato(11, Font.PLAIN));
         contatore.setForeground(Aspetto.TESTO_DEBOLE);
-        contatore.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 2));
+        contatore.setBorder(Aspetto.bordo(0, 0, 0, 2));
         secondaRiga.add(contatore, BorderLayout.EAST);
 
         JPanel testa = new JPanel();
         testa.setLayout(new BoxLayout(testa, BoxLayout.Y_AXIS));
         testa.setBackground(Aspetto.FONDO_ALTO);
         testa.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createMatteBorder(0, 0, 1, 0, Aspetto.BORDO),
-                BorderFactory.createEmptyBorder(10, 16, 10, 16)));
+                Aspetto.matte(0, 0, 1, 0, Aspetto.BORDO),
+                Aspetto.bordo(10, 16, 10, 16)));
         primaRiga.setAlignmentX(Component.LEFT_ALIGNMENT);
         secondaRiga.setAlignmentX(Component.LEFT_ALIGNMENT);
         testa.add(primaRiga);
@@ -176,7 +176,7 @@ public final class PannelloInventario extends JPanel {
             javax.swing.ButtonGroup gruppo = new javax.swing.ButtonGroup();
             for (final String nome : gruppi) {
                 JToggleButton b = new JToggleButton(nome);
-                b.setFont(b.getFont().deriveFont(12f));
+                b.setFont(b.getFont().deriveFont(Aspetto.punti(12f)));
                 b.setSelected(nome.equals(gruppoCorrente));
                 b.addActionListener(new ActionListener() {
                     public void actionPerformed(ActionEvent e) {
@@ -204,7 +204,7 @@ public final class PannelloInventario extends JPanel {
                 continue;
             }
             JToggleButton b = new JToggleButton(inv.etichetta);
-            b.setFont(b.getFont().deriveFont(12f));
+            b.setFont(b.getFont().deriveFont(Aspetto.punti(12f)));
             b.setSelected(inv == corrente);
             b.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
@@ -374,24 +374,24 @@ public final class PannelloInventario extends JPanel {
         Modulo() {
             setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
             setBackground(Aspetto.PANNELLO);
-            setBorder(BorderFactory.createMatteBorder(0, 0, 0, 1, Aspetto.BORDO));
-            setPreferredSize(new Dimension(300, 500));
+            setBorder(Aspetto.matte(0, 0, 0, 1, Aspetto.BORDO));
+            setPreferredSize(Aspetto.dim(300, 500));
 
             // --- testa: icona e nome ---
             JPanel testa = new JPanel(new BorderLayout(12, 0));
             testa.setOpaque(false);
-            testa.setBorder(BorderFactory.createEmptyBorder(16, 16, 12, 16));
+            testa.setBorder(Aspetto.bordo(16, 16, 12, 16));
             testa.setAlignmentX(Component.LEFT_ALIGNMENT);
-            testa.setMaximumSize(new Dimension(Integer.MAX_VALUE, 90));
-            icona.setPreferredSize(new Dimension(64, 64));
+            testa.setMaximumSize(Aspetto.dim(Integer.MAX_VALUE, 90));
+            icona.setPreferredSize(Aspetto.dim(64, 64));
             testa.add(icona, BorderLayout.WEST);
             JPanel testi = new JPanel();
             testi.setOpaque(false);
             testi.setLayout(new BoxLayout(testi, BoxLayout.Y_AXIS));
-            nome.setFont(nome.getFont().deriveFont(Font.BOLD, 14f));
+            nome.setFont(nome.getFont().deriveFont(Font.BOLD, Aspetto.punti(14f)));
             nome.setForeground(Aspetto.TESTO);
             nome.setAlignmentX(Component.LEFT_ALIGNMENT);
-            categoria.setFont(categoria.getFont().deriveFont(11f));
+            categoria.setFont(categoria.getFont().deriveFont(Aspetto.punti(11f)));
             categoria.setForeground(Aspetto.TESTO_TENUE);
             categoria.setAlignmentX(Component.LEFT_ALIGNMENT);
             posizione.setFont(Aspetto.monospaziato(10, Font.PLAIN));
@@ -409,7 +409,7 @@ public final class PannelloInventario extends JPanel {
             JPanel campi = new JPanel();
             campi.setOpaque(false);
             campi.setLayout(new BoxLayout(campi, BoxLayout.Y_AXIS));
-            campi.setBorder(BorderFactory.createEmptyBorder(0, 16, 10, 16));
+            campi.setBorder(Aspetto.bordo(0, 16, 10, 16));
             campi.setAlignmentX(Component.LEFT_ALIGNMENT);
 
             campi.add(riga("Identificativo", identificativo));
@@ -426,14 +426,14 @@ public final class PannelloInventario extends JPanel {
             // finiva sotto il blocco delle statistiche.
             JPanel azioni = new JPanel(new java.awt.GridLayout(0, 2, 6, 6));
             azioni.setOpaque(false);
-            azioni.setBorder(BorderFactory.createEmptyBorder(0, 16, 12, 16));
+            azioni.setBorder(Aspetto.bordo(0, 16, 12, 16));
             azioni.setAlignmentX(Component.LEFT_ALIGNMENT);
-            azioni.setMaximumSize(new Dimension(Integer.MAX_VALUE, 120));
-            cambia.setFont(cambia.getFont().deriveFont(11.5f));
-            ripara.setFont(ripara.getFont().deriveFont(11.5f));
-            ricarica.setFont(ricarica.getFont().deriveFont(11.5f));
-            svuota.setFont(svuota.getFont().deriveFont(11.5f));
-            importa.setFont(importa.getFont().deriveFont(11.5f));
+            azioni.setMaximumSize(Aspetto.dim(Integer.MAX_VALUE, 120));
+            cambia.setFont(cambia.getFont().deriveFont(Aspetto.punti(11.5f)));
+            ripara.setFont(ripara.getFont().deriveFont(Aspetto.punti(11.5f)));
+            ricarica.setFont(ricarica.getFont().deriveFont(Aspetto.punti(11.5f)));
+            svuota.setFont(svuota.getFont().deriveFont(Aspetto.punti(11.5f)));
+            importa.setFont(importa.getFont().deriveFont(Aspetto.punti(11.5f)));
             importa.setToolTipText("Legge un file JSON della Corvette e riempie il deposito dei pezzi");
             azioni.add(cambia);
             azioni.add(ripara);
@@ -449,7 +449,7 @@ public final class PannelloInventario extends JPanel {
             statistiche.setLayout(new BoxLayout(statistiche, BoxLayout.Y_AXIS));
             statistiche.setOpaque(false);
             statistiche.setAlignmentX(Component.LEFT_ALIGNMENT);
-            statistiche.setBorder(BorderFactory.createEmptyBorder(6, 16, 0, 16));
+            statistiche.setBorder(Aspetto.bordo(6, 16, 0, 16));
             add(statistiche);
 
             // Le statistiche principali della sezione: nella tuta sono salute,
@@ -458,7 +458,7 @@ public final class PannelloInventario extends JPanel {
             principaliPanel.setLayout(new BoxLayout(principaliPanel, BoxLayout.Y_AXIS));
             principaliPanel.setOpaque(false);
             principaliPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
-            principaliPanel.setBorder(BorderFactory.createEmptyBorder(6, 16, 0, 16));
+            principaliPanel.setBorder(Aspetto.bordo(6, 16, 0, 16));
             add(principaliPanel);
 
             add(Box.createVerticalGlue());
@@ -470,12 +470,12 @@ public final class PannelloInventario extends JPanel {
         private JPanel riga(String etichetta, Component editor) {
             JPanel r = new JPanel(new BorderLayout(10, 0));
             r.setOpaque(false);
-            r.setBorder(BorderFactory.createEmptyBorder(3, 0, 3, 0));
-            r.setMaximumSize(new Dimension(Integer.MAX_VALUE, 30));
+            r.setBorder(Aspetto.bordo(3, 0, 3, 0));
+            r.setMaximumSize(Aspetto.dim(Integer.MAX_VALUE, 30));
             JLabel l = new JLabel(etichetta);
-            l.setFont(l.getFont().deriveFont(11.5f));
+            l.setFont(l.getFont().deriveFont(Aspetto.punti(11.5f)));
             l.setForeground(Aspetto.TESTO_DEBOLE);
-            l.setPreferredSize(new Dimension(104, 24));
+            l.setPreferredSize(Aspetto.dim(104, 24));
             r.add(l, BorderLayout.WEST);
             if (editor instanceof JTextField) {
                 JTextField t = (JTextField) editor;
@@ -657,7 +657,7 @@ public final class PannelloInventario extends JPanel {
             titolo.setFont(Aspetto.monospaziato(10f, Font.BOLD));
             titolo.setForeground(Aspetto.ACCENTO);
             titolo.setAlignmentX(Component.LEFT_ALIGNMENT);
-            titolo.setBorder(BorderFactory.createEmptyBorder(10, 0, 6, 0));
+            titolo.setBorder(Aspetto.bordo(10, 0, 6, 0));
             statistiche.add(titolo);
 
             for (Object o : elenco) {
@@ -675,13 +675,13 @@ public final class PannelloInventario extends JPanel {
         private JPanel rigaStatistica(String id, final Map<String, Object> voce) {
             JPanel r = new JPanel(new BorderLayout(10, 0));
             r.setOpaque(false);
-            r.setBorder(BorderFactory.createEmptyBorder(2, 0, 2, 0));
-            r.setMaximumSize(new Dimension(Integer.MAX_VALUE, 28));
+            r.setBorder(Aspetto.bordo(2, 0, 2, 0));
+            r.setMaximumSize(Aspetto.dim(Integer.MAX_VALUE, 28));
             r.setAlignmentX(Component.LEFT_ALIGNMENT);
             JLabel nome = new JLabel(Etichette.leggi(id));
-            nome.setFont(nome.getFont().deriveFont(11.5f));
+            nome.setFont(nome.getFont().deriveFont(Aspetto.punti(11.5f)));
             nome.setForeground(Aspetto.TESTO_TENUE);
-            nome.setPreferredSize(new Dimension(126, 24));
+            nome.setPreferredSize(Aspetto.dim(126, 24));
             nome.setToolTipText(id);
             r.add(nome, BorderLayout.WEST);
 
@@ -733,7 +733,7 @@ public final class PannelloInventario extends JPanel {
             titolo.setFont(Aspetto.monospaziato(10f, Font.BOLD));
             titolo.setForeground(Aspetto.ACCENTO);
             titolo.setAlignmentX(Component.LEFT_ALIGNMENT);
-            titolo.setBorder(BorderFactory.createEmptyBorder(10, 0, 6, 0));
+            titolo.setBorder(Aspetto.bordo(10, 0, 6, 0));
             principaliPanel.add(titolo);
 
             for (final Inventari.Statistica st : principali) {
@@ -750,13 +750,13 @@ public final class PannelloInventario extends JPanel {
 
                 JPanel r = new JPanel(new BorderLayout(10, 0));
                 r.setOpaque(false);
-                r.setBorder(BorderFactory.createEmptyBorder(2, 0, 2, 0));
-                r.setMaximumSize(new Dimension(Integer.MAX_VALUE, 28));
+                r.setBorder(Aspetto.bordo(2, 0, 2, 0));
+                r.setMaximumSize(Aspetto.dim(Integer.MAX_VALUE, 28));
                 r.setAlignmentX(Component.LEFT_ALIGNMENT);
                 JLabel nome = new JLabel(st.etichetta);
-                nome.setFont(nome.getFont().deriveFont(11.5f));
+                nome.setFont(nome.getFont().deriveFont(Aspetto.punti(11.5f)));
                 nome.setForeground(Aspetto.TESTO_TENUE);
-                nome.setPreferredSize(new Dimension(126, 24));
+                nome.setPreferredSize(Aspetto.dim(126, 24));
                 nome.setToolTipText(Inventari.accorcia(st.percorso));
                 r.add(nome, BorderLayout.WEST);
 

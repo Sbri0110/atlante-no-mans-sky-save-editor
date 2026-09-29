@@ -76,7 +76,7 @@ public final class PannelloPrincipale extends JPanel {
         JPanel colonna = new JPanel();
         colonna.setLayout(new BoxLayout(colonna, BoxLayout.Y_AXIS));
         colonna.setBackground(Aspetto.FONDO);
-        colonna.setBorder(BorderFactory.createEmptyBorder(22, 26, 22, 26));
+        colonna.setBorder(Aspetto.bordo(22, 26, 22, 26));
         colonna.add(costruisciSchedaFile());
         colonna.add(Box.createVerticalStrut(18));
         colonna.add(costruisciAzioniRapide());
@@ -91,7 +91,7 @@ public final class PannelloPrincipale extends JPanel {
 
         javax.swing.JScrollPane scorrimento = new javax.swing.JScrollPane(involucro);
         scorrimento.setBorder(BorderFactory.createEmptyBorder());
-        scorrimento.getVerticalScrollBar().setUnitIncrement(18);
+        scorrimento.getVerticalScrollBar().setUnitIncrement(Aspetto.px(18));
         add(scorrimento, BorderLayout.CENTER);
     }
 
@@ -115,10 +115,10 @@ public final class PannelloPrincipale extends JPanel {
 
         JPanel comandi = new JPanel(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT, 8, 0));
         comandi.setOpaque(false);
-        comandi.setBorder(BorderFactory.createEmptyBorder(14, 0, 0, 0));
-        ricarica.setFont(ricarica.getFont().deriveFont(12.5f));
-        salva.setFont(salva.getFont().deriveFont(Font.BOLD, 12.5f));
-        salvaCome.setFont(salvaCome.getFont().deriveFont(12.5f));
+        comandi.setBorder(Aspetto.bordo(14, 0, 0, 0));
+        ricarica.setFont(ricarica.getFont().deriveFont(Aspetto.punti(12.5f)));
+        salva.setFont(salva.getFont().deriveFont(Font.BOLD, Aspetto.punti(12.5f)));
+        salvaCome.setFont(salvaCome.getFont().deriveFont(Aspetto.punti(12.5f)));
         comandi.add(ricarica);
         comandi.add(salva);
         comandi.add(salvaCome);
@@ -131,9 +131,9 @@ public final class PannelloPrincipale extends JPanel {
 
         JLabel nota = new JLabel("Modificano il salvataggio aperto. Niente viene scritto su disco "
                 + "finché non premi Salva.");
-        nota.setFont(nota.getFont().deriveFont(11.5f));
+        nota.setFont(nota.getFont().deriveFont(Aspetto.punti(11.5f)));
         nota.setForeground(Aspetto.TESTO_DEBOLE);
-        nota.setBorder(BorderFactory.createEmptyBorder(0, 0, 12, 0));
+        nota.setBorder(Aspetto.bordo(0, 0, 12, 0));
         scheda.add(nota, BorderLayout.NORTH);
 
         JPanel griglia = new JPanel(new java.awt.GridLayout(0, 3, 10, 10));
@@ -158,9 +158,9 @@ public final class PannelloPrincipale extends JPanel {
 
     private JButton pulsanteAzione(String titolo, String spiegazione, final String codice) {
         JButton b = new JButton(titolo);
-        b.setFont(b.getFont().deriveFont(12f));
+        b.setFont(b.getFont().deriveFont(Aspetto.punti(12f)));
         b.setToolTipText(spiegazione);
-        b.setPreferredSize(new Dimension(220, 44));
+        b.setPreferredSize(Aspetto.dim(220, 44));
         b.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 esegui(codice);
@@ -174,13 +174,13 @@ public final class PannelloPrincipale extends JPanel {
         p.setBackground(Aspetto.PANNELLO);
         p.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(Aspetto.BORDO),
-                BorderFactory.createEmptyBorder(16, 18, 16, 18)));
+                Aspetto.bordo(16, 18, 16, 18)));
         p.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         JLabel t = new JLabel(titolo.toUpperCase());
         t.setFont(Aspetto.monospaziato(10.5f, Font.BOLD));
         t.setForeground(Aspetto.ACCENTO);
-        t.setBorder(BorderFactory.createEmptyBorder(0, 0, 12, 0));
+        t.setBorder(Aspetto.bordo(0, 0, 12, 0));
         p.add(t, BorderLayout.NORTH);
         return p;
     }
@@ -188,11 +188,11 @@ public final class PannelloPrincipale extends JPanel {
     private void aggiungi(JPanel dove, String etichetta, JLabel valore) {
         JPanel riga = new JPanel(new BorderLayout(14, 0));
         riga.setOpaque(false);
-        riga.setBorder(BorderFactory.createEmptyBorder(4, 0, 4, 0));
+        riga.setBorder(Aspetto.bordo(4, 0, 4, 0));
         JLabel nome = new JLabel(etichetta);
-        nome.setFont(nome.getFont().deriveFont(12f));
+        nome.setFont(nome.getFont().deriveFont(Aspetto.punti(12f)));
         nome.setForeground(Aspetto.TESTO_DEBOLE);
-        nome.setPreferredSize(new Dimension(190, 20));
+        nome.setPreferredSize(Aspetto.dim(190, 20));
         riga.add(nome, BorderLayout.WEST);
         valore.setFont(Aspetto.monospaziato(12, Font.PLAIN));
         valore.setForeground(Aspetto.TESTO);

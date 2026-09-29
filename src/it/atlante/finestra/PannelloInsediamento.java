@@ -109,16 +109,16 @@ public final class PannelloInsediamento extends JPanel {
     private JPanel testata() {
         JPanel testa = new JPanel(new BorderLayout(14, 0));
         testa.setBackground(Aspetto.PANNELLO);
-        testa.setBorder(BorderFactory.createEmptyBorder(14, 18, 12, 18));
-        icona.setPreferredSize(new Dimension(48, 48));
+        testa.setBorder(Aspetto.bordo(14, 18, 12, 18));
+        icona.setPreferredSize(Aspetto.dim(48, 48));
         testa.add(icona, BorderLayout.WEST);
         JPanel testi = new JPanel();
         testi.setOpaque(false);
         testi.setLayout(new BoxLayout(testi, BoxLayout.Y_AXIS));
-        nome.setFont(nome.getFont().deriveFont(Font.BOLD, 15f));
+        nome.setFont(nome.getFont().deriveFont(Font.BOLD, Aspetto.punti(15f)));
         nome.setForeground(Aspetto.TESTO);
         nome.setAlignmentX(Component.LEFT_ALIGNMENT);
-        sotto.setFont(sotto.getFont().deriveFont(11.5f));
+        sotto.setFont(sotto.getFont().deriveFont(Aspetto.punti(11.5f)));
         sotto.setForeground(Aspetto.TESTO_TENUE);
         sotto.setAlignmentX(Component.LEFT_ALIGNMENT);
         testi.add(nome);
@@ -131,14 +131,14 @@ public final class PannelloInsediamento extends JPanel {
     private JScrollPane corpo() {
         JPanel colonne = new Colonne();
         colonne.setBackground(Aspetto.PANNELLO);
-        colonne.setBorder(BorderFactory.createEmptyBorder(0, 18, 14, 18));
+        colonne.setBorder(Aspetto.bordo(0, 18, 14, 18));
 
         JPanel sinistra = colonna();
         sinistra.add(titolo("INFORMAZIONI"));
-        nomeDato.setFont(nomeDato.getFont().deriveFont(12f));
+        nomeDato.setFont(nomeDato.getFont().deriveFont(Aspetto.punti(12f)));
         sinistra.add(riga("Nome", nomeDato));
         sinistra.add(riga("Popolazione", numero(popolazione, "Population")));
-        razza.setFont(razza.getFont().deriveFont(12f));
+        razza.setFont(razza.getFont().deriveFont(Aspetto.punti(12f)));
         sinistra.add(riga("Razza", razza));
         proprietario.setFont(Aspetto.monospaziato(11.5f, Font.PLAIN));
         proprietario.setEditable(false);
@@ -174,18 +174,18 @@ public final class PannelloInsediamento extends JPanel {
 
         destra.add(Box.createVerticalStrut(10));
         destra.add(titolo("EDIFICI E GIUDIZI"));
-        prossimaClasse.setFont(prossimaClasse.getFont().deriveFont(12f));
+        prossimaClasse.setFont(prossimaClasse.getFont().deriveFont(Aspetto.punti(12f)));
         destra.add(riga("Prossima classe", prossimaClasse));
         destra.add(riga("Prossimo indice", numero(prossimoIndice, "UpgradeIndex")));
         destra.add(riga("Prossimo seme", numero(prossimoSeme, "UpgradeSeed")));
-        giudizio.setFont(giudizio.getFont().deriveFont(12f));
+        giudizio.setFont(giudizio.getFont().deriveFont(Aspetto.punti(12f)));
         destra.add(riga("Giudizio in attesa", giudizio));
         perk.setFont(Aspetto.monospaziato(11.5f, Font.PLAIN));
         destra.add(riga("Ultimo perk", perk));
-        elencoPerk.setFont(elencoPerk.getFont().deriveFont(10.5f));
+        elencoPerk.setFont(elencoPerk.getFont().deriveFont(Aspetto.punti(10.5f)));
         elencoPerk.setForeground(Aspetto.TESTO_DEBOLE);
         elencoPerk.setAlignmentX(Component.LEFT_ALIGNMENT);
-        elencoPerk.setBorder(BorderFactory.createEmptyBorder(6, 0, 0, 0));
+        elencoPerk.setBorder(Aspetto.bordo(6, 0, 0, 0));
         destra.add(elencoPerk);
 
         colonne.add(sinistra);
@@ -194,7 +194,7 @@ public final class PannelloInsediamento extends JPanel {
         JScrollPane scorrimento = new JScrollPane(colonne);
         scorrimento.setBorder(BorderFactory.createEmptyBorder());
         scorrimento.setBackground(Aspetto.PANNELLO);
-        scorrimento.getVerticalScrollBar().setUnitIncrement(16);
+        scorrimento.getVerticalScrollBar().setUnitIncrement(Aspetto.px(16));
         return scorrimento;
     }
 
@@ -211,7 +211,7 @@ public final class PannelloInsediamento extends JPanel {
         l.setFont(Aspetto.monospaziato(10f, Font.BOLD));
         l.setForeground(Aspetto.ACCENTO);
         l.setAlignmentX(Component.LEFT_ALIGNMENT);
-        l.setBorder(BorderFactory.createEmptyBorder(8, 0, 6, 0));
+        l.setBorder(Aspetto.bordo(8, 0, 6, 0));
         return l;
     }
 
@@ -229,13 +229,13 @@ public final class PannelloInsediamento extends JPanel {
     private JPanel riga(String etichetta, Component editor) {
         JPanel r = new JPanel(new BorderLayout(10, 0));
         r.setOpaque(false);
-        r.setBorder(BorderFactory.createEmptyBorder(3, 0, 3, 0));
-        r.setMaximumSize(new Dimension(Integer.MAX_VALUE, 32));
+        r.setBorder(Aspetto.bordo(3, 0, 3, 0));
+        r.setMaximumSize(Aspetto.dim(Integer.MAX_VALUE, 32));
         r.setAlignmentX(Component.LEFT_ALIGNMENT);
         JLabel l = new JLabel(etichetta);
-        l.setFont(l.getFont().deriveFont(11.5f));
+        l.setFont(l.getFont().deriveFont(Aspetto.punti(11.5f)));
         l.setForeground(Aspetto.TESTO_DEBOLE);
-        l.setPreferredSize(new Dimension(126, 24));
+        l.setPreferredSize(Aspetto.dim(126, 24));
         r.add(l, BorderLayout.WEST);
         r.add(editor, BorderLayout.CENTER);
         return r;

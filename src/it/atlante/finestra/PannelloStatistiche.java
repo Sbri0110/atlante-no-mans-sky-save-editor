@@ -98,13 +98,13 @@ public final class PannelloStatistiche extends JPanel {
         setLayout(new BorderLayout());
         setBackground(Aspetto.FONDO);
         contenitore.setBackground(Aspetto.FONDO);
-        contenitore.setBorder(BorderFactory.createEmptyBorder(14, 16, 20, 16));
+        contenitore.setBorder(Aspetto.bordo(14, 16, 20, 16));
 
         JPanel barra = new JPanel(new BorderLayout());
         barra.setBackground(Aspetto.FONDO_ALTO);
         barra.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createMatteBorder(0, 0, 1, 0, Aspetto.BORDO),
-                BorderFactory.createEmptyBorder(10, 16, 10, 16)));
+                Aspetto.matte(0, 0, 1, 0, Aspetto.BORDO),
+                Aspetto.bordo(10, 16, 10, 16)));
         JLabel titolo = new JLabel("STATISTICHE");
         titolo.setFont(Aspetto.monospaziato(10.5f, Font.BOLD));
         titolo.setForeground(Aspetto.ACCENTO);
@@ -116,7 +116,7 @@ public final class PannelloStatistiche extends JPanel {
 
         JScrollPane scorrimento = new JScrollPane(contenitore);
         scorrimento.setBorder(BorderFactory.createEmptyBorder());
-        scorrimento.getVerticalScrollBar().setUnitIncrement(18);
+        scorrimento.getVerticalScrollBar().setUnitIncrement(Aspetto.px(18));
         add(scorrimento, BorderLayout.CENTER);
     }
 
@@ -244,7 +244,7 @@ public final class PannelloStatistiche extends JPanel {
         p.setBackground(Aspetto.PANNELLO);
         p.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(Aspetto.BORDO),
-                BorderFactory.createEmptyBorder(14, 16, 14, 16)));
+                Aspetto.bordo(14, 16, 14, 16)));
 
         JPanel testa = new JPanel(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT, 9, 0));
         testa.setOpaque(false);
@@ -254,10 +254,10 @@ public final class PannelloStatistiche extends JPanel {
                 Aspetto.ACCENTO, true));
         testa.add(immagine);
         JLabel titolo = new JLabel(nome);
-        titolo.setFont(titolo.getFont().deriveFont(Font.BOLD, 13f));
+        titolo.setFont(titolo.getFont().deriveFont(Font.BOLD, Aspetto.punti(13f)));
         titolo.setForeground(Aspetto.TESTO);
         testa.add(titolo);
-        testa.setBorder(BorderFactory.createEmptyBorder(0, 0, 10, 0));
+        testa.setBorder(Aspetto.bordo(0, 0, 10, 0));
         p.add(testa, BorderLayout.NORTH);
 
         JPanel righe = new JPanel();
@@ -289,20 +289,20 @@ public final class PannelloStatistiche extends JPanel {
     private JPanel riga(Valore v, final Map<String, Object> voce) {
         JPanel r = new JPanel(new BorderLayout(10, 0));
         r.setOpaque(false);
-        r.setBorder(BorderFactory.createEmptyBorder(3, 0, 3, 0));
-        r.setMaximumSize(new Dimension(Integer.MAX_VALUE, 30));
+        r.setBorder(Aspetto.bordo(3, 0, 3, 0));
+        r.setMaximumSize(Aspetto.dim(Integer.MAX_VALUE, 30));
 
         JLabel nome = new JLabel(v.nome);
-        nome.setFont(nome.getFont().deriveFont(12f));
+        nome.setFont(nome.getFont().deriveFont(Aspetto.punti(12f)));
         nome.setForeground(Aspetto.TESTO_TENUE);
-        nome.setPreferredSize(new Dimension(150, 24));
+        nome.setPreferredSize(Aspetto.dim(150, 24));
         nome.setToolTipText(v.id);
         r.add(nome, BorderLayout.WEST);
 
         final JTextField campo = new JTextField(testoDi(voce));
         campo.setFont(Aspetto.monospaziato(12, Font.PLAIN));
         campo.setHorizontalAlignment(SwingConstants.RIGHT);
-        campo.setPreferredSize(new Dimension(130, 26));
+        campo.setPreferredSize(Aspetto.dim(130, 26));
         campo.setToolTipText(v.id + "  —  modifica e premi Invio");
         campo.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {

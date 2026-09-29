@@ -69,8 +69,8 @@ public final class PannelloDettagli extends JPanel {
         this.suApplica = suApplica;
         setLayout(new BorderLayout(0, 0));
         setBackground(Aspetto.PANNELLO);
-        setBorder(BorderFactory.createMatteBorder(0, 1, 0, 0, Aspetto.BORDO));
-        setPreferredSize(new Dimension(380, 600));
+        setBorder(Aspetto.matte(0, 1, 0, 0, Aspetto.BORDO));
+        setPreferredSize(Aspetto.dim(380, 600));
 
         add(costruisciTesta(), BorderLayout.NORTH);
         add(costruisciCorpo(), BorderLayout.CENTER);
@@ -84,18 +84,18 @@ public final class PannelloDettagli extends JPanel {
         JPanel testa = new JPanel();
         testa.setLayout(new BoxLayout(testa, BoxLayout.Y_AXIS));
         testa.setBackground(Aspetto.PANNELLO_ALTO);
-        testa.setBorder(BorderFactory.createEmptyBorder(16, 18, 16, 18));
+        testa.setBorder(Aspetto.bordo(16, 18, 16, 18));
 
         iconaGrande.setAlignmentX(Component.LEFT_ALIGNMENT);
-        iconaGrande.setPreferredSize(new Dimension(88, 88));
-        iconaGrande.setMaximumSize(new Dimension(88, 88));
+        iconaGrande.setPreferredSize(Aspetto.dim(88, 88));
+        iconaGrande.setMaximumSize(Aspetto.dim(88, 88));
         iconaGrande.setHorizontalAlignment(SwingConstants.LEFT);
 
-        nome.setFont(nome.getFont().deriveFont(Font.BOLD, 17f));
+        nome.setFont(nome.getFont().deriveFont(Font.BOLD, Aspetto.punti(17f)));
         nome.setForeground(Aspetto.TESTO);
         nome.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        sottotitolo.setFont(sottotitolo.getFont().deriveFont(12f));
+        sottotitolo.setFont(sottotitolo.getFont().deriveFont(Aspetto.punti(12f)));
         sottotitolo.setForeground(Aspetto.TESTO_TENUE);
         sottotitolo.setAlignmentX(Component.LEFT_ALIGNMENT);
 
@@ -115,7 +115,7 @@ public final class PannelloDettagli extends JPanel {
         JPanel corpo = new JPanel();
         corpo.setLayout(new BoxLayout(corpo, BoxLayout.Y_AXIS));
         corpo.setBackground(Aspetto.PANNELLO);
-        corpo.setBorder(BorderFactory.createEmptyBorder(14, 18, 14, 18));
+        corpo.setBorder(Aspetto.bordo(14, 18, 14, 18));
 
         percorso.setFont(Aspetto.monospaziato(11, Font.PLAIN));
         percorso.setForeground(Aspetto.TESTO_DEBOLE);
@@ -124,7 +124,7 @@ public final class PannelloDettagli extends JPanel {
         corpo.add(Box.createVerticalStrut(14));
 
         JLabel etichettaValore = new JLabel("Valore");
-        etichettaValore.setFont(etichettaValore.getFont().deriveFont(Font.BOLD, 11f));
+        etichettaValore.setFont(etichettaValore.getFont().deriveFont(Font.BOLD, Aspetto.punti(11f)));
         etichettaValore.setForeground(Aspetto.TESTO_DEBOLE);
         etichettaValore.setAlignmentX(Component.LEFT_ALIGNMENT);
         corpo.add(etichettaValore);
@@ -132,9 +132,9 @@ public final class PannelloDettagli extends JPanel {
 
         riquadroValore.setOpaque(false);
         riquadroValore.setAlignmentX(Component.LEFT_ALIGNMENT);
-        riquadroValore.setMaximumSize(new Dimension(Integer.MAX_VALUE, 36));
+        riquadroValore.setMaximumSize(Aspetto.dim(Integer.MAX_VALUE, 36));
         campo.setFont(Aspetto.monospaziato(13, Font.PLAIN));
-        interruttore.setFont(interruttore.getFont().deriveFont(13f));
+        interruttore.setFont(interruttore.getFont().deriveFont(Aspetto.punti(13f)));
         riquadroValore.add(campo, BorderLayout.CENTER);
         corpo.add(riquadroValore);
         corpo.add(Box.createVerticalStrut(10));
@@ -142,16 +142,16 @@ public final class PannelloDettagli extends JPanel {
         JPanel comandi = new JPanel(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT, 8, 0));
         comandi.setOpaque(false);
         comandi.setAlignmentX(Component.LEFT_ALIGNMENT);
-        comandi.setMaximumSize(new Dimension(Integer.MAX_VALUE, 34));
-        applica.setFont(applica.getFont().deriveFont(Font.BOLD, 12.5f));
-        scegli.setFont(scegli.getFont().deriveFont(12.5f));
+        comandi.setMaximumSize(Aspetto.dim(Integer.MAX_VALUE, 34));
+        applica.setFont(applica.getFont().deriveFont(Font.BOLD, Aspetto.punti(12.5f)));
+        scegli.setFont(scegli.getFont().deriveFont(Aspetto.punti(12.5f)));
         comandi.add(applica);
         comandi.add(scegli);
         corpo.add(comandi);
         corpo.add(Box.createVerticalStrut(18));
 
         JLabel etichettaDescrizione = new JLabel("Descrizione");
-        etichettaDescrizione.setFont(etichettaDescrizione.getFont().deriveFont(Font.BOLD, 11f));
+        etichettaDescrizione.setFont(etichettaDescrizione.getFont().deriveFont(Font.BOLD, Aspetto.punti(11f)));
         etichettaDescrizione.setForeground(Aspetto.TESTO_DEBOLE);
         etichettaDescrizione.setAlignmentX(Component.LEFT_ALIGNMENT);
         corpo.add(etichettaDescrizione);
@@ -162,13 +162,13 @@ public final class PannelloDettagli extends JPanel {
         descrizione.setWrapStyleWord(true);
         descrizione.setBackground(Aspetto.PANNELLO);
         descrizione.setForeground(Aspetto.TESTO_TENUE);
-        descrizione.setFont(descrizione.getFont().deriveFont(12.5f));
+        descrizione.setFont(descrizione.getFont().deriveFont(Aspetto.punti(12.5f)));
         descrizione.setBorder(null);
         JScrollPane scorrimento = new JScrollPane(descrizione);
         scorrimento.setBorder(BorderFactory.createEmptyBorder());
         scorrimento.setOpaque(false);
         scorrimento.getViewport().setOpaque(false);
-        scorrimento.getVerticalScrollBar().setUnitIncrement(16);
+        scorrimento.getVerticalScrollBar().setUnitIncrement(Aspetto.px(16));
         scorrimento.setAlignmentX(Component.LEFT_ALIGNMENT);
         corpo.add(scorrimento);
         return corpo;
@@ -177,9 +177,9 @@ public final class PannelloDettagli extends JPanel {
     private JComponent costruisciPiede() {
         JPanel piede = new JPanel(new BorderLayout());
         piede.setBackground(Aspetto.PANNELLO_ALTO);
-        piede.setBorder(BorderFactory.createEmptyBorder(10, 18, 10, 18));
+        piede.setBorder(Aspetto.bordo(10, 18, 10, 18));
         JLabel suggerimento = new JLabel("Doppio clic su un valore per modificarlo in linea");
-        suggerimento.setFont(suggerimento.getFont().deriveFont(11.5f));
+        suggerimento.setFont(suggerimento.getFont().deriveFont(Aspetto.punti(11.5f)));
         suggerimento.setForeground(Aspetto.TESTO_DEBOLE);
         piede.add(suggerimento, BorderLayout.WEST);
         return piede;
@@ -377,27 +377,27 @@ public final class PannelloDettagli extends JPanel {
             super(genitore, "Scegli un oggetto", ModalityType.APPLICATION_MODAL);
             this.catalogo = catalogo;
             this.icone = icone;
-            setSize(560, 560);
+            setSize(Aspetto.px(560), Aspetto.px(560));
             setLocationRelativeTo(genitore);
             setLayout(new BorderLayout(0, 0));
             getContentPane().setBackground(Aspetto.PANNELLO);
 
-            ricerca.setFont(ricerca.getFont().deriveFont(14f));
+            ricerca.setFont(ricerca.getFont().deriveFont(Aspetto.punti(14f)));
             ricerca.putClientProperty("JTextField.placeholderText", "Cerca per nome o identificatore...");
-            ricerca.setBorder(BorderFactory.createEmptyBorder(12, 14, 12, 14));
+            ricerca.setBorder(Aspetto.bordo(12, 14, 12, 14));
 
             JPanel testa = new JPanel(new BorderLayout());
             testa.setBackground(Aspetto.PANNELLO_ALTO);
             testa.add(ricerca, BorderLayout.CENTER);
-            conteggio.setBorder(BorderFactory.createEmptyBorder(0, 14, 8, 14));
-            conteggio.setFont(conteggio.getFont().deriveFont(11.5f));
+            conteggio.setBorder(Aspetto.bordo(0, 14, 8, 14));
+            conteggio.setFont(conteggio.getFont().deriveFont(Aspetto.punti(11.5f)));
             conteggio.setForeground(Aspetto.TESTO_DEBOLE);
             testa.add(conteggio, BorderLayout.SOUTH);
             add(testa, BorderLayout.NORTH);
 
             elenco.setBackground(Aspetto.PANNELLO);
             elenco.setCellRenderer(new DisegnatoreVoce());
-            elenco.setFixedCellHeight(34);
+            elenco.setFixedCellHeight(Aspetto.px(34));
             JScrollPane scorrimento = new JScrollPane(elenco);
             scorrimento.setBorder(BorderFactory.createEmptyBorder());
             add(scorrimento, BorderLayout.CENTER);
@@ -406,7 +406,7 @@ public final class PannelloDettagli extends JPanel {
             piede.setBackground(Aspetto.PANNELLO_ALTO);
             JButton annulla = new JButton("Annulla");
             JButton conferma = new JButton("Usa questo");
-            conferma.setFont(conferma.getFont().deriveFont(Font.BOLD, 12.5f));
+            conferma.setFont(conferma.getFont().deriveFont(Font.BOLD, Aspetto.punti(12.5f)));
             piede.add(annulla);
             piede.add(conferma);
             add(piede, BorderLayout.SOUTH);
@@ -473,13 +473,13 @@ public final class PannelloDettagli extends JPanel {
 
             DisegnatoreVoce() {
                 setLayout(new BorderLayout(10, 0));
-                setBorder(BorderFactory.createEmptyBorder(3, 10, 3, 10));
+                setBorder(Aspetto.bordo(3, 10, 3, 10));
                 add(icona, BorderLayout.WEST);
                 JPanel testi = new JPanel();
                 testi.setOpaque(false);
                 testi.setLayout(new BoxLayout(testi, BoxLayout.Y_AXIS));
-                titolo.setFont(titolo.getFont().deriveFont(13f));
-                dettaglio.setFont(dettaglio.getFont().deriveFont(11f));
+                titolo.setFont(titolo.getFont().deriveFont(Aspetto.punti(13f)));
+                dettaglio.setFont(dettaglio.getFont().deriveFont(Aspetto.punti(11f)));
                 dettaglio.setForeground(Aspetto.TESTO_DEBOLE);
                 testi.add(titolo);
                 testi.add(dettaglio);
@@ -514,11 +514,11 @@ public final class PannelloDettagli extends JPanel {
 
         Etichetta() {
             setOpaque(false);
-            setFont(getFont().deriveFont(Font.BOLD, 10.5f));
+            setFont(getFont().deriveFont(Font.BOLD, Aspetto.punti(10.5f)));
             setForeground(Aspetto.ATTENZIONE);
             setBorder(BorderFactory.createCompoundBorder(
                     BorderFactory.createLineBorder(Aspetto.ATTENZIONE, 1, true),
-                    BorderFactory.createEmptyBorder(2, 9, 2, 9)));
+                    Aspetto.bordo(2, 9, 2, 9)));
             setVisible(false);
         }
 

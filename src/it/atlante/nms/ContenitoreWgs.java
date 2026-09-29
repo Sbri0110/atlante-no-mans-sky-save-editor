@@ -51,6 +51,16 @@ public final class ContenitoreWgs {
         public String nomeSlot = "";
         /** Nome del salvataggio dato dal giocatore ("La mia partita"). */
         public String nomeSalvataggio = "";
+        /**
+         * Dove si trovava il giocatore all'ultimo salvataggio, dai metadati:
+         * "Nel sistema X", "A bordo Stazione Y di Z", "Base Z".
+         *
+         * Serve a distinguere due slot della stessa partita: l'automatico e il
+         * manuale hanno lo stesso nome del salvataggio, e nella tendina
+         * sembravano identici. Ma il gioco, quando si riprende, carica il piu'
+         * recente dei due: modificare l'altro non si vede in partita.
+         */
+        public String doveTiTrovi = "";
         /** Durata di gioco in secondi, dai metadati. */
         public long durataGioco = -1;
         /** Dimensione del payload scompattato, dai metadati. */
@@ -168,7 +178,13 @@ public final class ContenitoreWgs {
      *   12  uint32   zero
      *   16  uint32   dimensione del payload scompattato
      *   20  ...      nome del salvataggio, testo a terminazione nulla
+     *   ...          dove ti trovi, secondo testo a terminazione nulla
      * </pre>
+     *
+     * Verificato sui due slot del salvataggio di prova: entrambi portano il
+     * nome della partita, poi l'automatico dice in che sistema ti trovi
+     * ("Nel sistema ...") e il manuale dove sei sceso ("A bordo ..."). Fra i
+     * due testi c'e' solo riempimento a zero.
      */
     private static void leggiMetadati(Slot slot) throws IOException {
         byte[] d = leggiFile(slot.metadati);
@@ -177,12 +193,46 @@ public final class ContenitoreWgs {
         }
         slot.durataGioco = leggi32(d, 8);
         slot.dimensionePayload = leggi32(d, 16) & 0xFFFFFFFFL;
-        int fine = 20;
-        while (fine < d.length && d[fine] != 0) {
-            fine++;
-        }
+        int fine = fineTesto(d, 20);
         String nome = new String(d, 20, fine - 20, Charset.forName("UTF-8"));
         slot.nomeSalvataggio = nome.trim();
+
+        // Subito dopo c'e' un secondo testo: dove si trovava il giocatore.
+        int inizio = fine;
+        while (inizio < d.length && d[inizio] == 0) {
+            inizio++;
+        }
+        int fine2 = fineTesto(d, inizio);
+        String dove = new String(d, inizio, fine2 - inizio, Charset.forName("UTF-8")).trim();
+        if (plausibileDove(dove)) {
+            slot.doveTiTrovi = dove;
+        }
+    }
+
+    /** L'indice del primo byte nullo a partire da {@code inizio}. */
+    private static int fineTesto(byte[] d, int inizio) {
+        int i = inizio;
+        while (i < d.length && d[i] != 0) {
+            i++;
+        }
+        return i;
+    }
+
+    /**
+     * Vero se il testo sembra una descrizione di luogo e non riempimento
+     * binario: solo caratteri stampabili, non troppo lungo.
+     */
+    private static boolean plausibileDove(String s) {
+        if (s.isEmpty() || s.length() > 80) {
+            return false;
+        }
+        for (int i = 0; i < s.length(); i++) {
+            char c = s.charAt(i);
+            if (c < 32 || c == 127) {
+                return false;
+            }
+        }
+        return true;
     }
 
     // ------------------------------------------------------------------
@@ -417,5 +467,210 @@ public final class ContenitoreWgs {
                 | ((d[i + 1] & 0xFF) << 8)
                 | ((d[i + 2] & 0xFF) << 16)
                 | ((d[i + 3] & 0xFF) << 24);
+    }
+
+    // ------------------------------------------------------------------
+    // Scrittura dell'indice
+    // ------------------------------------------------------------------
+
+    /**
+     * Aggiorna i metadati del contenitore e l'indice dei contenitori per il
+     * payload appena riscritto.
+     *
+     * Xbox Game Pass non tiene i salvataggi come file sciolti: ogni salvataggio
+     * e' un contenitore composto da un file di metadati e dal payload compresso,
+     * e {@code containers.index} registra per ognuno la <b>dimensione totale</b>.
+     *
+     * Inoltre il file dei metadati memorizza al byte 16 la dimensione esatta del
+     * <b>payload scompattato</b>: No Man's Sky alloca esattamente quel buffer prima
+     * di chiamare la decompressione LZ4. Se il payload decompresso e' piu' grande
+     * (anche di poche decine di byte dopo una modifica), il gioco riceve un JSON
+     * troncato all'estremita' e propone di <b>inizializzare una nuova partita</b>
+     * su un pianeta vuoto.
+     *
+     * Questo metodo aggiorna entrambi: il byte 16 del file di metadati con la
+     * dimensione scompattata, e containers.index con la dimensione totale e la
+     * data di modifica.
+     *
+     * @param payload il file appena scritto
+     * @param dimensioneDecompressa la dimensione reale decompressa del payload
+     * @return una nota da mostrare; vuota se non c'e' nessun indice da toccare
+     */
+    public static String aggiornaContenitore(File payload, long dimensioneDecompressa) {
+        File contenitore = payload.getParentFile();
+        if (contenitore == null) {
+            return "";
+        }
+
+        StringBuilder note = new StringBuilder();
+        long dimensioneMeta = 0;
+
+        // 1. Aggiornamento del file dei metadati (dimensione scompattata al byte 16)
+        File meta = trovaFileMetadati(contenitore, payload);
+        if (meta != null && meta.isFile()) {
+            dimensioneMeta = meta.length();
+            if (dimensioneDecompressa > 0) {
+                try {
+                    byte[] datiMeta = leggiFile(meta);
+                    if (datiMeta.length >= 20) {
+                        scrivi32(datiMeta, 16, dimensioneDecompressa);
+                        java.io.OutputStream outMeta = new java.io.FileOutputStream(meta);
+                        try {
+                            outMeta.write(datiMeta);
+                        } finally {
+                            outMeta.close();
+                        }
+                        note.append("Metadati aggiornati (decompresso ").append(dimensioneDecompressa).append(" byte). ");
+                    }
+                } catch (IOException e) {
+                    note.append("ATTENZIONE: non ho potuto aggiornare i metadati: ").append(e.getMessage()).append(". ");
+                }
+            }
+        }
+
+        // 2. Aggiornamento dell'indice dei contenitori (containers.index)
+        File radice = contenitore.getParentFile();
+        File indice = (radice != null) ? new File(radice, "containers.index") : null;
+        if (indice == null || !indice.isFile()) {
+            if (radice != null && radice.getParentFile() != null) {
+                File indiceSuperiore = new File(radice.getParentFile(), "containers.index");
+                if (indiceSuperiore.isFile()) {
+                    indice = indiceSuperiore;
+                }
+            }
+        }
+
+        String nome = contenitore.getName();
+        if (indice == null || !indice.isFile() || nome.length() != 32) {
+            return note.toString();
+        }
+        try {
+            byte[] dati = leggiFile(indice);
+            int posizione = cerca(guidInByte(nome), dati);
+            if (posizione < 0) {
+                return note.toString() + "ATTENZIONE: il contenitore non compare in containers.index.";
+            }
+            long dimensione = payload.length() + dimensioneMeta;
+
+            // Timestamp a posizione + 16 (FILETIME in 100ns dal 1 gennaio 1601 UTC)
+            int doveData = posizione + 16;
+            if (doveData + 8 <= dati.length) {
+                long fileTime = (System.currentTimeMillis() + 11644473600000L) * 10000L;
+                scrivi64(dati, doveData, fileTime);
+            }
+
+            // Dimensione totale a posizione + 32
+            int doveDim = posizione + 32;
+            if (doveDim + 8 > dati.length) {
+                return note.toString() + "ATTENZIONE: containers.index e' troncato.";
+            }
+            scrivi64(dati, doveDim, dimensione);
+
+            java.io.OutputStream out = new java.io.FileOutputStream(indice);
+            try {
+                out.write(dati);
+            } finally {
+                out.close();
+            }
+            note.append("Indice aggiornato (totale ").append(dimensione).append(" byte).");
+            return note.toString();
+        } catch (IOException e) {
+            return note.toString() + "ATTENZIONE: non ho potuto aggiornare containers.index: " + e.getMessage();
+        }
+    }
+
+    /** Retrocompatibilita' con chiamate senza dimensione decompressa esplicita. */
+    public static String aggiornaIndice(File payload) {
+        return aggiornaContenitore(payload, -1);
+    }
+
+    /**
+     * Il GUID del contenitore come lo scrive .NET: i primi tre gruppi al
+     * contrario. Il nome della cartella e' "6D75D8AC158B45E099788DE4B593BD8B",
+     * nell'indice diventa {@code AC D8 75 6D | 8B 15 | E0 45 | 99 78 ...}.
+     */
+    private static byte[] guidInByte(String nome) {
+        byte[] n = new byte[16];
+        for (int i = 0; i < 16; i++) {
+            n[i] = (byte) ((esadecimale(nome.charAt(i * 2)) << 4) | esadecimale(nome.charAt(i * 2 + 1)));
+        }
+        // .NET scrive al contrario i primi tre gruppi (4, 2 e 2 byte), e come
+        // sono gli ultimi otto.
+        byte[] fuori = new byte[16];
+        fuori[0] = n[3];
+        fuori[1] = n[2];
+        fuori[2] = n[1];
+        fuori[3] = n[0];
+        fuori[4] = n[5];
+        fuori[5] = n[4];
+        fuori[6] = n[7];
+        fuori[7] = n[6];
+        System.arraycopy(n, 8, fuori, 8, 8);
+        return fuori;
+    }
+
+    private static int esadecimale(char c) {
+        if (c >= '0' && c <= '9') {
+            return c - '0';
+        }
+        if (c >= 'a' && c <= 'f') {
+            return c - 'a' + 10;
+        }
+        return c - 'A' + 10;
+    }
+
+    private static int cerca(byte[] ago, byte[] pagliaio) {
+        for (int i = 0; i + ago.length <= pagliaio.length; i++) {
+            boolean uguale = true;
+            for (int j = 0; j < ago.length; j++) {
+                if (pagliaio[i + j] != ago[j]) {
+                    uguale = false;
+                    break;
+                }
+            }
+            if (uguale) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    /** La dimensione del file di metadati che sta accanto al payload. */
+    private static long dimensioneMetadati(File contenitore, File payload) {
+        File[] voci = contenitore.listFiles();
+        if (voci == null) {
+            return 0;
+        }
+        for (File f : voci) {
+            if (!f.equals(payload) && !f.getName().startsWith("container.")) {
+                return f.length();
+            }
+        }
+        return 0;
+    }
+
+    private static void scrivi64(byte[] d, int i, long valore) {
+        for (int j = 0; j < 8; j++) {
+            d[i + j] = (byte) ((valore >>> (8 * j)) & 0xFF);
+        }
+    }
+
+    private static void scrivi32(byte[] d, int i, long valore) {
+        for (int j = 0; j < 4; j++) {
+            d[i + j] = (byte) ((valore >>> (8 * j)) & 0xFF);
+        }
+    }
+
+    private static File trovaFileMetadati(File contenitore, File payload) {
+        File[] voci = contenitore.listFiles();
+        if (voci == null) {
+            return null;
+        }
+        for (File f : voci) {
+            if (!f.equals(payload) && !f.getName().startsWith("container.") && f.getName().length() == 32) {
+                return f;
+            }
+        }
+        return null;
     }
 }

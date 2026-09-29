@@ -119,16 +119,16 @@ public final class PannelloCompagno extends JPanel {
     private JPanel testata() {
         JPanel testa = new JPanel(new BorderLayout(14, 0));
         testa.setBackground(Aspetto.PANNELLO);
-        testa.setBorder(BorderFactory.createEmptyBorder(14, 18, 12, 18));
-        icona.setPreferredSize(new Dimension(52, 52));
+        testa.setBorder(Aspetto.bordo(14, 18, 12, 18));
+        icona.setPreferredSize(Aspetto.dim(52, 52));
         testa.add(icona, BorderLayout.WEST);
         JPanel testi = new JPanel();
         testi.setOpaque(false);
         testi.setLayout(new BoxLayout(testi, BoxLayout.Y_AXIS));
-        nome.setFont(nome.getFont().deriveFont(Font.BOLD, 15f));
+        nome.setFont(nome.getFont().deriveFont(Font.BOLD, Aspetto.punti(15f)));
         nome.setForeground(Aspetto.TESTO);
         nome.setAlignmentX(Component.LEFT_ALIGNMENT);
-        sotto.setFont(sotto.getFont().deriveFont(11.5f));
+        sotto.setFont(sotto.getFont().deriveFont(Aspetto.punti(11.5f)));
         sotto.setForeground(Aspetto.TESTO_TENUE);
         sotto.setAlignmentX(Component.LEFT_ALIGNMENT);
         testi.add(nome);
@@ -141,17 +141,17 @@ public final class PannelloCompagno extends JPanel {
     private JScrollPane corpo() {
         JPanel colonne = new Colonne();
         colonne.setBackground(Aspetto.PANNELLO);
-        colonne.setBorder(BorderFactory.createEmptyBorder(0, 18, 14, 18));
+        colonne.setBorder(Aspetto.bordo(0, 18, 14, 18));
 
         JPanel sinistra = colonna();
         sinistra.add(titolo("INFORMAZIONI"));
-        nomeDato.setFont(nomeDato.getFont().deriveFont(12f));
+        nomeDato.setFont(nomeDato.getFont().deriveFont(Aspetto.punti(12f)));
         sinistra.add(riga("Nome", nomeDato));
-        tipo.setFont(tipo.getFont().deriveFont(12f));
+        tipo.setFont(tipo.getFont().deriveFont(Aspetto.punti(12f)));
         sinistra.add(riga("Tipo", tipo));
-        bioma.setFont(bioma.getFont().deriveFont(12f));
+        bioma.setFont(bioma.getFont().deriveFont(Aspetto.punti(12f)));
         sinistra.add(riga("Bioma", bioma));
-        predatore.setFont(predatore.getFont().deriveFont(12f));
+        predatore.setFont(predatore.getFont().deriveFont(Aspetto.punti(12f)));
         sinistra.add(riga("Predatore", predatore));
         sinistra.add(riga("Taglia", numero(taglia, "Scale")));
         sinistra.add(Box.createVerticalStrut(10));
@@ -197,7 +197,7 @@ public final class PannelloCompagno extends JPanel {
         for (int i = 0; i < 3; i++) {
             final int posizione = i;
             JComboBox<String> menu = new JComboBox<String>(new String[]{"S", "A", "B", "C"});
-            menu.setFont(menu.getFont().deriveFont(12f));
+            menu.setFont(menu.getFont().deriveFont(Aspetto.punti(12f)));
             menu.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
                     if (caricando) {
@@ -226,13 +226,13 @@ public final class PannelloCompagno extends JPanel {
                 }
             });
             JLabel iconaMossa = new JLabel();
-            iconaMossa.setPreferredSize(new Dimension(24, 22));
+            iconaMossa.setPreferredSize(Aspetto.dim(24, 22));
             iconeMosse.add(iconaMossa);
             mosse.add(menu);
             JPanel rigaMossa = new JPanel(new BorderLayout(6, 0));
             rigaMossa.setOpaque(false);
             rigaMossa.setAlignmentX(Component.LEFT_ALIGNMENT);
-            rigaMossa.setMaximumSize(new Dimension(Integer.MAX_VALUE, 30));
+            rigaMossa.setMaximumSize(Aspetto.dim(Integer.MAX_VALUE, 30));
             rigaMossa.add(iconaMossa, BorderLayout.WEST);
             rigaMossa.add(menu, BorderLayout.CENTER);
             destra.add(rigaMossa);
@@ -244,7 +244,7 @@ public final class PannelloCompagno extends JPanel {
         JScrollPane scorrimento = new JScrollPane(colonne);
         scorrimento.setBorder(BorderFactory.createEmptyBorder());
         scorrimento.setBackground(Aspetto.PANNELLO);
-        scorrimento.getVerticalScrollBar().setUnitIncrement(16);
+        scorrimento.getVerticalScrollBar().setUnitIncrement(Aspetto.px(16));
         return scorrimento;
     }
 
@@ -265,7 +265,7 @@ public final class PannelloCompagno extends JPanel {
     /** Un si'/no legato a un campo booleano del salvataggio. */
     private JComboBox<String> siNo(final String nomeCampo) {
         final JComboBox<String> menu = new JComboBox<String>(new String[]{"No", "Sì"});
-        menu.setFont(menu.getFont().deriveFont(12f));
+        menu.setFont(menu.getFont().deriveFont(Aspetto.punti(12f)));
         menu.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 if (caricando || compagno() == null) {
@@ -292,7 +292,7 @@ public final class PannelloCompagno extends JPanel {
         l.setFont(Aspetto.monospaziato(10f, Font.BOLD));
         l.setForeground(Aspetto.ACCENTO);
         l.setAlignmentX(Component.LEFT_ALIGNMENT);
-        l.setBorder(BorderFactory.createEmptyBorder(8, 0, 6, 0));
+        l.setBorder(Aspetto.bordo(8, 0, 6, 0));
         return l;
     }
 
@@ -310,13 +310,13 @@ public final class PannelloCompagno extends JPanel {
     private JPanel riga(String etichetta, Component editor) {
         JPanel r = new JPanel(new BorderLayout(10, 0));
         r.setOpaque(false);
-        r.setBorder(BorderFactory.createEmptyBorder(3, 0, 3, 0));
-        r.setMaximumSize(new Dimension(Integer.MAX_VALUE, 32));
+        r.setBorder(Aspetto.bordo(3, 0, 3, 0));
+        r.setMaximumSize(Aspetto.dim(Integer.MAX_VALUE, 32));
         r.setAlignmentX(Component.LEFT_ALIGNMENT);
         JLabel l = new JLabel(etichetta);
-        l.setFont(l.getFont().deriveFont(11.5f));
+        l.setFont(l.getFont().deriveFont(Aspetto.punti(11.5f)));
         l.setForeground(Aspetto.TESTO_DEBOLE);
-        l.setPreferredSize(new Dimension(120, 24));
+        l.setPreferredSize(Aspetto.dim(120, 24));
         r.add(l, BorderLayout.WEST);
         r.add(editor, BorderLayout.CENTER);
         return r;
@@ -327,7 +327,7 @@ public final class PannelloCompagno extends JPanel {
         p.setOpaque(false);
         campo.setFont(Aspetto.monospaziato(11.5f, Font.PLAIN));
         JButton genera = new JButton("Genera");
-        genera.setFont(genera.getFont().deriveFont(11.5f));
+        genera.setFont(genera.getFont().deriveFont(Aspetto.punti(11.5f)));
         genera.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 String nuovo = Piloti.semeNuovo();

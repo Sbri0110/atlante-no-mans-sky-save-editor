@@ -144,34 +144,38 @@ public final class Lz4 {
     public static byte[] compatta(byte[] src) {
         int n = src.length;
         ByteArrayOutputStream out = new ByteArrayOutputStream(Math.max(64, n / 4));
+        if (n < 13) {
+            scriviLetteraliFinali(out, src, 0, n);
+            return out.toByteArray();
+        }
         int[] tabella = new int[DIMENSIONE_TABELLA];
         Arrays.fill(tabella, -1);
 
         int i = 0;
         int inizioLetterali = 0;
-        int fineConsentita = n - ULTIMI_BYTE_LIBERI;
+        // Secondo le specifiche standard LZ4:
+        // - gli ultimi 5 byte devono SEMPRE essere letterali
+        // - nessuna corrispondenza puo' iniziare a meno di 12 byte dalla fine: i <= n - 12
+        int fineRicerca = n - 12;
 
-        while (i < fineConsentita) {
-            if (i + 4 > n) {
-                break;
-            }
+        while (i <= fineRicerca) {
             int sequenza = leggi32(src, i);
             int h = hash(sequenza);
             int candidato = tabella[h];
             tabella[h] = i;
 
             boolean trovato = candidato >= 0
-                    && i - candidato < 65536
-                    && i - candidato > 0
+                    && (i - candidato) > 0
+                    && (i - candidato) < 65536
                     && candidato + 4 <= n
                     && leggi32(src, candidato) == sequenza;
 
-            if (!trovato || i - candidato < FINE_MINIMA_CORRISPONDENZA + 1) {
+            if (!trovato) {
                 i++;
                 continue;
             }
 
-            // Estende la corrispondenza il piu' possibile.
+            // Estende la corrispondenza il piu' possibile senza intaccare gli ultimi 5 byte di letterali.
             int lunghezza = 4;
             int massimo = n - ULTIMI_BYTE_LIBERI - i;
             while (lunghezza < massimo && src[candidato + lunghezza] == src[i + lunghezza]) {

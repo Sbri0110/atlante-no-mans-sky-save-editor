@@ -66,9 +66,11 @@ public final class GrigliaSlot extends JPanel {
         void modificato();
     }
 
-    private static final int LATO_MASSIMO = 112;
-    private static final int LATO_MINIMO = 56;
-    private static final int DISTANZA = 6;
+    // Misure nominali: vengono ingrandite con il resto dell'interfaccia, cosi'
+    // la griglia segue lo schermo come tutto il resto.
+    private static final int LATO_MASSIMO = Aspetto.px(112);
+    private static final int LATO_MINIMO = Aspetto.px(56);
+    private static final int DISTANZA = Aspetto.px(6);
 
     private final Catalogo catalogo;
     private final Icone icone;
@@ -106,11 +108,11 @@ public final class GrigliaSlot extends JPanel {
         setBackground(Aspetto.PANNELLO);
 
         contenitore.setBackground(Aspetto.PANNELLO);
-        contenitore.setBorder(BorderFactory.createEmptyBorder(12, 12, 12, 12));
+        contenitore.setBorder(Aspetto.bordo(12, 12, 12, 12));
 
         scorrimento = new JScrollPane(contenitore);
         scorrimento.setBorder(BorderFactory.createEmptyBorder());
-        scorrimento.getVerticalScrollBar().setUnitIncrement(20);
+        scorrimento.getVerticalScrollBar().setUnitIncrement(Aspetto.px(20));
         scorrimento.setBackground(Aspetto.PANNELLO);
         add(scorrimento, java.awt.BorderLayout.CENTER);
     }
@@ -606,7 +608,7 @@ public final class GrigliaSlot extends JPanel {
         }
 
         public int getScrollableUnitIncrement(Rectangle visibile, int orientamento, int direzione) {
-            return 20;
+            return Aspetto.px(20);
         }
 
         public int getScrollableBlockIncrement(Rectangle visibile, int orientamento, int direzione) {
@@ -754,7 +756,7 @@ public final class GrigliaSlot extends JPanel {
             g2.setColor(scelto ? Aspetto.SELEZIONE
                     : !sbloccato ? Aspetto.FONDO
                     : sottoIlPuntatore ? Aspetto.PANNELLO_ALTO : Aspetto.FONDO_ALTO);
-            g2.fillRoundRect(0, 0, larghezza, altezza, 12, 12);
+            g2.fillRoundRect(0, 0, larghezza, altezza, Aspetto.px(12), Aspetto.px(12));
 
             // --- contorno ---
             if (!sbloccato) {
@@ -769,7 +771,7 @@ public final class GrigliaSlot extends JPanel {
                 g2.setColor(scelto ? Aspetto.ACCENTO : Aspetto.BORDO_VIVO);
                 g2.setStroke(new BasicStroke(scelto ? 1.8f : 1f));
             }
-            g2.drawRoundRect(0, 0, larghezza - 1, altezza - 1, 12, 12);
+            g2.drawRoundRect(0, 0, larghezza - 1, altezza - 1, Aspetto.px(12), Aspetto.px(12));
             g2.setStroke(new BasicStroke(1f));
 
             if (!sbloccato) {
@@ -787,44 +789,50 @@ public final class GrigliaSlot extends JPanel {
                 g2.setFont(Aspetto.monospaziato(9.5f, Font.PLAIN));
                 String t = "libero";
                 FontMetrics fm = g2.getFontMetrics();
-                g2.drawString(t, (larghezza - fm.stringWidth(t)) / 2, altezza - 12);
+                g2.drawString(t, (larghezza - fm.stringWidth(t)) / 2, altezza - Aspetto.px(12));
                 g2.dispose();
                 return;
             }
 
             // --- angolo dello slot super-caricato ---
             if (speciale) {
-                int r = 13;
+                int r = Aspetto.px(13);
                 g2.setColor(Aspetto.ACCENTO);
                 g2.fillArc(larghezza - r * 2 - 2, 2, r * 2, r * 2, 0, 360);
                 g2.setColor(Aspetto.FONDO);
                 g2.setFont(Aspetto.monospaziato(9.5f, Font.BOLD));
-                g2.drawString("S", larghezza - r - 5, 14);
+                g2.drawString("S", larghezza - r - Aspetto.px(5), Aspetto.px(14));
             }
 
             // --- icona ---
             Catalogo.Voce voce = catalogo == null ? null : catalogo.voce(id);
-            int latoIcona = Math.max(18, Math.min(46, Math.min(larghezza - 16, (int) (altezza * 0.40))));
-            javax.swing.ImageIcon icona = icone.perFile(voce == null ? null : voce.icona, latoIcona);
+            int latoIcona = Math.max(Aspetto.px(18), Math.min(Aspetto.px(46),
+                    Math.min(larghezza - Aspetto.px(16), (int) (altezza * 0.40))));
+            // La griglia disegna con misure gia' ingrandite: l'icona vuole la
+            // misura nominale, perche' la ingrandisce lei.
+            javax.swing.ImageIcon icona = icone.perFile(voce == null ? null : voce.icona,
+                    Aspetto.nominale(latoIcona));
             int centroX = larghezza / 2;
             if (icona != null) {
-                g2.drawImage(icona.getImage(), centroX - latoIcona / 2, 7, latoIcona, latoIcona, null);
+                g2.drawImage(icona.getImage(), centroX - latoIcona / 2, Aspetto.px(7),
+                        latoIcona, latoIcona, null);
             } else {
                 g2.setColor(Aspetto.TESTO_DEBOLE);
-                g2.setFont(Aspetto.monospaziato(Math.max(8f, latoIcona / 4f), Font.BOLD));
+                g2.setFont(Aspetto.monospaziatoReale(Math.max(8f, latoIcona / 4f), Font.BOLD));
                 String sigla = id.length() > 4 ? id.substring(0, 4) : id;
                 FontMetrics fm = g2.getFontMetrics();
-                g2.drawString(sigla, centroX - fm.stringWidth(sigla) / 2, 7 + latoIcona / 2 + 3);
+                g2.drawString(sigla, centroX - fm.stringWidth(sigla) / 2,
+                        Aspetto.px(7) + latoIcona / 2 + Aspetto.px(3));
             }
 
             // --- nome di gioco ---
             String nome = voce != null ? voce.etichetta() : id;
             g2.setColor(scelto ? Aspetto.TESTO : Aspetto.TESTO_TENUE);
-            float dimensione = larghezza < 82 ? 8.5f : 9.5f;
-            g2.setFont(g2.getFont().deriveFont(Font.PLAIN, dimensione));
-            int righeNome = larghezza < 92 ? 1 : 2;
-            List<String> righeTesto = spezza(g2, nome, larghezza - 10, righeNome);
-            int yTesto = 7 + latoIcona + g2.getFontMetrics().getAscent() + 3;
+            float dimensione = larghezza < Aspetto.px(82) ? 8.5f : 9.5f;
+            g2.setFont(g2.getFont().deriveFont(Font.PLAIN, Aspetto.punti(dimensione)));
+            int righeNome = larghezza < Aspetto.px(92) ? 1 : 2;
+            List<String> righeTesto = spezza(g2, nome, larghezza - Aspetto.px(10), righeNome);
+            int yTesto = Aspetto.px(7) + latoIcona + g2.getFontMetrics().getAscent() + Aspetto.px(3);
             for (String riga : righeTesto) {
                 FontMetrics fm = g2.getFontMetrics();
                 g2.drawString(riga, (larghezza - fm.stringWidth(riga)) / 2, yTesto);
@@ -844,13 +852,14 @@ public final class GrigliaSlot extends JPanel {
                 String testoQ = massimo.isEmpty() ? quantita : quantita + "/" + massimo;
                 g2.setFont(Aspetto.monospaziato(9f, Font.PLAIN));
                 FontMetrics fm = g2.getFontMetrics();
-                int larghezzaQ = Math.min(fm.stringWidth(testoQ) + 12, larghezza - 6);
+                int larghezzaQ = Math.min(fm.stringWidth(testoQ) + Aspetto.px(12),
+                        larghezza - Aspetto.px(6));
                 int xq = (larghezza - larghezzaQ) / 2;
-                int yq = altezza - 17;
+                int yq = altezza - Aspetto.px(17);
                 g2.setColor(Aspetto.velato(Aspetto.INFO, 40));
-                g2.fillRoundRect(xq, yq, larghezzaQ, 14, 14, 14);
+                g2.fillRoundRect(xq, yq, larghezzaQ, Aspetto.px(14), Aspetto.px(14), Aspetto.px(14));
                 g2.setColor(Aspetto.INFO);
-                g2.drawString(testoQ, xq + 6, yq + 10);
+                g2.drawString(testoQ, xq + Aspetto.px(6), yq + Aspetto.px(10));
             }
 
             // --- danno ---
@@ -862,10 +871,12 @@ public final class GrigliaSlot extends JPanel {
             }
             if (valoreDanno > 0) {
                 g2.setColor(Aspetto.ERRORE);
-                g2.fillRoundRect(5, 5, Math.min(46, larghezza - 10), 13, 13, 13);
+                g2.fillRoundRect(Aspetto.px(5), Aspetto.px(5),
+                        Math.min(Aspetto.px(46), larghezza - Aspetto.px(10)),
+                        Aspetto.px(13), Aspetto.px(13), Aspetto.px(13));
                 g2.setColor(new Color(0xFFF2F2));
                 g2.setFont(Aspetto.monospaziato(8.5f, Font.BOLD));
-                g2.drawString("danno", 10, 14);
+                g2.drawString("danno", Aspetto.px(10), Aspetto.px(14));
             }
 
             g2.dispose();

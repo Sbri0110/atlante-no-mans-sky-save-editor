@@ -1,7 +1,10 @@
 package it.atlante.finestra;
 
 import javax.swing.UIManager;
+import javax.swing.border.EmptyBorder;
 import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Toolkit;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -192,6 +195,128 @@ public final class Aspetto {
     }
 
     // ------------------------------------------------------------------
+    // Scala dell'interfaccia
+    // ------------------------------------------------------------------
+
+    /**
+     * Ingrandimento dell'interfaccia rispetto alla misura nominale di 96 DPI.
+     *
+     * Su uno schermo ad alta densita' Windows ingrandisce i programmi, ma la
+     * macchina virtuale di Java 8 resta ferma a 96 DPI: le misure scritte nel
+     * codice valgono pixel fisici, e un carattere di 13 punti su un monitor da
+     * 168 pixel per pollice viene disegnato al 57% della sua dimensione. E' il
+     * motivo per cui l'interfaccia appariva piccola sul pannello 4K.
+     *
+     * FlatLaf se ne accorge da solo e ingrandisce le metriche dei suoi
+     * componenti, ma non i caratteri, che glieli mettiamo noi dopo il setup.
+     * Qui si prende la stessa scala e la si applica a tutto quello che il tema
+     * non tocca: caratteri, dimensioni, margini, icone.
+     *
+     * Misurato il 2026-09-30 sullo schermo di Sbri (3840x2160, 168 DPI):
+     * la scala giusta e' 1,75, mentre l'interfaccia usciva a 1,0.
+     */
+    private static float scala = 1f;
+
+    /** Valore scritto a mano in risorse/aspetto.properties, se c'e'. */
+    private static float scalaImposta;
+
+    /** La scala in uso: 1,0 = misure nominali, 1,75 = schermo a 168 DPI. */
+    public static float scala() {
+        return scala;
+    }
+
+    /**
+     * Una misura nominale portata alla scala dello schermo.
+     *
+     * I valori fuori misura non si toccano: {@code Integer.MAX_VALUE} serve a
+     * dire "quanto largo serve" nei layout a scatola, e moltiplicarlo andrebbe
+     * in overflow. Lo zero resta zero.
+     */
+    public static int px(int n) {
+        if (n <= 0 || n > 10000) {
+            return n;
+        }
+        return Math.round(n * scala);
+    }
+
+    /** Una dimensione nominale portata alla scala dello schermo. */
+    public static Dimension dim(int larghezza, int altezza) {
+        return new Dimension(px(larghezza), px(altezza));
+    }
+
+    /** Un margine nominale portato alla scala dello schermo. */
+    public static EmptyBorder bordo(int sopra, int sinistra, int sotto, int destra) {
+        return new EmptyBorder(px(sopra), px(sinistra), px(sotto), px(destra));
+    }
+
+    /** Un margine nominale uguale sui quattro lati. */
+    public static EmptyBorder bordo(int tutti) {
+        return bordo(tutti, tutti, tutti, tutti);
+    }
+
+    /** Margini nominali, per chi costruisce un Insets invece di un bordo. */
+    public static java.awt.Insets insetti(int sopra, int sinistra, int sotto, int destra) {
+        return new java.awt.Insets(px(sopra), px(sinistra), px(sotto), px(destra));
+    }
+
+    /**
+     * Un bordo pieno nominale, come {@code BorderFactory.createMatteBorder}.
+     *
+     * Sta qui e non nel codice dei pannelli perche' deve passare dalla stessa
+     * scala: un bordo di separazione spesso 1 pixel sullo schermo di Sbri
+     * sarebbe la meta' di quello che si vede su un monitor normale.
+     */
+    public static javax.swing.border.Border matte(int sopra, int sinistra, int sotto, int destra,
+                                                  java.awt.Color colore) {
+        return javax.swing.BorderFactory.createMatteBorder(
+                px(sopra), px(sinistra), px(sotto), px(destra), colore);
+    }
+
+    /** Una dimensione di carattere in punti, ingrandita come il resto. */
+    public static float punti(float punti) {
+        return punti * scala;
+    }
+
+    /**
+     * Da una misura gia' in pixel dello schermo alla misura nominale
+     * corrispondente.
+     *
+     * Serve a chi disegna a mano partendo da una misura reale (la griglia degli
+     * slot) e poi chiede un'icona, che vuole la misura nominale perche' la
+     * ingrandisce lei.
+     */
+    public static int nominale(int reale) {
+        return scala == 1f ? reale : Math.round(reale / scala);
+    }
+
+    /**
+     * Decide la scala dell'interfaccia.
+     *
+     * L'ordine: il valore scritto a mano nella configurazione, poi quello che
+     * FlatLaf ha ricavato dallo schermo (la stessa scala che applica alle sue
+     * metriche: usarne una diversa disallineerebbe i componenti del tema da
+     * quelli nostri), infine la densita' dello schermo letta direttamente.
+     */
+    private static float calcolaScala() {
+        if (scalaImposta > 0f) {
+            return scalaImposta;
+        }
+        if (flatlaf) {
+            try {
+                Class<?> ui = Class.forName("com.formdev.flatlaf.util.UIScale");
+                Object v = ui.getMethod("getUserScaleFactor").invoke(null);
+                if (v instanceof Number && ((Number) v).floatValue() > 0f) {
+                    return ((Number) v).floatValue();
+                }
+            } catch (Throwable e) {
+                // versione di FlatLaf senza quel metodo: si ripiega sul DPI
+            }
+        }
+        int dpi = Toolkit.getDefaultToolkit().getScreenResolution();
+        return dpi > 0 ? dpi / 96f : 1f;
+    }
+
+    // ------------------------------------------------------------------
     // Installazione
     // ------------------------------------------------------------------
 
@@ -203,6 +328,10 @@ public final class Aspetto {
         if (!flatlaf) {
             provaNimbus();
         }
+        // La scala si decide dopo il tema: FlatLaf la ricava dallo schermo, e la
+        // nostra dev'essere la stessa, altrimenti i componenti del tema e
+        // quelli nostri sarebbero ingranditi in modo diverso.
+        scala = calcolaScala();
         ritocchiComuni();
     }
 
@@ -309,6 +438,23 @@ public final class Aspetto {
         corrente.accentoChiaro = leggiColore(p, "accentoChiaro", corrente.accentoChiaro);
         corrente.accentoScuro = leggiColore(p, "accentoScuro", corrente.accentoScuro);
         corrente.selezione = leggiColore(p, "selezione", corrente.selezione);
+
+        // Scala scritta a mano: serve quando quella ricavata dallo schermo non
+        // e' quella giusta (due monitor con densita' diverse, o un gusto
+        // personale). Assente vuol dire "decidila tu".
+        String s = p.getProperty("scala");
+        if (s != null && !s.trim().isEmpty()) {
+            try {
+                float v = Float.parseFloat(s.trim().replace(',', '.'));
+                if (v >= 1f && v <= 4f) {
+                    scalaImposta = v;
+                } else {
+                    System.err.println("scala fuori intervallo (1 - 4): " + s);
+                }
+            } catch (NumberFormatException e) {
+                System.err.println("scala non valida: " + s);
+            }
+        }
     }
 
     private static Color leggiColore(Properties p, String chiave, Color ripiego) {
@@ -331,6 +477,11 @@ public final class Aspetto {
         }
         Properties p = new Properties();
         p.setProperty("tavolozza", corrente.nome);
+        // Se la scala e' stata imposta a mano si riscrive: altrimenti cambiando
+        // tavolozza si perderebbe, perche' qui il file viene rifatto da zero.
+        if (scalaImposta > 0f) {
+            p.setProperty("scala", String.valueOf(scalaImposta));
+        }
         p.setProperty("fondo", esadecimale(corrente.fondo));
         p.setProperty("fondoAlto", esadecimale(corrente.fondoAlto));
         p.setProperty("pannello", esadecimale(corrente.pannello));
@@ -527,10 +678,13 @@ public final class Aspetto {
         metti("TitledBorder.titleColor", TESTO_TENUE);
         metti("TitledBorder.border", javax.swing.BorderFactory.createLineBorder(BORDO));
 
+        // I caratteri vanno ingranditi a mano: FlatLaf scala le metriche dei
+        // suoi componenti ma non i font, che glieli mettiamo noi dopo il setup.
         java.awt.Font base = new java.awt.Font("Segoe UI", java.awt.Font.PLAIN, 13);
         if (!"Segoe UI".equals(base.getFamily())) {
             base = new java.awt.Font(java.awt.Font.SANS_SERIF, java.awt.Font.PLAIN, 13);
         }
+        base = base.deriveFont(13f * scala);
         String[] chiavi = {"Label", "Button", "TextField", "ComboBox", "Tree", "Table",
                 "List", "Menu", "MenuItem", "TabbedPane", "TitledBorder", "ToolTip", "RadioButton",
                 "CheckBox", "ToggleButton", "OptionPane", "CheckBoxMenuItem", "RadioButtonMenuItem"};
@@ -543,9 +697,25 @@ public final class Aspetto {
         UIManager.put(chiave, valore);
     }
 
-    /** Carattere monospaziato, per identificatori e misure. */
+    /**
+     * Carattere monospaziato, per identificatori e misure.
+     *
+     * La dimensione e' nominale e viene ingrandita come il resto.
+     */
     public static java.awt.Font monospaziato(float dimensione, int stile) {
-        int punti = Math.round(dimensione);
+        return monospaziatoGrezzo(Math.round(dimensione * scala), stile);
+    }
+
+    /**
+     * Come {@link #monospaziato}, ma per una misura gia' in pixel dello
+     * schermo: si usa dove la dimensione deriva da un'altra misura gia'
+     * ingrandita, per non ingrandirla due volte.
+     */
+    public static java.awt.Font monospaziatoReale(float punti, int stile) {
+        return monospaziatoGrezzo(Math.round(punti), stile);
+    }
+
+    private static java.awt.Font monospaziatoGrezzo(int punti, int stile) {
         java.awt.Font f = new java.awt.Font("Consolas", stile, punti);
         if (!"Consolas".equals(f.getFamily())) {
             f = new java.awt.Font(java.awt.Font.MONOSPACED, stile, punti);

@@ -156,13 +156,13 @@ public final class PannelloTraguardi extends JPanel {
         setLayout(new BorderLayout());
         setBackground(Aspetto.FONDO);
         contenitore.setBackground(Aspetto.FONDO);
-        contenitore.setBorder(BorderFactory.createEmptyBorder(14, 16, 20, 16));
+        contenitore.setBorder(Aspetto.bordo(14, 16, 20, 16));
 
         add(costruisciBarra(), BorderLayout.NORTH);
 
         JScrollPane scorrimento = new JScrollPane(contenitore);
         scorrimento.setBorder(BorderFactory.createEmptyBorder());
-        scorrimento.getVerticalScrollBar().setUnitIncrement(18);
+        scorrimento.getVerticalScrollBar().setUnitIncrement(Aspetto.px(18));
         add(scorrimento, BorderLayout.CENTER);
     }
 
@@ -197,8 +197,8 @@ public final class PannelloTraguardi extends JPanel {
         JPanel barra = new JPanel(new BorderLayout(12, 0));
         barra.setBackground(Aspetto.FONDO_ALTO);
         barra.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createMatteBorder(0, 0, 1, 0, Aspetto.BORDO),
-                BorderFactory.createEmptyBorder(10, 16, 10, 16)));
+                Aspetto.matte(0, 0, 1, 0, Aspetto.BORDO),
+                Aspetto.bordo(10, 16, 10, 16)));
 
         JLabel titolo = new JLabel("PROGRESSIONE DEL VIAGGIATORE");
         titolo.setFont(Aspetto.monospaziato(10.5f, Font.BOLD));
@@ -211,7 +211,7 @@ public final class PannelloTraguardi extends JPanel {
         contatore.setForeground(Aspetto.TESTO_TENUE);
         destra.add(contatore);
 
-        cerca.setPreferredSize(new Dimension(200, 28));
+        cerca.setPreferredSize(Aspetto.dim(200, 28));
         cerca.setToolTipText("Cerca fra i traguardi: nasconde le schede che non contengono il testo");
         cerca.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -221,7 +221,7 @@ public final class PannelloTraguardi extends JPanel {
         destra.add(cerca);
 
         JButton massimizza = new JButton("Massimizza fazioni e gilde");
-        massimizza.setFont(massimizza.getFont().deriveFont(11.5f));
+        massimizza.setFont(massimizza.getFont().deriveFont(Aspetto.punti(11.5f)));
         massimizza.setToolTipText("Porta tutte le reputazioni a 100");
         massimizza.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -283,7 +283,7 @@ public final class PannelloTraguardi extends JPanel {
         p.setBackground(Aspetto.PANNELLO);
         p.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(Aspetto.BORDO),
-                BorderFactory.createEmptyBorder(14, 16, 14, 16)));
+                Aspetto.bordo(14, 16, 14, 16)));
 
         JPanel testa = new JPanel(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT, 9, 0));
         testa.setOpaque(false);
@@ -293,10 +293,10 @@ public final class PannelloTraguardi extends JPanel {
                 Aspetto.ACCENTO, true));
         testa.add(immagine);
         JLabel titolo = new JLabel(s.titolo);
-        titolo.setFont(titolo.getFont().deriveFont(Font.BOLD, 13.5f));
+        titolo.setFont(titolo.getFont().deriveFont(Font.BOLD, Aspetto.punti(13.5f)));
         titolo.setForeground(Aspetto.TESTO);
         testa.add(titolo);
-        testa.setBorder(BorderFactory.createEmptyBorder(0, 0, 10, 0));
+        testa.setBorder(Aspetto.bordo(0, 0, 10, 0));
         p.add(testa, BorderLayout.NORTH);
 
         JPanel righe = new JPanel();
@@ -313,20 +313,20 @@ public final class PannelloTraguardi extends JPanel {
     private JPanel riga(final Voce v) {
         JPanel r = new JPanel(new BorderLayout(10, 0));
         r.setOpaque(false);
-        r.setBorder(BorderFactory.createEmptyBorder(3, 0, 3, 0));
-        r.setMaximumSize(new Dimension(Integer.MAX_VALUE, 30));
+        r.setBorder(Aspetto.bordo(3, 0, 3, 0));
+        r.setMaximumSize(Aspetto.dim(Integer.MAX_VALUE, 30));
 
         JLabel nome = new JLabel(v.nome);
-        nome.setFont(nome.getFont().deriveFont(12f));
+        nome.setFont(nome.getFont().deriveFont(Aspetto.punti(12f)));
         nome.setForeground(Aspetto.TESTO_TENUE);
-        nome.setPreferredSize(new Dimension(180, 24));
+        nome.setPreferredSize(Aspetto.dim(180, 24));
         nome.setToolTipText(v.id);
         r.add(nome, BorderLayout.WEST);
 
         JTextField campo = new JTextField(testoDi(v.id));
         campo.setFont(Aspetto.monospaziato(12, Font.PLAIN));
         campo.setHorizontalAlignment(SwingConstants.RIGHT);
-        campo.setPreferredSize(new Dimension(140, 26));
+        campo.setPreferredSize(Aspetto.dim(140, 26));
         campo.setToolTipText(v.id + "  —  modifica e premi Invio");
         campo.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -338,9 +338,9 @@ public final class PannelloTraguardi extends JPanel {
         // Accanto alle parole apprese, il pulsante che le impara tutte.
         if (v.id.contains("WORDS")) {
             JButton impara = new JButton("Impara tutte");
-            impara.setFont(impara.getFont().deriveFont(11f));
+            impara.setFont(impara.getFont().deriveFont(Aspetto.punti(11f)));
             impara.setToolTipText("Impara tutte le parole che ti mancano, per tutte le razze");
-            impara.setPreferredSize(new Dimension(120, 26));
+            impara.setPreferredSize(Aspetto.dim(120, 26));
             impara.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
                     imparaTutteLeParole();
