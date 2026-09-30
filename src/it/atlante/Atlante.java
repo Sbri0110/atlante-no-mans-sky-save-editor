@@ -107,7 +107,7 @@ public final class Atlante {
         pannello.add(testi, BorderLayout.CENTER);
 
         pannello.setBorder(javax.swing.BorderFactory.createCompoundBorder(
-                javax.swing.BorderFactory.createLineBorder(new Color(0x4A3238)),
+                Aspetto.bordoScheda(),
                 Aspetto.bordo(24, 34, 24, 40)));
 
         finestra.setContentPane(pannello);

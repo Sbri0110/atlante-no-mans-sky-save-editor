@@ -108,7 +108,12 @@ public final class Finestra extends JFrame {
         this.cartellaBackup = cartellaBackup;
         this.testata = new Testata();
 
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+        addWindowListener(new java.awt.event.WindowAdapter() {
+            public void windowClosing(java.awt.event.WindowEvent e) {
+                chiudi();
+            }
+        });
         setMinimumSize(Aspetto.dim(1180, 720));
         setSize(Aspetto.px(1440), Aspetto.px(900));
         setLocationRelativeTo(null);
@@ -246,6 +251,7 @@ public final class Finestra extends JFrame {
         comandi.setOpaque(false);
         apri.setFont(apri.getFont().deriveFont(Aspetto.punti(12.5f)));
         salva.setFont(salva.getFont().deriveFont(Font.BOLD, Aspetto.punti(12.5f)));
+        Aspetto.pulsantePrimario(salva);
         salvaCome.setFont(salvaCome.getFont().deriveFont(Aspetto.punti(12.5f)));
         salva.setEnabled(false);
         salvaCome.setEnabled(false);
@@ -295,7 +301,7 @@ public final class Finestra extends JFrame {
         scorrimento.getVerticalScrollBar().setUnitIncrement(Aspetto.px(16));
 
         JLabel titolo = new JLabel("  SEZIONI");
-        titolo.setFont(Aspetto.monospaziato(10, Font.BOLD));
+        titolo.setFont(titolo.getFont().deriveFont(Font.BOLD, Aspetto.punti(10.5f)));
         titolo.setForeground(Aspetto.TESTO_DEBOLE);
         titolo.setBorder(Aspetto.bordo(12, 8, 8, 8));
 
@@ -318,7 +324,7 @@ public final class Finestra extends JFrame {
         barra.setBorder(BorderFactory.createCompoundBorder(
                 Aspetto.matte(1, 0, 0, 0, Aspetto.BORDO),
                 Aspetto.bordo(7, 16, 7, 16)));
-        stato.setFont(Aspetto.monospaziato(11.5f, Font.PLAIN));
+        stato.setFont(stato.getFont().deriveFont(Aspetto.punti(11f)));
         stato.setForeground(Aspetto.TESTO_TENUE);
         messaggio.setFont(messaggio.getFont().deriveFont(Aspetto.punti(11.5f)));
         messaggio.setForeground(Aspetto.TESTO_DEBOLE);
@@ -355,8 +361,7 @@ public final class Finestra extends JFrame {
         file.addSeparator();
         file.add(voce("Esci", 0, new Runnable() {
             public void run() {
-                dispose();
-                System.exit(0);
+                chiudi();
             }
         }));
         barra.add(file);
@@ -626,6 +631,10 @@ public final class Finestra extends JFrame {
     }
 
     private void apri(File file) {
+        if (!confermaCambio()) {
+            ripristinaSelezioneSalvataggio();
+            return;
+        }
         try {
             messaggio.setText("Apertura in corso...");
             Salvataggio nuovo = Salvataggio.apri(file, mappaChiavi());
@@ -659,10 +668,40 @@ public final class Finestra extends JFrame {
             aggiornaStato(nuovo.riepilogo());
             messaggio.setText("Sezione: " + sezioneCorrente.nome);
         } catch (IOException e) {
+            ripristinaSelezioneSalvataggio();
             JOptionPane.showMessageDialog(this,
                     "Non riesco ad aprire il file.\n\n" + e.getMessage(),
                     "Errore di apertura", JOptionPane.ERROR_MESSAGE);
             aggiornaStato("Apertura non riuscita.");
+        }
+    }
+
+    private void ripristinaSelezioneSalvataggio() {
+        ActionListener[] ascoltatori = comboSalvataggi.getActionListeners();
+        for (ActionListener a : ascoltatori) comboSalvataggi.removeActionListener(a);
+        try {
+            comboSalvataggi.setSelectedItem(voceCorrente);
+        } finally {
+            for (ActionListener a : ascoltatori) comboSalvataggi.addActionListener(a);
+        }
+    }
+
+    private boolean confermaCambio() {
+        if (salvataggio == null || !salvataggio.modificato()) return true;
+        int scelta = JOptionPane.showOptionDialog(this,
+                "Ci sono modifiche non salvate in " + salvataggio.nome() + ".",
+                "Modifiche non salvate", JOptionPane.DEFAULT_OPTION, JOptionPane.WARNING_MESSAGE,
+                null, new String[]{"Salva", "Scarta modifiche", "Annulla"}, "Salva");
+        if (scelta == 1) return true;
+        if (scelta != 0) return false;
+        salva();
+        return !salvataggio.modificato();
+    }
+
+    private void chiudi() {
+        if (confermaCambio()) {
+            dispose();
+            System.exit(0);
         }
     }
 
@@ -779,10 +818,17 @@ public final class Finestra extends JFrame {
         if (scelta.showSaveDialog(this) != JFileChooser.APPROVE_OPTION) {
             return;
         }
+        if (scelta.getSelectedFile().exists() && JOptionPane.showConfirmDialog(this,
+                "Sostituire il file esistente?\n" + scelta.getSelectedFile().getAbsolutePath(),
+                "Salva con nome", JOptionPane.YES_NO_OPTION) != JOptionPane.YES_OPTION) {
+            return;
+        }
         try {
             salvataggio.salvaCome(scelta.getSelectedFile());
+            testata.aggiorna(salvataggio);
             aggiornaStato("Scritto: " + scelta.getSelectedFile().getAbsolutePath());
-            messaggio.setText("Salvato");
+            messaggio.setText(salvataggio.modificato()
+                    ? "Copia esportata; modifiche ancora da salvare nel file aperto" : "Salvato");
         } catch (IOException e) {
             JOptionPane.showMessageDialog(this, e.getMessage(), "Errore", JOptionPane.ERROR_MESSAGE);
         }
@@ -903,7 +949,7 @@ public final class Finestra extends JFrame {
             nomeSalvataggio.setFont(nomeSalvataggio.getFont().deriveFont(Aspetto.punti(14f)));
             nomeSalvataggio.setForeground(Aspetto.ACCENTO_CHIARO);
             nomeSalvataggio.setAlignmentX(Component.LEFT_ALIGNMENT);
-            percorso.setFont(Aspetto.monospaziato(10.5f, Font.PLAIN));
+            percorso.setFont(percorso.getFont().deriveFont(Aspetto.punti(10.5f)));
             percorso.setForeground(Aspetto.TESTO_DEBOLE);
             percorso.setAlignmentX(Component.LEFT_ALIGNMENT);
             testi.add(javax.swing.Box.createVerticalGlue());
@@ -952,7 +998,7 @@ public final class Finestra extends JFrame {
             g2.setPaint(new GradientPaint(0, 0, Aspetto.PANNELLO_ALTO, getWidth(), getHeight(), Aspetto.FONDO));
             g2.fillRect(0, 0, getWidth(), getHeight());
             // filo di accento sul bordo inferiore
-            g2.setColor(Aspetto.ACCENTO_SCURO);
+            g2.setColor(Aspetto.BORDO);
             g2.fillRect(0, getHeight() - 1, getWidth(), 1);
             g2.dispose();
             super.paintComponent(g);
@@ -984,7 +1030,7 @@ public final class Finestra extends JFrame {
         Pillola(int tipo) {
             this.tipo = tipo;
             setOpaque(false);
-            setFont(Aspetto.monospaziato(11, Font.PLAIN));
+            setFont(getFont().deriveFont(Aspetto.punti(11f)));
         }
 
         private Color colore() {
@@ -1022,12 +1068,14 @@ public final class Finestra extends JFrame {
             Color c = colore();
             Graphics2D g2 = (Graphics2D) g.create();
             g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-            g2.setColor(new Color(c.getRed(), c.getGreen(), c.getBlue(), 40));
+            g2.setColor(new Color(c.getRed(), c.getGreen(), c.getBlue(), 22));
             g2.fillRoundRect(0, 0, getWidth() - 1, getHeight() - 1, getHeight(), getHeight());
+            g2.setColor(Aspetto.velato(c, 55));
+            g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, getHeight(), getHeight());
             g2.setColor(c);
             g2.setFont(getFont());
             java.awt.FontMetrics fm = g2.getFontMetrics();
-            g2.drawString(testo, 12, (getHeight() + fm.getAscent() - fm.getDescent()) / 2);
+            g2.drawString(testo, Aspetto.px(12), (getHeight() + fm.getAscent() - fm.getDescent()) / 2);
             g2.dispose();
         }
     }
@@ -1036,11 +1084,14 @@ public final class Finestra extends JFrame {
     private final class DisegnatoreSezione extends JPanel
             implements ListCellRenderer<Navigazione.Sezione> {
 
+        private boolean selezionata;
+
         private final JLabel icona = new JLabel();
         private final JLabel titolo = new JLabel();
         private final JLabel dettaglio = new JLabel();
 
         DisegnatoreSezione() {
+            setOpaque(false);
             setLayout(new BorderLayout(10, 0));
             setBorder(Aspetto.bordo(5, 10, 5, 8));
             add(icona, BorderLayout.WEST);
@@ -1058,7 +1109,7 @@ public final class Finestra extends JFrame {
         public Component getListCellRendererComponent(JList<? extends Navigazione.Sezione> lista,
                                                       Navigazione.Sezione valore, int indice,
                                                       boolean selezionato, boolean conFuoco) {
-            setBackground(selezionato ? Aspetto.SELEZIONE : Aspetto.PANNELLO);
+            selezionata = selezionato;
             titolo.setForeground(selezionato ? Aspetto.TESTO : Aspetto.TESTO_TENUE);
             // Icona di gioco, non una lettera: ogni sezione ha la sua.
             ImageIcon img = icone.perFile(valore.segno + ".PNG", 26);
@@ -1070,6 +1121,25 @@ public final class Finestra extends JFrame {
             dettaglio.setText(quanti == 0 ? valore.descrizione : quanti + " campi");
             setToolTipText(valore.descrizione);
             return this;
+        }
+
+        @Override
+        protected void paintComponent(Graphics g) {
+            Graphics2D g2 = (Graphics2D) g.create();
+            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            g2.setColor(Aspetto.PANNELLO);
+            g2.fillRect(0, 0, getWidth(), getHeight());
+            if (selezionata) {
+                int margine = Aspetto.px(6);
+                g2.setColor(Aspetto.SELEZIONE);
+                g2.fillRoundRect(margine, Aspetto.px(2), getWidth() - margine * 2,
+                        getHeight() - Aspetto.px(4), Aspetto.px(10), Aspetto.px(10));
+                g2.setColor(Aspetto.ACCENTO);
+                g2.fillRoundRect(margine, Aspetto.px(12), Aspetto.px(2),
+                        getHeight() - Aspetto.px(24), Aspetto.px(2), Aspetto.px(2));
+            }
+            g2.dispose();
+            super.paintComponent(g);
         }
     }
 

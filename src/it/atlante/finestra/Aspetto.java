@@ -111,9 +111,9 @@ public final class Aspetto {
         // di sfondo, il colore serve a indicare cosa e' attivo, non a decorare.
         // Il rosso del marchio compare solo nel logo.
         PREDEFINITE.put("Neutro", costruisci("Neutro",
-                "#0A0B0D", "#101114", "#141518", "#1A1C21", "#24262C", "#34373F",
-                "#6E7BE8", "#A5AEF5", "#3A4199", "#232A52",
-                "#E9EAEC", "#8C9099", "#5E626B"));
+                "#101216", "#15181E", "#191D24", "#222731", "#2D3440", "#424D5E",
+                "#91A6EC", "#C4D1FA", "#495B88", "#28364E",
+                "#EFF2F7", "#B0BAC9", "#8995A7"));
 
         // Cremisi — il colore del marchio, per chi lo vuole.
         PREDEFINITE.put("Cremisi", costruisci("Cremisi",
@@ -650,14 +650,14 @@ public final class Aspetto {
         metti("Button.background", PANNELLO_ALTO);
         metti("Button.foreground", TESTO);
         metti("Button.borderColor", BORDO);
-        metti("Button.hoverBackground", PANNELLO);
+        metti("Button.hoverBackground", BORDO);
         metti("Button.default.background", ACCENTO);
         metti("Button.default.foreground", new Color(0xFFF2F2));
         metti("Button.default.hoverBackground", ACCENTO_CHIARO);
         metti("ToggleButton.background", PANNELLO_ALTO);
         metti("ToggleButton.foreground", TESTO);
         metti("ToggleButton.selectedBackground", ACCENTO);
-        metti("ToggleButton.selectedForeground", new Color(0xFFF2F2));
+        metti("ToggleButton.selectedForeground", FONDO);
         metti("ToggleButton.buttonType", "roundRect");
         metti("Separator.foreground", BORDO);
         metti("Label.foreground", TESTO);
@@ -677,6 +677,25 @@ public final class Aspetto {
         metti("RadioButton.foreground", TESTO);
         metti("TitledBorder.titleColor", TESTO_TENUE);
         metti("TitledBorder.border", javax.swing.BorderFactory.createLineBorder(BORDO));
+        metti("Component.arc", 12);
+        metti("Button.arc", 12);
+        metti("TextComponent.arc", 10);
+        metti("Component.focusWidth", 1);
+        metti("Component.innerFocusWidth", 0);
+        metti("Component.focusColor", ACCENTO);
+        metti("Button.margin", new java.awt.Insets(7, 16, 7, 16));
+        metti("Button.toolbar.hoverBackground", PANNELLO_ALTO);
+        metti("TextField.margin", new java.awt.Insets(7, 10, 7, 10));
+        metti("ComboBox.padding", new java.awt.Insets(5, 9, 5, 9));
+        metti("TabbedPane.showTabSeparators", Boolean.FALSE);
+        metti("TabbedPane.tabHeight", 38);
+        metti("TabbedPane.selectionHeight", 2);
+        metti("ScrollBar.width", 10);
+        metti("Tree.selectionArc", 8);
+        metti("List.selectionArc", 8);
+        metti("Table.selectionForeground", TESTO);
+        metti("Tree.selectionForeground", TESTO);
+        metti("List.selectionForeground", TESTO);
 
         // I caratteri vanno ingranditi a mano: FlatLaf scala le metriche dei
         // suoi componenti ma non i font, che glieli mettiamo noi dopo il setup.
@@ -726,6 +745,34 @@ public final class Aspetto {
     /** Colore con trasparenza, per i fondi delle pillole. */
     public static Color velato(Color c, int alfa) {
         return new Color(c.getRed(), c.getGreen(), c.getBlue(), alfa);
+    }
+
+    /** Bordo discreto arrotondato, con colore risolto dalla tavolozza corrente. */
+    public static javax.swing.border.Border bordoScheda() {
+        return new javax.swing.border.AbstractBorder() {
+            public java.awt.Insets getBorderInsets(java.awt.Component c) {
+                return new java.awt.Insets(1, 1, 1, 1);
+            }
+            public void paintBorder(java.awt.Component c, java.awt.Graphics g,
+                                    int x, int y, int larghezza, int altezza) {
+                java.awt.Graphics2D g2 = (java.awt.Graphics2D) g.create();
+                g2.setRenderingHint(java.awt.RenderingHints.KEY_ANTIALIASING,
+                        java.awt.RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setColor(BORDO);
+                g2.drawRoundRect(x, y, larghezza - 1, altezza - 1, px(14), px(14));
+                g2.dispose();
+            }
+        };
+    }
+
+    public static void pulsantePrimario(javax.swing.JButton pulsante) {
+        pulsante.putClientProperty("FlatLaf.style",
+                "background: " + hex(ACCENTO) + "; foreground: " + hex(FONDO)
+                + "; hoverBackground: " + hex(ACCENTO_CHIARO) + "; borderWidth: 0; arc: 12");
+    }
+
+    private static String hex(Color c) {
+        return String.format("#%02x%02x%02x", c.getRed(), c.getGreen(), c.getBlue());
     }
 
     private Aspetto() {

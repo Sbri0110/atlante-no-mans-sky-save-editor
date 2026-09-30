@@ -47,7 +47,12 @@ public final class Lz4 {
      * @return i byte scompattati
      */
     public static byte[] scompatta(byte[] src, int attesa) {
+        if (attesa < 0 || attesa > (1 << 26)) {
+            throw new IllegalArgumentException("dimensione LZ4 non valida: " + attesa);
+        }
+        int limite = attesa > 0 ? attesa : (1 << 26);
         int capienza = attesa > 0 ? attesa : Math.max(64, src.length * 4);
+        capienza = Math.min(capienza, limite);
         byte[] out = new byte[capienza];
         int lun = 0;
         int i = 0;
@@ -61,14 +66,21 @@ public final class Lz4 {
             if (letterali == 15) {
                 int b;
                 do {
+                    if (i >= n) {
+                        throw new IllegalArgumentException("blocco LZ4 troncato: lunghezza dei letterali incompleta");
+                    }
                     b = src[i++] & 0xFF;
                     letterali += b;
+                    if (letterali > limite) {
+                        throw new IllegalArgumentException("letterali LZ4 oltre la dimensione consentita");
+                    }
                 } while (b == 255);
             }
             if (i + letterali > n) {
                 throw new IllegalArgumentException(
                         "blocco LZ4 troncato: servono " + letterali + " letterali, disponibili " + (n - i));
             }
+            controllaDimensione(lun, letterali, limite);
             out = assicura(out, lun + letterali);
             System.arraycopy(src, i, out, lun, letterali);
             lun += letterali;
@@ -95,11 +107,18 @@ public final class Lz4 {
             if (corrispondenza == 15) {
                 int b;
                 do {
+                    if (i >= n) {
+                        throw new IllegalArgumentException("blocco LZ4 troncato: lunghezza della corrispondenza incompleta");
+                    }
                     b = src[i++] & 0xFF;
                     corrispondenza += b;
+                    if (corrispondenza > limite) {
+                        throw new IllegalArgumentException("corrispondenza LZ4 oltre la dimensione consentita");
+                    }
                 } while (b == 255);
             }
             corrispondenza += 4;
+            controllaDimensione(lun, corrispondenza, limite);
 
             int inizio = lun - offset;
             out = assicura(out, lun + corrispondenza);
@@ -116,6 +135,12 @@ public final class Lz4 {
                     "dimensione scompattata inattesa: " + lun + " invece di " + attesa);
         }
         return lun == out.length ? out : Arrays.copyOf(out, lun);
+    }
+
+    private static void controllaDimensione(int prodotti, int aggiunti, int limite) {
+        if (aggiunti > limite - prodotti) {
+            throw new IllegalArgumentException("blocco LZ4 oltre la dimensione consentita");
+        }
     }
 
     private static byte[] assicura(byte[] out, int richiesti) {

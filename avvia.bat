@@ -15,7 +15,7 @@ rem ============================================================
 set "QUI=%~dp0"
 cd /d "%QUI%"
 
-if not exist classi (
+if not exist Atlante.jar if not exist classi\it\atlante\Atlante.class (
   echo Le classi non ci sono: eseguo prima la compilazione.
   call compila.bat
   if errorlevel 1 (
@@ -65,5 +65,9 @@ if not defined JAVA (
 )
 
 echo Avvio con: %JAVA%
-start "Atlante" "%JAVA%" -Xmx2g -Dfile.encoding=UTF-8 -cp "classi;lib\flatlaf.jar" it.atlante.Atlante
+if exist Atlante.jar (
+  start "Atlante" "%JAVA%" -Xmx2g -Dfile.encoding=UTF-8 -jar Atlante.jar
+) else (
+  start "Atlante" "%JAVA%" -Xmx2g -Dfile.encoding=UTF-8 -cp "classi;lib\flatlaf.jar" it.atlante.Atlante
+)
 exit /b 0

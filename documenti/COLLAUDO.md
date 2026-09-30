@@ -1,5 +1,18 @@
 # Riga di comando e collaudo
 
+## Prove di regressione senza salvataggi personali
+
+```bat
+java -cp "classi;lib/flatlaf.jar" it.atlante.strumenti.Regressioni
+```
+
+Le 63 verifiche coprono numeri e stringhe JSON, chiavi duplicate e collisioni,
+blocchi LZ4 troncati, dimensioni incoerenti, compressione ai confini dei blocchi,
+backup, esportazione e riconoscimento dei file WGS. I dati vengono creati in
+una nuova sottocartella `collaudo/regressioni-*`; non vengono cercati o modificati
+salvataggi personali. Una verifica fallita termina il processo con codice diverso
+da zero. Per Linux/macOS usare `:` al posto di `;` nel classpath.
+
 ## Riga di comando
 
 ```bash

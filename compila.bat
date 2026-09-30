@@ -77,14 +77,13 @@ popd
 
 rem --- archivio avviabile, per il doppio clic ---
 if defined JAR (
-  if exist "%JAR%" (
     echo Creo Atlante.jar ...
     > manifest.txt echo Manifest-Version: 1.0
     >> manifest.txt echo Main-Class: it.atlante.Atlante
     >> manifest.txt echo Class-Path: lib/flatlaf.jar
     "%JAR%" cfm Atlante.jar manifest.txt -C classi .
+    if errorlevel 1 goto erroreJar
     del manifest.txt
-  )
 )
 
 echo.
@@ -98,4 +97,9 @@ popd
 echo.
 echo Compilazione FALLITA.
 pause
+exit /b 1
+
+:erroreJar
+del manifest.txt
+echo Creazione di Atlante.jar FALLITA.
 exit /b 1

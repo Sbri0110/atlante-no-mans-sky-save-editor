@@ -102,7 +102,7 @@ public final class ContenitoreWgs {
         }
         List<Slot> trovati = new ArrayList<Slot>();
         for (File c : cartelle) {
-            if (!c.isDirectory() || c.getName().length() != 32) {
+            if (!c.isDirectory() || !guidValido(c.getName())) {
                 continue;
             }
             Slot slot = leggiCartella(c);
@@ -139,13 +139,13 @@ public final class ContenitoreWgs {
         File payload = null;
         File metadati = null;
         for (File f : files) {
-            if (!f.isFile()) {
+            if (!f.isFile() || !guidValido(f.getName())) {
                 continue;
             }
             byte[] testa = leggiTesta(f, 8);
             if (FlussoBlocchi.riconosci(testa)) {
                 payload = f;
-            } else if (f.getName().length() == 32) {
+            } else {
                 metadati = f;
             }
         }
@@ -498,7 +498,8 @@ public final class ContenitoreWgs {
      */
     public static String aggiornaContenitore(File payload, long dimensioneDecompressa) {
         File contenitore = payload.getParentFile();
-        if (contenitore == null) {
+        if (contenitore == null || !guidValido(contenitore.getName())
+                || !guidValido(payload.getName())) {
             return "";
         }
 
@@ -667,10 +668,14 @@ public final class ContenitoreWgs {
             return null;
         }
         for (File f : voci) {
-            if (!f.equals(payload) && !f.getName().startsWith("container.") && f.getName().length() == 32) {
+            if (f.isFile() && !f.equals(payload) && guidValido(f.getName())) {
                 return f;
             }
         }
         return null;
+    }
+
+    private static boolean guidValido(String nome) {
+        return nome.matches("[0-9a-fA-F]{32}");
     }
 }

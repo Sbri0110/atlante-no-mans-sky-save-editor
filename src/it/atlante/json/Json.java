@@ -26,6 +26,9 @@ import java.util.Map;
  */
 public final class Json {
 
+    private static final java.util.regex.Pattern NUMERO = java.util.regex.Pattern.compile(
+            "-?(0|[1-9][0-9]*)(\\.[0-9]+)?([eE][+-]?[0-9]+)?");
+
     private Json() {
     }
 
@@ -34,6 +37,9 @@ public final class Json {
         private final String testo;
 
         public Numero(String testo) {
+            if (testo == null || !NUMERO.matcher(testo).matches()) {
+                throw new IllegalArgumentException("numero JSON non valido: " + testo);
+            }
             this.testo = testo;
         }
 
@@ -160,6 +166,9 @@ public final class Json {
                 }
                 pos++;
                 saltaSpazi();
+                if (mappa.containsKey(chiave)) {
+                    throw new IllegalArgumentException("chiave JSON duplicata: " + chiave);
+                }
                 mappa.put(chiave, valore());
                 saltaSpazi();
                 if (finito()) {
@@ -216,6 +225,9 @@ public final class Json {
                     return b.toString();
                 }
                 if (c != '\\') {
+                    if (c < 0x20) {
+                        throw new IllegalArgumentException("carattere di controllo nella stringa alla posizione " + (pos - 1));
+                    }
                     b.append(c);
                     continue;
                 }
@@ -236,7 +248,11 @@ public final class Json {
                         if (pos + 4 > s.length()) {
                             throw new IllegalArgumentException("escape \\u incompleto");
                         }
-                        b.append((char) Integer.parseInt(s.substring(pos, pos + 4), 16));
+                        String hex = s.substring(pos, pos + 4);
+                        if (!hex.matches("[0-9a-fA-F]{4}")) {
+                            throw new IllegalArgumentException("escape \\u non valido");
+                        }
+                        b.append((char) Integer.parseInt(hex, 16));
                         pos += 4;
                         break;
                     default:

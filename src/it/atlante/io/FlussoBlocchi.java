@@ -78,12 +78,23 @@ public final class FlussoBlocchi {
             if (dimensioneComp <= 0 || dimensioneComp > (1 << 26)) {
                 throw new IOException("dimensione compressa implausibile: " + dimensioneComp);
             }
+            if (dimensioneDecomp < 0 || dimensioneDecomp > DIMENSIONE_BLOCCO) {
+                throw new IOException("dimensione decompressa implausibile: " + dimensioneDecomp);
+            }
 
             byte[] compresso = new byte[dimensioneComp];
             if (leggiPieno(in, compresso, dimensioneComp) != dimensioneComp) {
                 throw new EOFException("blocco " + (numero + 1) + " troncato");
             }
-            byte[] decompresso = Lz4.scompatta(compresso, dimensioneDecomp);
+            byte[] decompresso;
+            try {
+                decompresso = Lz4.scompatta(compresso, dimensioneDecomp);
+            } catch (IllegalArgumentException e) {
+                throw new IOException("blocco " + (numero + 1) + " non valido: " + e.getMessage(), e);
+            }
+            if (decompresso.length != dimensioneDecomp) {
+                throw new IOException("dimensione decompressa diversa dall'intestazione");
+            }
             out.write(decompresso, 0, decompresso.length);
             numero++;
         }

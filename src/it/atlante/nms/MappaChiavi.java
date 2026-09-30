@@ -135,6 +135,9 @@ public final class MappaChiavi {
                     esito.tradotte++;
                 }
                 traduciIn(e.getValue(), esito);
+                if (nuovo.containsKey(nome)) {
+                    throw new IllegalArgumentException("collisione nella traduzione della chiave: " + nome);
+                }
                 nuovo.put(nome, e.getValue());
             }
             mappa.clear();
@@ -174,6 +177,9 @@ public final class MappaChiavi {
                     esito.tradotte++;
                 }
                 cifraIn(e.getValue(), esito);
+                if (nuovo.containsKey(chiave)) {
+                    throw new IllegalArgumentException("collisione nella cifratura della chiave: " + chiave);
+                }
                 nuovo.put(chiave, e.getValue());
             }
             mappa.clear();

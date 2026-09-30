@@ -118,6 +118,7 @@ public final class PannelloPrincipale extends JPanel {
         comandi.setBorder(Aspetto.bordo(14, 0, 0, 0));
         ricarica.setFont(ricarica.getFont().deriveFont(Aspetto.punti(12.5f)));
         salva.setFont(salva.getFont().deriveFont(Font.BOLD, Aspetto.punti(12.5f)));
+        Aspetto.pulsantePrimario(salva);
         salvaCome.setFont(salvaCome.getFont().deriveFont(Aspetto.punti(12.5f)));
         comandi.add(ricarica);
         comandi.add(salva);
@@ -158,9 +159,9 @@ public final class PannelloPrincipale extends JPanel {
 
     private JButton pulsanteAzione(String titolo, String spiegazione, final String codice) {
         JButton b = new JButton(titolo);
-        b.setFont(b.getFont().deriveFont(Aspetto.punti(12f)));
+        b.setFont(b.getFont().deriveFont(Font.BOLD, Aspetto.punti(12.5f)));
         b.setToolTipText(spiegazione);
-        b.setPreferredSize(Aspetto.dim(220, 44));
+        b.setPreferredSize(Aspetto.dim(220, 52));
         b.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 esegui(codice);
@@ -170,16 +171,26 @@ public final class PannelloPrincipale extends JPanel {
     }
 
     private JPanel scheda(String titolo) {
-        JPanel p = new JPanel(new BorderLayout());
-        p.setBackground(Aspetto.PANNELLO);
+        JPanel p = new JPanel(new BorderLayout()) {
+            protected void paintComponent(java.awt.Graphics g) {
+                java.awt.Graphics2D g2 = (java.awt.Graphics2D) g.create();
+                g2.setRenderingHint(java.awt.RenderingHints.KEY_ANTIALIASING,
+                        java.awt.RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setColor(Aspetto.PANNELLO);
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), Aspetto.px(14), Aspetto.px(14));
+                g2.dispose();
+                super.paintComponent(g);
+            }
+        };
+        p.setOpaque(false);
         p.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(Aspetto.BORDO),
-                Aspetto.bordo(16, 18, 16, 18)));
+                Aspetto.bordoScheda(),
+                Aspetto.bordo(20, 22, 20, 22)));
         p.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        JLabel t = new JLabel(titolo.toUpperCase());
-        t.setFont(Aspetto.monospaziato(10.5f, Font.BOLD));
-        t.setForeground(Aspetto.ACCENTO);
+        JLabel t = new JLabel(titolo);
+        t.setFont(t.getFont().deriveFont(Font.BOLD, Aspetto.punti(15f)));
+        t.setForeground(Aspetto.TESTO);
         t.setBorder(Aspetto.bordo(0, 0, 12, 0));
         p.add(t, BorderLayout.NORTH);
         return p;
@@ -191,10 +202,10 @@ public final class PannelloPrincipale extends JPanel {
         riga.setBorder(Aspetto.bordo(4, 0, 4, 0));
         JLabel nome = new JLabel(etichetta);
         nome.setFont(nome.getFont().deriveFont(Aspetto.punti(12f)));
-        nome.setForeground(Aspetto.TESTO_DEBOLE);
+        nome.setForeground(Aspetto.TESTO_TENUE);
         nome.setPreferredSize(Aspetto.dim(190, 20));
         riga.add(nome, BorderLayout.WEST);
-        valore.setFont(Aspetto.monospaziato(12, Font.PLAIN));
+        valore.setFont(valore.getFont().deriveFont(Aspetto.punti(12.5f)));
         valore.setForeground(Aspetto.TESTO);
         riga.add(valore, BorderLayout.CENTER);
         dove.add(riga);

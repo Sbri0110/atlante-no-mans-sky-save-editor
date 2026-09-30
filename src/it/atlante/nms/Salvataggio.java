@@ -4,9 +4,7 @@ import it.atlante.io.FlussoBlocchi;
 import it.atlante.json.Json;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.nio.file.AtomicMoveNotSupportedException;
 import java.nio.file.Files;
@@ -72,8 +70,13 @@ public final class Salvataggio {
         FlussoBlocchi.Resoconto r = new FlussoBlocchi.Resoconto();
         byte[] decompresso = formato.leggi(grezzo, r);
         String testo = new String(decompresso, UTF8).replaceAll("\\u0000+$", "");
-        Object albero = Json.leggi(testo);
-        mappa.traduci(albero);
+        Object albero;
+        try {
+            albero = Json.leggi(testo);
+            mappa.traduci(albero);
+        } catch (IllegalArgumentException e) {
+            throw new IOException("contenuto del salvataggio non valido: " + e.getMessage(), e);
+        }
 
         Salvataggio s = new Salvataggio(file, mappa, formato, albero);
         s.dimensioneCompressa = grezzo.length;
@@ -163,9 +166,11 @@ public final class Salvataggio {
     private byte[] testoDelSalvataggio() {
         // Le chiavi tornano nella forma cifrata prima di uscire: il gioco
         // riconosce solo quella.
-        mappa.cifra(albero);
-        String json = Json.scrivi(albero);
-        mappa.traduci(albero);
+        // La serializzazione non deve cambiare l'albero dell'interfaccia,
+        // nemmeno se una chiave o un valore non e' scrivibile.
+        Object copia = Json.leggi(Json.scrivi(albero));
+        mappa.cifra(copia);
+        String json = Json.scrivi(copia);
         byte[] utf8 = json.getBytes(UTF8);
         // Il motore di No Man's Sky (C++) tratta il buffer di salvataggio scompattato
         // come stringa C a terminazione nulla (char*). Se il byte nullo finale manca,
@@ -198,60 +203,47 @@ public final class Salvataggio {
 
         File backup = creaBackup(cartellaBackup);
 
-        File temporaneo = new File(file.getParentFile(), file.getName() + ".nuovo");
-        OutputStream out = new FileOutputStream(temporaneo);
-        try {
-            out.write(compresso);
-            out.flush();
-        } finally {
-            out.close();
-        }
-        // Sostituzione del file, non un semplice spostamento.
-        //
-        // Qui c'era File.renameTo, che su Windows non sovrascrive un file che
-        // esiste gia': il salvataggio finiva sempre con "impossibile sostituire
-        // il file" e non si salvava niente. Files.move con REPLACE_EXISTING fa
-        // quello che serve, e con ATOMIC_MOVE la sostituzione e' un'unica
-        // operazione del sistema: o il file nuovo c'e' per intero, o resta il
-        // vecchio. Se il file system non sa farlo atomico, si ripiega.
-        Path destinazione = file.toPath();
-        Path sorgente = temporaneo.toPath();
-        try {
-            Files.move(sorgente, destinazione, StandardCopyOption.REPLACE_EXISTING,
-                    StandardCopyOption.ATOMIC_MOVE);
-        } catch (AtomicMoveNotSupportedException e) {
-            Files.move(sorgente, destinazione, StandardCopyOption.REPLACE_EXISTING);
-        } catch (IOException e) {
-            Files.deleteIfExists(sorgente);
-            throw new IOException("impossibile sostituire il file: " + file, e);
-        }
+        scriviAtomico(file, compresso);
 
         dimensioneCompressa = compresso.length;
         dimensioneDecompressa = testo.length;
         blocchi = r.blocchi;
         modificato = false;
-
-        // Su Xbox Game Pass il salvataggio non e' un file sciolto ma un
-        // contenitore, e containers.index ne registra la dimensione: riscrivere
-        // il payload la cambia, e se l'indice resta indietro il gioco non
-        // riconosce piu' la partita. Inoltre il file dei metadati memorizza
-        // la dimensione scompattata al byte 16, usata dal gioco per allocare
-        // il buffer di decompressione LZ4.
         notaIndice = ContenitoreWgs.aggiornaContenitore(file, dimensioneDecompressa);
         return backup;
     }
 
+    private static void scriviAtomico(File file, byte[] dati) throws IOException {
+        Path destinazione = file.toPath().toAbsolutePath();
+        Path sorgente = Files.createTempFile(destinazione.getParent(), "atlante-", ".nuovo");
+        try {
+            Files.write(sorgente, dati);
+            try {
+                Files.move(sorgente, destinazione, StandardCopyOption.REPLACE_EXISTING,
+                        StandardCopyOption.ATOMIC_MOVE);
+            } catch (AtomicMoveNotSupportedException e) {
+                Files.move(sorgente, destinazione, StandardCopyOption.REPLACE_EXISTING);
+            }
+        } finally {
+            Files.deleteIfExists(sorgente);
+        }
+    }
+
     /** Scrive il contenuto in un altro file, senza copia di sicurezza. */
     public void salvaCome(File destinazione) throws IOException {
+        if (destinazione.getCanonicalFile().equals(file.getCanonicalFile())
+                || (destinazione.exists() && Files.isSameFile(destinazione.toPath(), file.toPath()))) {
+            salva(null);
+            return;
+        }
         String problema = verifica();
         if (problema != null) {
             throw new IOException("scrittura annullata: " + problema);
         }
         byte[] testo = testoDelSalvataggio();
         FlussoBlocchi.Resoconto r = new FlussoBlocchi.Resoconto();
-        Files.write(destinazione.toPath(), formato.scrivi(testo, r));
-        blocchi = r.blocchi;
-        modificato = false;
+        scriviAtomico(destinazione, formato.scrivi(testo, r));
+        // E' una copia esportata: il file aperto deve ancora essere salvato.
     }
 
     private File creaBackup(File cartella) throws IOException {

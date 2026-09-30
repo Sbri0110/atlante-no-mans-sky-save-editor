@@ -45,7 +45,7 @@ public enum Formato {
 
     /** Riconosce il formato dai primi byte del file. */
     public static Formato rileva(byte[] dati) {
-        if (dati == null || dati.length < 8) {
+        if (dati == null || dati.length == 0) {
             return SCONOSCIUTO;
         }
         if (FlussoBlocchi.riconosci(dati)) {
