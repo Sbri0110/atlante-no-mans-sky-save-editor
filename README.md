@@ -105,7 +105,7 @@ Ci sono due strade, e servono cose diverse.
 
 ### 1. Usare il programma
 
-Scarica `Atlante-1.0.zip` dalla pagina delle
+Scarica `Atlante-1.1.zip` dalla pagina delle
 [release](https://github.com/Sbri0110/atlante-no-mans-sky-save-editor/releases),
 estrailo dove vuoi e fai doppio clic su `avvia.bat`.
 
