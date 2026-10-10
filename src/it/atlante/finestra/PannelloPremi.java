@@ -384,7 +384,7 @@ public final class PannelloPremi extends JPanel {
     private final class Gruppo extends JPanel {
 
         private final JPanel corpo = new JPanel();
-        private final JLabel freccia = new JLabel("▾");
+        private final JLabel freccia = new JLabel();
         private final boolean costruito;
 
         Gruppo(String titolo, final Premi.Spedizione spedizione, List<Premi.Premio> premi) {
@@ -401,14 +401,17 @@ public final class PannelloPremi extends JPanel {
             }
 
             JPanel testa = new JPanel(new BorderLayout(10, 0));
-            testa.setBackground(Aspetto.FONDO_ALTO);
-            testa.setBorder(BorderFactory.createCompoundBorder(
-                    Aspetto.matte(0, 0, 1, 0, Aspetto.BORDO),
-                    Aspetto.bordo(9, 12, 9, 12)));
+            // Testata a scheda: fondo arrotondato e barra d'accento a sinistra.
+            // Il pannello resta non opaco perche' il fondo lo disegna il bordo.
+            testa.setOpaque(false);
+            testa.setBorder(Aspetto.bordoSchedaAccento());
 
             JPanel sinistra = new JPanel(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT, 8, 0));
             sinistra.setOpaque(false);
             freccia.setForeground(Aspetto.TESTO_DEBOLE);
+            // La freccia e' disegnata, non un carattere: il glifo manca in
+            // molti font e usciva un quadratino vuoto.
+            freccia.setIcon(Icone.triangolo(true, 12, Aspetto.TESTO_DEBOLE));
             sinistra.add(freccia);
             JLabel nome = new JLabel(titolo);
             nome.setFont(nome.getFont().deriveFont(Font.BOLD, Aspetto.punti(13f)));
@@ -446,7 +449,7 @@ public final class PannelloPremi extends JPanel {
                 public void mouseClicked(java.awt.event.MouseEvent e) {
                     boolean visibile = corpo.isVisible();
                     corpo.setVisible(!visibile);
-                    freccia.setText(visibile ? "▸" : "▾");
+                    freccia.setIcon(Icone.triangolo(!visibile, 12, Aspetto.TESTO_DEBOLE));
                     revalidate();
                     repaint();
                 }

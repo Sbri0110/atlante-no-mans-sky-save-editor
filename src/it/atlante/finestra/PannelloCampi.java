@@ -261,7 +261,9 @@ public final class PannelloCampi extends JPanel {
             testa.setBorder(Aspetto.bordo(6, rientro(livello), 6, 14));
             testa.setCursor(java.awt.Cursor.getPredefinedCursor(java.awt.Cursor.HAND_CURSOR));
 
-            freccia.setText("▸");
+            // Freccia disegnata: il glifo del carattere manca in molti font e
+            // usciva un quadratino vuoto.
+            freccia.setIcon(Icone.triangolo(false, 12, Aspetto.TESTO_DEBOLE));
             freccia.setForeground(Aspetto.TESTO_DEBOLE);
             freccia.setFont(freccia.getFont().deriveFont(Aspetto.punti(12f)));
             freccia.setPreferredSize(Aspetto.dim(14, 16));
@@ -295,7 +297,9 @@ public final class PannelloCampi extends JPanel {
         void alterna() {
             if (aperto) {
                 corpo.setVisible(false);
-                freccia.setText("▸");
+                // Freccia disegnata: il glifo del carattere manca in molti font e
+            // usciva un quadratino vuoto.
+            freccia.setIcon(Icone.triangolo(false, 12, Aspetto.TESTO_DEBOLE));
                 aperto = false;
             } else {
                 apri();
@@ -331,7 +335,7 @@ public final class PannelloCampi extends JPanel {
                 }
             }
             corpo.setVisible(true);
-            freccia.setText("▾");
+            freccia.setIcon(Icone.triangolo(true, 12, Aspetto.TESTO_DEBOLE));
             aperto = true;
             revalidate();
             repaint();

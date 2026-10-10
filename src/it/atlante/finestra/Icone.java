@@ -114,7 +114,19 @@ public final class Icone {
         g.setStroke(new java.awt.BasicStroke(1.4f));
         g.drawRoundRect(0, 0, lato - 1, lato - 1, lato / 3, lato / 3);
 
-        if (segno != null && !segno.isEmpty()) {
+        if ("\u25c6".equals(segno)) {
+            // Il rombo non si chiede al font: alcuni non hanno il glifo e al
+            // suo posto esce un quadratino vuoto. Si disegna.
+            int centro = lato / 2;
+            int raggio = Math.max(3, Math.round(lato * 0.24f));
+            java.awt.geom.Path2D.Float rombo = new java.awt.geom.Path2D.Float();
+            rombo.moveTo(centro, centro - raggio);
+            rombo.lineTo(centro + raggio, centro);
+            rombo.lineTo(centro, centro + raggio);
+            rombo.lineTo(centro - raggio, centro);
+            rombo.closePath();
+            g.fill(rombo);
+        } else if (segno != null && !segno.isEmpty()) {
             int dimensione = Math.max(8, Math.round(lato * 0.52f));
             g.setFont(new Font(Font.SANS_SERIF, Font.BOLD, dimensione));
             java.awt.FontMetrics fm = g.getFontMetrics();
@@ -122,6 +134,47 @@ public final class Icone {
             int y = (lato - fm.getHeight()) / 2 + fm.getAscent();
             g.drawString(segno, x, y);
         }
+        g.dispose();
+        ImageIcon icona = new ImageIcon(img);
+        CACHE.put(chiave, icona);
+        return icona;
+    }
+
+    /**
+     * Il triangolino che apre e chiude un gruppo.
+     *
+     * Non e' un carattere: i glifi {@code U+25BE} e {@code U+25B8} mancano in
+     * parecchi font di sistema e l'utente vedeva un quadratino vuoto al posto
+     * della freccia. Disegnandolo si vede sempre, con qualunque font.
+     *
+     * @param giu     vero se punta in basso (gruppo aperto), falso se a destra (chiuso)
+     * @param lato    lato in pixel, in misura nominale
+     * @param colore  colore del triangolo
+     */
+    public static ImageIcon triangolo(boolean giu, int lato, Color colore) {
+        lato = Aspetto.px(lato);
+        String chiave = "tri:" + giu + "@" + lato + ":" + colore.getRGB();
+        ImageIcon inCache = CACHE.get(chiave);
+        if (inCache != null) {
+            return inCache;
+        }
+        BufferedImage img = new BufferedImage(lato, lato, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g = img.createGraphics();
+        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        g.setColor(colore);
+        float m = Math.max(1.5f, lato * 0.2f);
+        java.awt.geom.Path2D.Float p = new java.awt.geom.Path2D.Float();
+        if (giu) {
+            p.moveTo(m, m);
+            p.lineTo(lato - m, m);
+            p.lineTo(lato / 2f, lato - m);
+        } else {
+            p.moveTo(m, m);
+            p.lineTo(m, lato - m);
+            p.lineTo(lato - m, lato / 2f);
+        }
+        p.closePath();
+        g.fill(p);
         g.dispose();
         ImageIcon icona = new ImageIcon(img);
         CACHE.put(chiave, icona);

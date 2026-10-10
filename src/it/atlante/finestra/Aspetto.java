@@ -110,10 +110,14 @@ public final class Aspetto {
         // d'accento. E' la tavolozza dei programmi professionali: niente tinte
         // di sfondo, il colore serve a indicare cosa e' attivo, non a decorare.
         // Il rosso del marchio compare solo nel logo.
+        //
+        // 2026-10-10 — rifinita: fondo piu' profondo, un gradino in piu' fra i
+        // livelli (fondo, pannello, testata) e bordi piu' morbidi. Serve a dare
+        // rilievo alle schede senza aggiungere decorazioni.
         PREDEFINITE.put("Neutro", costruisci("Neutro",
-                "#101216", "#15181E", "#191D24", "#222731", "#2D3440", "#424D5E",
-                "#91A6EC", "#C4D1FA", "#495B88", "#28364E",
-                "#EFF2F7", "#B0BAC9", "#8995A7"));
+                "#0A0C11", "#101319", "#14181F", "#1C212B", "#29303D", "#3B4557",
+                "#8CA3F0", "#C0CEFB", "#44568A", "#223049",
+                "#F2F5FA", "#AFB9C8", "#8691A4"));
 
         // Cremisi — il colore del marchio, per chi lo vuole.
         PREDEFINITE.put("Cremisi", costruisci("Cremisi",
@@ -602,7 +606,7 @@ public final class Aspetto {
         metti("Tree.paintLines", Boolean.TRUE);
         metti("Tree.lineColor", BORDO);
         metti("Tree.selectionBackground", SELEZIONE);
-        metti("Tree.selectionForeground", new Color(0xFFE9E9));
+        metti("Tree.selectionForeground", TESTO);
         metti("Tree.selectionInactiveBackground", PANNELLO_ALTO);
         metti("Tree.background", PANNELLO);
         metti("Tree.foreground", TESTO);
@@ -612,7 +616,7 @@ public final class Aspetto {
         metti("Table.gridColor", BORDO);
         metti("Table.rowHeight", 26);
         metti("Table.selectionBackground", SELEZIONE);
-        metti("Table.selectionForeground", new Color(0xFFE9E9));
+        metti("Table.selectionForeground", TESTO);
         metti("Table.background", PANNELLO);
         metti("Table.foreground", TESTO);
         metti("TabbedPane.tabHeight", 34);
@@ -667,7 +671,7 @@ public final class Aspetto {
         metti("List.background", PANNELLO);
         metti("List.foreground", TESTO);
         metti("List.selectionBackground", SELEZIONE);
-        metti("List.selectionForeground", new Color(0xFFE9E9));
+        metti("List.selectionForeground", TESTO);
         metti("List.selectionInactiveBackground", PANNELLO_ALTO);
         metti("ScrollPane.background", FONDO);
         metti("Viewport.background", FONDO);
@@ -760,6 +764,44 @@ public final class Aspetto {
                         java.awt.RenderingHints.VALUE_ANTIALIAS_ON);
                 g2.setColor(BORDO);
                 g2.drawRoundRect(x, y, larghezza - 1, altezza - 1, px(14), px(14));
+                g2.dispose();
+            }
+        };
+    }
+
+    /**
+     * Bordo "a scheda" con una barra d'accento a sinistra.
+     *
+     * Serve alle testate dei gruppi: fondo arrotondato un gradino piu' chiaro
+     * del pannello, contorno sottile e una barra d'accento che segna l'inizio
+     * del gruppo. Non cambia la disposizione: e' solo come si presenta.
+     *
+     * Chi lo usa deve rendere il pannello <b>non opaco</b>, altrimenti il fondo
+     * rettangolare copre gli angoli arrotondati.
+     */
+    public static javax.swing.border.Border bordoSchedaAccento() {
+        return new javax.swing.border.AbstractBorder() {
+            public java.awt.Insets getBorderInsets(java.awt.Component c) {
+                int verticale = px(9);
+                int orizzontale = px(13);
+                return new java.awt.Insets(verticale, orizzontale + px(4) + px(7),
+                        verticale, orizzontale);
+            }
+            public void paintBorder(java.awt.Component c, java.awt.Graphics g,
+                                    int x, int y, int larghezza, int altezza) {
+                java.awt.Graphics2D g2 = (java.awt.Graphics2D) g.create();
+                g2.setRenderingHint(java.awt.RenderingHints.KEY_ANTIALIASING,
+                        java.awt.RenderingHints.VALUE_ANTIALIAS_ON);
+                int arco = px(12);
+                g2.setColor(PANNELLO_ALTO);
+                g2.fillRoundRect(x, y, larghezza - 1, altezza - 1, arco, arco);
+                g2.setColor(BORDO);
+                g2.drawRoundRect(x, y, larghezza - 1, altezza - 1, arco, arco);
+                int barra = px(4);
+                int margine = px(8);
+                g2.setColor(ACCENTO);
+                g2.fillRoundRect(x + px(8), y + margine, barra, altezza - 2 * margine,
+                        barra, barra);
                 g2.dispose();
             }
         };
